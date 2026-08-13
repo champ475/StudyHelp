@@ -6,7 +6,7 @@ import pytest
 from studyhelp.schemas.step_schema import Problem
 
 FIXTURE_PATH = (
-    Path(__file__).parents[3]
+    Path(__file__).parents[1]
     / "src"
     / "studyhelp"
     / "seed"
