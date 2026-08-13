@@ -1,0 +1,120 @@
+# Architecture Decision Record
+
+Living record of architectural decisions. Distinct from `CHANGELOG.md` (chronological log of *changes*) — this is a log of *decisions*: what was decided, why, what alternatives were considered and rejected, and what it affects. Never delete an entry; superseded decisions are marked as such, date-stamped, pointing at the entry that replaced them.
+
+Seeded from the dated decisions already made during planning, recorded in `docs/technical_architecture.md` (see its own §0 changelog table and inline `[REVISED — <citation>]` markers) and `docs/approach.md` §7. Entries below dated pre-2026-08-13 reflect when the decision was made during planning, transcribed into this file on 2026-08-13.
+
+---
+
+## Pre-implementation decisions (from `docs/technical_architecture.md` and `docs/approach.md`)
+
+### D1 — Two-layer verification: deterministic symbolic/rule-based check before any LLM involvement
+**Decision:** Every step submission is checked by sympy + a per-topic rule engine before the LLM is ever invoked. The verifier is a hard pipeline gate called directly by application code — never a tool the LLM decides when to invoke.
+**Why:** A pure-LLM checker can mis-grade a correct step as wrong or miss a real error; for a young learner with no way to sanity-check the tutor, an unreliable correction is worse than none. Reinforced by Davis & Aaronson 2023 (E4) — GPT-4 + WolframAlpha + Code Interpreter still failed largely due to "interface failures" (the LLM mis-formulating its own tool query), showing that even giving an LLM a correctness tool doesn't work if the LLM controls when/how to call it. Alternative considered and rejected: let the LLM call a `check_step()` function at its own discretion — rejected because it reintroduces the exact failure mode the two-layer split exists to eliminate.
+**Affects:** Verification Service design (§3), pipeline shape (§1): verify → classify → retrieve → converse → re-verify → log.
+
+### D2 — Bias toward false negatives over false positives in the verifier
+**Decision:** When verifier confidence is low, don't interrupt, rather than risk wrongly telling a child they're wrong.
+**Why:** Wrongly accusing a correct step of being wrong is more damaging to trust than occasionally missing a real error, especially for a 10-year-old who can't push back on the tutor.
+**Affects:** Verifier confidence thresholding, must be explicit and tested, not emergent.
+
+### D3 — Error classification is closed-set, not open-ended
+**Decision:** Retrieve candidate misconceptions for the current `(topic, step_type)` from the misconception bank before calling the LLM; the LLM picks among them or says "none of these." Never let it freely diagnose.
+**Why:** Otero, Druga & Lan 2025 (B7) — GPT-4-turbo misconception accuracy jumped from 52.96% (unconstrained) to 73.82–83.91% (topic-constrained). Jin et al. 2024 (B8) — all 16 tested LLMs scored F1<0.5 diagnosing *why* a student erred, with strong overconfidence specifically on wrong diagnoses (the failure mode is "confidently wrong," not "appropriately unsure").
+**Affects:** Error Classification service (§4), Misconception Bank retrieval (§5) — retrieval now runs twice per error (once to constrain classification, once to ground dialogue generation).
+**Supersedes:** original design where "LLM fallback classifies novel errors directly into the taxonomy" (see `docs/technical_architecture.md` §0 row 1).
+
+### D4 — Buggy-rule library first, LLM fallback second for error classification
+**Decision:** A pattern-matchable library of known buggy rules (Brown & Burton / VanLehn tradition) is checked first; the LLM only classifies when no signature matches.
+**Why:** A large fraction of primary arithmetic errors are enumerable, systematic procedural bugs, not random noise (B1–B3). Cheap, deterministic, explainable, and a genuine bridge between classic symbolic ITS research and modern LLM tutoring for the paper's framing.
+**Affects:** Error Classification service (§4). Directly motivates the phase-0 topic choice (subtraction-with-borrowing has the deepest buggy-rule literature of any NCERT Class 5 topic).
+
+### D5 — Novel/LLM-classified errors are never auto-promoted into the trusted taxonomy
+**Decision:** LLM classifications always carry a lower-confidence flag and route to a semi-automated review queue — similar novel errors clustered before a human reviewer looks, per Feldman et al. 2018 (B4)'s CHI 2018 approach — rather than one-by-one triage or silent auto-promotion.
+**Why:** LLM classification overconfidence (D3's Jin et al. citation) means an unsupervised LLM diagnosis can't be trusted at the same tier as a buggy-rule-signature match. Clustering first turns "triage 12 near-duplicate items" into "confirm this cluster is a new bug, once."
+**Affects:** Error Classification service (§4) review-queue design; this is the system's data flywheel — confirmed novel bugs get promoted into the buggy-rule library and misconception bank.
+
+### D6 — "Examinee vs. diagnostician" role-framing fix in the classification prompt
+**Decision:** Classification prompts must explicitly instruct the LLM that it is not solving the problem — the correct answer is given — its only job is to explain the reasoning path that would produce the *student's* incorrect answer.
+**Why:** Song et al. 2026 (B10) named a reproducible failure mode: LLMs asked to explain a wrong answer default to an "examinee" mindset (quietly re-solving) instead of a "diagnostician" mindset (reasoning about why *this* answer is wrong given the student's actual approach).
+**Affects:** Error Classification prompt design (§4); becomes an explicit eval case (§9) — does the stated reasoning path match the student's apparent approach, or does it just re-derive the correct answer and note a discrepancy.
+
+### D7 — Every dialogue turn is decide-then-generate, not error-to-message directly
+**Decision:** Each turn is two structured calls (or two phases of one call): call 1 outputs `{error_type, remediation_strategy, instructional_intent}` grounded in the verifier's output and retrieved misconception entry; call 2 generates the child-facing `message` conditioned on that decision object.
+**Why:** Wang, Zhang, Robinson, Loeb & Demszky 2024 ("Bridge," NAACL, C5) — GPT-4 conditioned on an explicit expert decision framework was preferred 76% more than unconditioned generation; *randomly assigned* decisions (going through the motions without being the right decision) cut quality by 97% vs. expert-informed decisions. The decision content has to actually be right — which is why it's fed by the retrieved, topic-constrained misconception match (D3), not invented fresh each turn.
+**Affects:** Dialogue Orchestrator (§6) turn structure; makes strategy-selection independently loggable/evaluable, separate from message wording (§9).
+**Supersedes:** original design where the orchestrator "generates a Socratic message directly from (error, misconception context)" (`docs/technical_architecture.md` §0 row 2).
+
+### D8 — Deterministic, per-turn answer-leakage filter
+**Decision:** Before any generated message reaches the child, string/value-match it against the known correct step/final answer (and close paraphrases/numeric matches) from the problem schema; reject-and-regenerate on match, with an explicit "don't state the answer" instruction appended to the regeneration prompt.
+**Why:** SafeTutors (Hazra et al. 2026, E8) — pedagogical-harm rate (mostly premature answer disclosure) rose from 17.7% at turn 1 to 77.8% by later turns across every tested model; prompting alone is not sufficient once a dialogue runs several turns. Because the system already has ground-truth from the problem schema, this is cheap to check deterministically rather than via a generic moderation pass.
+**Affects:** Dialogue Orchestrator (§6) output pipeline; interacts with streaming (only stream after a message passes both gates, never speculatively). Lee et al. 2026's "LeakShield" prompting technique (C10) adopted as first line of defense before the filter has to trigger a (turn-budget-costing) regeneration.
+**Supersedes:** original design of "turn-budget cap + one output-safety pass" (`docs/technical_architecture.md` §0 row 3).
+
+### D9 — Measurable readability gate (Flesch-Kincaid or similar), not just a prompt instruction
+**Decision:** Run a readability check on every generated message against a target ceiling appropriate for a Class 5 reader; regenerate with an explicit simplification instruction if it fails.
+**Why:** Parra, Corica & Godoy 2026 (C13) — LLM tutor responses require a *higher* reading level than human tutors' by default, across every tested model; the model doesn't self-correct without being forced to. Jiao et al. 2025 (E10) — children over-trust AI responses even when wrong, partly *because* of confident/anthropomorphized phrasing, so an over-complex explanation is also more likely to be blindly accepted.
+**Affects:** Dialogue Orchestrator (§6) output pipeline, same regenerate-on-fail pattern as D8. Needs its own regression test set (known-over-complex drafts that must be caught), tracked as filter precision/recall (§9).
+**Supersedes:** original design of "'age-appropriate tone' as a prompt instruction" (`docs/technical_architecture.md` §0 row 4).
+
+### D10 — Intervention timing is a configurable orchestrator policy, not a hardcoded default
+**Decision:** The orchestrator exposes intervention timing as a policy parameter consulted per step — "interrupt on first error" / "interrupt after Nth repeated error on the same step" / "wait for problem completion" — rather than one hardcoded behavior with alternates special-cased for the study.
+**Why:** The feedback-timing literature is genuinely unsettled, not a case of "immediate is obviously right with delayed only as a study comparison arm." Kandemir et al. 2026 (D4 in lit survey) found no significant average timing effect in computer-assisted learning specifically (g=0.03); Metcalfe, Kornell & Finn 2009 (D7 in lit survey) found delayed feedback beat immediate for children on a (declarative) learning task; Young, Bevan & Sanders 2024 (D10 in lit survey) found the productive-struggle literature hasn't resolved when outside intervention helps vs. short-circuits useful struggle.
+**Affects:** Dialogue Orchestrator (§6) state machine; directly simplifies running the three-condition RCT later, since conditions become policy configs rather than special-cased code paths. Experiment Assignment service (§8) persists the assigned condition per student/session from day one.
+**Supersedes:** original design where "immediate interruption" was implicitly the hardcoded default (`docs/technical_architecture.md` §0 row 7).
+
+### D11 — Step graph (DAG), not a linear step list
+**Decision:** Problems are authored with a DAG of acceptable intermediate states, not a single prescribed sequence. The verifier checks the student's step against every reachable node, not just the immediate expected successor. A match against a non-adjacent-but-valid node is accepted but flagged for review, not silently accepted or rejected.
+**Why:** Class 5 problems often have more than one legitimate solution path. Shih et al. 2023 (A8/D9 in lit survey)'s own deployed fractions ITS explicitly couldn't capture "all possible patterns of learners' responses" because it matched against a fixed pattern library instead of a full graph — real evidence, not a theoretical concern, that this failure mode bites in practice.
+**Affects:** Problem/step-schema representation (§2), Verification Service (§3).
+
+### D12 — Structured, math-aware step input only, never free-text math parsing
+**Decision:** Students submit steps through a math-aware input widget (MathQuill-style or per-step-type structured fields) that emits an unambiguous structured value (small JSON AST or constrained LaTeX subset) — never a raw string to be parsed.
+**Why:** Sidesteps an entire class of notation-ambiguity bugs (implicit multiplication, fraction-bar parsing, sign placement) that would otherwise consume a large fraction of engineering time for little research value.
+**Affects:** Frontend step-input widget (§2, §11 build sequence step 5), Verification Service input contract (§3).
+
+### D13 — Typing friction is a documented UX failure mode for this age group
+**Decision:** Minimize keystrokes per step at the widget level (numeric keypad, drag-to-place-digit, tap-to-select from a small candidate set wherever the step type allows); track time-to-submit-a-step as a pilot UX metric.
+**Why:** Shih et al. 2023 (A8)'s real 6th-grade deployment explicitly reported keyboard/mouse input as "time-consuming and inconvenient," causing impatience.
+**Affects:** Frontend step-input widget design (§2); pilot instrumentation (§9, §11 build sequence step 7).
+
+### D14 — Turn budget with graceful fallback
+**Decision:** Cap dialogue turns per step (3–4). After the cap, show a fully worked example and let the student proceed, logging the step as "escalated."
+**Why:** Open-ended multi-turn dialogue risks a frustration loop if the child still doesn't get it after several tries (`docs/approach.md` §7). Escalation rate is itself a useful research signal — how often dialogue alone fails to get the student there.
+**Affects:** Dialogue Orchestrator (§6) state machine.
+
+### D15 — Re-verification on every retry, never LLM self-assessment
+**Decision:** When a student resubmits a step mid-dialogue, the resubmission goes back through the deterministic Verification Service (D1), never through the LLM's judgment of whether the student "seems to get it now."
+**Why:** Keeps multi-turn dialogue from drifting away from the grounding that made single-turn correction reliable in the first place; the two-layer verification idea otherwise only really protects the first correction.
+**Affects:** Dialogue Orchestrator (§6) `AwaitingRetry` state transition.
+
+### D16 — Attention-based (SAKT-style), not recurrence-based (DKT/LSTM), if/when a learned knowledge-tracing model is justified
+**Decision:** v1 uses a simple, explainable mastery score (basic BKT update or decaying success-rate counter), not a deep KT model. *If* v2 data volume justifies a learned model, prefer an attention-based architecture (SAKT) over LSTM-based DKT.
+**Why:** RNN-based KT models need long interaction histories; a single Class-5 tutoring session is far shorter/sparser than DKT's benchmark datasets (thousands of interactions/student). Pandey & Karypis 2019 (A3 sub-bullet) reported SAKT ~4.4% average AUC improvement over DKT-family baselines specifically on sparse-history data.
+**Affects:** Student Model (§7) — v1 scope explicitly excludes deep KT; only changes what "v2" should reach for.
+**Supersedes:** original doc's generic "DKT/LSTM" naming as the eventual upgrade path (`docs/technical_architecture.md` §7 revision note).
+
+### D17 — LLM provider: Groq, not Anthropic/OpenAI
+**Decision:** LLM access goes through the Groq API (fast open-weight model inference), behind a provider-agnostic wrapper (thin interface around "classify" / "decide" / "generate" calls) so switching models or providers is a config change, not a rewrite. Model selection must verify structured-output/tool-calling reliability before committing, not assume it. No key available yet — phases 1–2 (schema, verifier, buggy-rule matching) build and test fully unblocked with no LLM calls; the LLM-calling interface is stubbed with realistic fake responses until a key is provided.
+**Why:** Explicit project-level instruction (`CLAUDE.md`). This is a real deviation from most of the literature survey's evaluated models (GPT-4/Claude-class), so it's treated deliberately: because Groq-hosted open models may be weaker at exactly the diagnosis/error-localization tasks the survey already flags as unreliable even for frontier models (Jin et al. 2024, B8; Srivatsa et al. 2025, C12), this *strengthens* rather than loosens the case for the deterministic verifier and closed-set classification (D1, D3) — guardrails don't get relaxed to compensate for a smaller model.
+**Affects:** LLM client design (§8), every LLM-touching service (§4, §6). All real Groq calls, once wired, are logged in full (prompt, response, latency, token cost).
+**Supersedes:** `docs/technical_architecture.md` §8's line "LLM access: Claude via API, structured/tool-output mode..." — that line reflected an earlier planning-stage assumption and was never updated in the source doc. Superseded 2026-08-13, before any implementation, per explicit instruction in `CLAUDE.md`.
+
+### D18 — DPDP Act 2023 / DPDP Rules 2025 compliance is a pre-pilot gate, not a paperwork footnote
+**Decision:** Qualified legal guidance on DPDP compliance (verifiable parental consent, Rule 10 restrictions on behavioral tracking of children's data) is required before any real student's data is collected, even a small pilot. This has consent-flow implications for the product itself (e.g., a parental-consent gate before a child's account can generate logged data), not just paperwork to file separately.
+**Why:** The system handles data from children under 18 in India; the per-student misconception/knowledge model (Student Model, §7) is exactly the kind of behavioral tracking the DPDP Rules target.
+**Affects:** Pilot planning (§11 build sequence step 7), Student Model / Event Log design (§7, §8) — flagged to Arnav early per `CLAUDE.md`'s compliance note, not deferred.
+
+---
+
+## Project-scoping decisions (from `docs/approach.md` §7 and `CLAUDE.md`)
+
+### D19 — Sequence topic coverage; don't build the full syllabus before shipping
+**Decision:** Architect every interface (step schema, verifier interface, error taxonomy, dialogue engine, logging) topic-agnostic and ready for the full syllabus, but ship the first working slice against one topic, pilot it, then expand chapter by chapter.
+**Why:** Symbolic verification effort is not uniform across topics (arithmetic is cheap, geometry/data-handling/patterns are each their own hard problem). For the research study specifically, coverage breadth actively hurts statistical power — narrower topic coverage with more repetitions per error type beats shallow coverage of everything. "Architecture is topic-agnostic, ships N of M chapters" is not in tension with "built for full Class 5 math" as a product claim.
+**Affects:** Overall build sequence (`docs/technical_architecture.md` §11); directly produced the phase-0 topic audit (2026-08-13 entry, `CHANGELOG.md`).
+
+### D20 — First-slice topic: NCERT Class 5 Chapter 1, multi-digit subtraction with borrowing
+**Decision:** The first verifier/misconception-bank slice targets subtraction with borrowing on large numbers (NCERT Ch.1, "The Fish Tale"), confirmed by Arnav on 2026-08-13 after a chapter-by-chapter audit of all 14 NCERT Class 5 Math-Magic chapters.
+**Why:** Of all 14 chapters, this one has by far the deepest misconception-literature grounding (Brown & Burton's DEBUGGY, VanLehn's repair theory — B1–B3) and one of the cleanest step-DAG decompositions. Runners-up considered: Ch.13 long division (richest step-DAG in the syllabus, but the survey's specific bug-tradition citations center on subtraction) and Ch.6 LCM/HCF (also clean, weaker literature grounding). Chapters ruled out for v1 step-verification: Shapes and Angles, How Many Squares?, Does it Look the Same?, Can You See the Pattern?, Mapping Your Way, Boxes and Sketches, Smart Charts — these are recognition/visual/interpretive tasks, not linear checkable procedures, matching the caveat already flagged in `docs/approach.md` §7.
+**Affects:** Phase 1 (`docs/technical_architecture.md` §11 step 1) — step schema, verifier, and misconception bank all built first against this topic. See full audit table in `CHANGELOG.md`, 2026-08-13 09:15 entry.
