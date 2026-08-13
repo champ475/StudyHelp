@@ -1,0 +1,25 @@
+{
+  "case_id": "accept_007_p014_middle_step",
+  "problem_id": "subtraction-borrow-014",
+  "prior_accepted_steps": [
+    "s1_cmp_units",
+    "s2_borrow_units",
+    "s3_sub_units"
+  ],
+  "student_step": {
+    "step_type": "compare_column",
+    "fields": {
+      "column": "tens",
+      "minuend_digit": 3,
+      "subtrahend_digit": 8,
+      "borrow_needed": true
+    }
+  },
+  "expected": {
+    "is_valid": true,
+    "matched_step_id": "s4_cmp_tens",
+    "confidence_band": "accept",
+    "error_kind": null,
+    "error_note": null
+  }
+}

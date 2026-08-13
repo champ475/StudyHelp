@@ -1,0 +1,27 @@
+{
+  "case_id": "passthrough_005_p014_b4_stale_borrow_digit",
+  "problem_id": "subtraction-borrow-014",
+  "prior_accepted_steps": [
+    "s1_cmp_units",
+    "s2_borrow_units",
+    "s3_sub_units",
+    "s4_cmp_tens",
+    "s5_borrow_tens"
+  ],
+  "student_step": {
+    "step_type": "subtract_column",
+    "fields": {
+      "column": "tens",
+      "minuend_digit": 14,
+      "subtrahend_digit": 8,
+      "result_digit": 6
+    }
+  },
+  "expected": {
+    "is_valid": true,
+    "matched_step_id": null,
+    "confidence_band": "passthrough",
+    "error_kind": "field_mismatch",
+    "error_note": "low_confidence_passthrough"
+  }
+}

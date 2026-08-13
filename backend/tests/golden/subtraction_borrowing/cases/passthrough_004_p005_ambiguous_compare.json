@@ -1,0 +1,25 @@
+{
+  "case_id": "passthrough_004_p005_ambiguous_compare",
+  "problem_id": "subtraction-borrow-005",
+  "prior_accepted_steps": [
+    "s1_cmp_units",
+    "s2_borrow_units",
+    "s3_sub_units"
+  ],
+  "student_step": {
+    "step_type": "compare_column",
+    "fields": {
+      "column": "tens",
+      "minuend_digit": 9,
+      "subtrahend_digit": 1,
+      "borrow_needed": false
+    }
+  },
+  "expected": {
+    "is_valid": true,
+    "matched_step_id": null,
+    "confidence_band": "passthrough",
+    "error_kind": "field_mismatch",
+    "error_note": "low_confidence_passthrough"
+  }
+}

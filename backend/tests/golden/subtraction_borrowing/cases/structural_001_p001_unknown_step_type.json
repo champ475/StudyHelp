@@ -1,0 +1,16 @@
+{
+  "case_id": "structural_001_p001_unknown_step_type",
+  "problem_id": "subtraction-borrow-001",
+  "prior_accepted_steps": [],
+  "student_step": {
+    "step_type": "multiply",
+    "fields": {}
+  },
+  "expected": {
+    "is_valid": false,
+    "matched_step_id": null,
+    "confidence_band": "structural",
+    "error_kind": "wrong_step_type",
+    "error_note": null
+  }
+}

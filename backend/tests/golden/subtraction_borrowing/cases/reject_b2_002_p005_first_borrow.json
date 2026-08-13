@@ -1,0 +1,25 @@
+{
+  "case_id": "reject_b2_002_p005_first_borrow",
+  "problem_id": "subtraction-borrow-005",
+  "prior_accepted_steps": [
+    "s1_cmp_units"
+  ],
+  "student_step": {
+    "step_type": "borrow",
+    "fields": {
+      "from_column": "tens",
+      "from_digit_before": 4,
+      "from_digit_after": 4,
+      "to_column": "units",
+      "to_digit_before": 2,
+      "to_digit_after": 12
+    }
+  },
+  "expected": {
+    "is_valid": false,
+    "matched_step_id": null,
+    "confidence_band": "reject",
+    "error_kind": "field_mismatch",
+    "error_note": null
+  }
+}

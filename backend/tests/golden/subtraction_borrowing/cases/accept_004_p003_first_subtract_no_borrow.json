@@ -1,0 +1,23 @@
+{
+  "case_id": "accept_004_p003_first_subtract_no_borrow",
+  "problem_id": "subtraction-borrow-003",
+  "prior_accepted_steps": [
+    "s1_cmp_units"
+  ],
+  "student_step": {
+    "step_type": "subtract_column",
+    "fields": {
+      "column": "units",
+      "minuend_digit": 9,
+      "subtrahend_digit": 5,
+      "result_digit": 4
+    }
+  },
+  "expected": {
+    "is_valid": true,
+    "matched_step_id": "s2_sub_units",
+    "confidence_band": "accept",
+    "error_kind": null,
+    "error_note": null
+  }
+}

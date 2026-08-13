@@ -1,0 +1,28 @@
+{
+  "case_id": "accept_002_p001_final_answer",
+  "problem_id": "subtraction-borrow-001",
+  "prior_accepted_steps": [
+    "s1_cmp_units",
+    "s2_borrow_units",
+    "s3_sub_units",
+    "s4_cmp_tens",
+    "s5_sub_tens"
+  ],
+  "student_step": {
+    "step_type": "write_final_answer",
+    "fields": {
+      "digits": {
+        "tens": 2,
+        "units": 7
+      },
+      "value": 27
+    }
+  },
+  "expected": {
+    "is_valid": true,
+    "matched_step_id": "s6_final",
+    "confidence_band": "accept",
+    "error_kind": null,
+    "error_note": null
+  }
+}

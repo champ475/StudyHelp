@@ -58,3 +58,15 @@ jobs:
         run: pytest tests/unit -q
       - name: Integration tests
         run: pytest tests/integration -q
+
+  golden:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+      - name: Golden regression suite
+        run: pytest tests/golden -q

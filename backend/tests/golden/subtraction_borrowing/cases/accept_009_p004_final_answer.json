@@ -1,0 +1,35 @@
+{
+  "case_id": "accept_009_p004_final_answer",
+  "problem_id": "subtraction-borrow-004",
+  "prior_accepted_steps": [
+    "s1_cmp_units",
+    "s2_borrow_thousands_to_hundreds",
+    "s3_borrow_hundreds_to_tens",
+    "s4_borrow_tens_to_units",
+    "s5_sub_units",
+    "s6_cmp_tens",
+    "s7_sub_tens",
+    "s8_cmp_hundreds",
+    "s9_sub_hundreds",
+    "s10_cmp_thousands",
+    "s11_sub_thousands"
+  ],
+  "student_step": {
+    "step_type": "write_final_answer",
+    "fields": {
+      "digits": {
+        "hundreds": 9,
+        "tens": 9,
+        "units": 9
+      },
+      "value": 999
+    }
+  },
+  "expected": {
+    "is_valid": true,
+    "matched_step_id": "s12_final",
+    "confidence_band": "accept",
+    "error_kind": null,
+    "error_note": null
+  }
+}

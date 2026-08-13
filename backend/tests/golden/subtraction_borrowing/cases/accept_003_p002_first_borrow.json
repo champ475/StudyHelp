@@ -1,0 +1,25 @@
+{
+  "case_id": "accept_003_p002_first_borrow",
+  "problem_id": "subtraction-borrow-002",
+  "prior_accepted_steps": [
+    "s1_cmp_units"
+  ],
+  "student_step": {
+    "step_type": "borrow",
+    "fields": {
+      "from_column": "hundreds",
+      "from_digit_before": 5,
+      "from_digit_after": 4,
+      "to_column": "tens",
+      "to_digit_before": 0,
+      "to_digit_after": 10
+    }
+  },
+  "expected": {
+    "is_valid": true,
+    "matched_step_id": "s2_borrow_hundreds_to_tens",
+    "confidence_band": "accept",
+    "error_kind": null,
+    "error_note": null
+  }
+}

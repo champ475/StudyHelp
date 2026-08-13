@@ -1,0 +1,26 @@
+{
+  "case_id": "reject_b1_002_p004_units",
+  "problem_id": "subtraction-borrow-004",
+  "prior_accepted_steps": [
+    "s1_cmp_units",
+    "s2_borrow_thousands_to_hundreds",
+    "s3_borrow_hundreds_to_tens",
+    "s4_borrow_tens_to_units"
+  ],
+  "student_step": {
+    "step_type": "subtract_column",
+    "fields": {
+      "column": "units",
+      "minuend_digit": 10,
+      "subtrahend_digit": 1,
+      "result_digit": 1
+    }
+  },
+  "expected": {
+    "is_valid": false,
+    "matched_step_id": null,
+    "confidence_band": "reject",
+    "error_kind": "field_mismatch",
+    "error_note": null
+  }
+}

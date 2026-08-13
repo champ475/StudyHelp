@@ -1,0 +1,21 @@
+{
+  "case_id": "non_adjacent_002_p002_skip_both_borrows",
+  "problem_id": "subtraction-borrow-002",
+  "prior_accepted_steps": [],
+  "student_step": {
+    "step_type": "subtract_column",
+    "fields": {
+      "column": "units",
+      "minuend_digit": 13,
+      "subtrahend_digit": 8,
+      "result_digit": 5
+    }
+  },
+  "expected": {
+    "is_valid": true,
+    "matched_step_id": "s4_sub_units",
+    "confidence_band": "non_adjacent",
+    "error_kind": "none",
+    "error_note": "non_adjacent_valid_match"
+  }
+}

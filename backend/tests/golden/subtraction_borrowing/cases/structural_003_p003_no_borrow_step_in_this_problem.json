@@ -1,0 +1,23 @@
+{
+  "case_id": "structural_003_p003_no_borrow_step_in_this_problem",
+  "problem_id": "subtraction-borrow-003",
+  "prior_accepted_steps": [],
+  "student_step": {
+    "step_type": "borrow",
+    "fields": {
+      "from_column": "tens",
+      "from_digit_before": 8,
+      "from_digit_after": 7,
+      "to_column": "units",
+      "to_digit_before": 9,
+      "to_digit_after": 19
+    }
+  },
+  "expected": {
+    "is_valid": false,
+    "matched_step_id": null,
+    "confidence_band": "structural",
+    "error_kind": "wrong_step_type",
+    "error_note": null
+  }
+}

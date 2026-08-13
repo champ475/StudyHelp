@@ -1,0 +1,25 @@
+{
+  "case_id": "passthrough_001_p002_ambiguous_borrow",
+  "problem_id": "subtraction-borrow-002",
+  "prior_accepted_steps": [
+    "s1_cmp_units"
+  ],
+  "student_step": {
+    "step_type": "borrow",
+    "fields": {
+      "from_column": "thousands",
+      "from_digit_before": 9,
+      "from_digit_after": 8,
+      "to_column": "tens",
+      "to_digit_before": 0,
+      "to_digit_after": 10
+    }
+  },
+  "expected": {
+    "is_valid": true,
+    "matched_step_id": null,
+    "confidence_band": "passthrough",
+    "error_kind": "field_mismatch",
+    "error_note": "low_confidence_passthrough"
+  }
+}
