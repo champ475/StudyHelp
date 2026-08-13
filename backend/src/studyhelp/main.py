@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 import studyhelp.verification  # noqa: F401  side effect: registers topic verifiers
-from studyhelp.api.routes import health, problems
+from studyhelp.api.routes import health, problems, sessions
 from studyhelp.logging import configure_logging
 
 
@@ -10,6 +10,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title="StudyHelp API")
     app.include_router(health.router)
     app.include_router(problems.router)
+    app.include_router(sessions.router)
     return app
 
 
