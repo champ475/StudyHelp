@@ -77,3 +77,29 @@ async def test_verify_step_unknown_problem_returns_404(client: AsyncClient) -> N
         },
     )
     assert response.status_code == 404
+
+
+async def test_public_problem_endpoint_never_exposes_answers(client: AsyncClient) -> None:
+    """The frontend fetches this from the browser — it must never contain
+    expected_state values or the final answer, or a student could read
+    every correct step straight out of devtools (undermining the leakage
+    filter's whole purpose, D8)."""
+    response = await client.get("/problems/subtraction-borrow-001")
+    assert response.status_code == 200
+    body = response.json()
+
+    assert "final_answer" not in body
+    assert body["problem_id"] == "subtraction-borrow-001"
+    assert body["given"] == {"minuend": 52, "subtrahend": 25}
+
+    for node in body["step_graph"]:
+        assert set(node.keys()) == {"step_id", "type", "next"}
+        assert "expected_state" not in node
+
+    raw_body = response.text
+    assert "27" not in raw_body  # the final answer to 52-25, must never appear
+
+
+async def test_public_problem_endpoint_unknown_problem_returns_404(client: AsyncClient) -> None:
+    response = await client.get("/problems/does-not-exist")
+    assert response.status_code == 404

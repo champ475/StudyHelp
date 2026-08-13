@@ -4,7 +4,7 @@ involvement anywhere in the path. Not a real student-facing endpoint yet;
 that's the dialogue-orchestrator-backed API built in Phase 3.
 """
 
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -14,11 +14,53 @@ from studyhelp.db.base import get_session
 from studyhelp.db.repositories.event_repository import log_event
 from studyhelp.db.repositories.problem_repository import get_problem
 from studyhelp.logging import get_logger
+from studyhelp.schemas.step_schema import AltPath, NcertRef
 from studyhelp.schemas.verify import ProblemState, StudentStep, VerifyResult
 from studyhelp.verification.interface import registry
 
 router = APIRouter(prefix="/problems", tags=["problems"])
 logger = get_logger(__name__)
+
+
+class PublicStepNode(BaseModel):
+    """Deliberately omits `expected_state` — a raw `Problem` includes every
+    step's correct values, and this endpoint is reachable from the
+    browser. Exposing it would let a student read every answer straight
+    out of devtools, directly undermining the leakage filter's whole
+    purpose (D8). The frontend only needs step *types* and the DAG shape
+    to know which widget to render next; it must never see expected
+    values ahead of the student submitting a guess."""
+
+    step_id: str
+    type: str
+    next: list[str]
+
+
+class PublicProblem(BaseModel):
+    problem_id: str
+    ncert_ref: NcertRef
+    given: dict[str, Any]
+    step_graph: list[PublicStepNode]
+    alt_paths: list[AltPath]
+
+
+@router.get("/{problem_id}", response_model=PublicProblem)
+async def get_problem_public(
+    problem_id: str, session: Annotated[AsyncSession, Depends(get_session)]
+) -> PublicProblem:
+    problem = await get_problem(session, problem_id)
+    if problem is None:
+        raise HTTPException(status_code=404, detail=f"Unknown problem '{problem_id}'")
+    return PublicProblem(
+        problem_id=problem.problem_id,
+        ncert_ref=problem.ncert_ref,
+        given=problem.given,
+        step_graph=[
+            PublicStepNode(step_id=node.step_id, type=node.type, next=node.next)
+            for node in problem.step_graph
+        ],
+        alt_paths=problem.alt_paths,
+    )
 
 
 class VerifyStepRequest(BaseModel):
