@@ -71,11 +71,17 @@ class MockLLMProvider:
         if self._generate_override is not None:
             return self._generate_override
         hint_level = min(len(request.conversation_so_far) // 2 + 1, 3)
+        # Deliberately short, plain, Class-5-appropriate — this is what a
+        # real generate() call should also produce; the raw
+        # instructional_intent string is planning content for the *next*
+        # LLM call, not something to paste verbatim into child-facing text.
+        messages_by_hint_level = {
+            1: "Let's look at this step again. What do you notice?",
+            2: "Take another look at this column. Do you see anything to fix?",
+            3: "Let's slow down. Can you check this step one more time?",
+        }
         return GenerateResponse(
-            message=(
-                "[mock tutor] Let's look at this step together. "
-                f"({request.decision.instructional_intent})"
-            ),
+            message=messages_by_hint_level[hint_level],
             expects_retry=True,
             hint_level=hint_level,
             concept_flag=None,
