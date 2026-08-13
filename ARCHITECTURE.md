@@ -130,6 +130,16 @@ Seeded from the dated decisions already made during planning, recorded in `docs/
 **Affects:** `llm/client.py`, `llm/providers/mock.py` (default provider, fully tested, deterministic on purpose so tests don't need to tolerate randomness), `llm/providers/groq.py` (written to the shape of Groq's OpenAI-compatible JSON-mode chat-completions API, **not verified against a live API** — no key exists yet; smoke-tested only for constructibility, not for real structured-output behavior).
 **Open task, not yet done:** once a Groq key is provided, directly test the chosen model's structured-output/tool-calling reliability before relying on it anywhere beyond local supervised testing, per CLAUDE.md.
 
+### D26 — Classification orchestrator: rule match short-circuits before any DB/LLM access; closed-set validation happens in application code regardless of provider
+**Decision:** `classification/classifier.py`'s `classify_error()` tries the buggy-rule matcher first; only if nothing matches does it retrieve misconception-bank candidates and call the LLM. The LLM's returned `misconception_id` is checked against the exact retrieved candidate-id set in application code — any id outside that set (or `None`) is routed to the novel-error review queue, never trusted as-is. LLM-sourced classifications always carry `confidence="low"`; only rule matches carry `confidence="high"`.
+**Why:** Direct implementation of D3/D4/D5. Short-circuiting on a rule match before touching the DB or LLM keeps the common case (a known bug) cheap and fast, and keeps the rule-match path unit-testable without any DB/network dependency (`tests/unit/classification/test_classifier.py`) — only the LLM-fallback path needs integration-test coverage against a real Postgres.
+**Affects:** `classification/classifier.py`, `db/repositories/misconception_repository.py` (retrieve-don't-dump — only `(topic, step_type)`-scoped candidates are ever loaded), `db/repositories/novel_error_repository.py`.
+
+### D27 — Novel-error clustering: a stable structural-signature string, not ML
+**Decision:** `classification/clustering.py`'s `cluster_signature(topic, step_type, discrepant_fields)` produces a deterministic key (sorted discrepant-field names + a short hash) used to group `novel_errors` rows. `cluster_pending_novel_errors()` assigns this signature to every unclustered row and is idempotent (already-clustered rows are untouched; re-running clusters nothing new).
+**Why:** Feldman et al. 2018's clustering-before-human-review approach (D5) doesn't require anything more sophisticated at this scale — "same topic, same step type, same fields disagreed" is already a meaningful, cheap grouping that turns "review 12 near-duplicate novel errors" into "confirm this one cluster is a new bug." A real similarity-embedding approach is a reasonable v2 if/when the novel-error volume from a real pilot makes a plain structural key too coarse — not needed yet, and not build-time-blocking for Phase 2.
+**Affects:** `classification/clustering.py`, `db/models/novel_error.py` (migration `0002_novel_errors.py`). Promoting a confirmed cluster into `buggy_rule_library`/`misconception_bank` is explicitly out of scope here — that's Phase 6 (real pilot), per the approved build plan.
+
 ---
 
 ## Implementation-phase decisions (from the approved Phase 1–4 build plan, 2026-08-13)

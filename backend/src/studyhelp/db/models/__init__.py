@@ -3,6 +3,7 @@
 from studyhelp.db.models.buggy_rule import BuggyRuleEntry
 from studyhelp.db.models.event import Event
 from studyhelp.db.models.misconception import MisconceptionBankEntry, ReviewStatus
+from studyhelp.db.models.novel_error import NovelError
 from studyhelp.db.models.problem import ProblemModel
 from studyhelp.db.models.session import ExperimentCondition, SessionModel
 from studyhelp.db.models.step_type import StepType
@@ -13,6 +14,7 @@ __all__ = [
     "Event",
     "ExperimentCondition",
     "MisconceptionBankEntry",
+    "NovelError",
     "ProblemModel",
     "ReviewStatus",
     "SessionModel",
