@@ -1,0 +1,66 @@
+[
+  {
+    "id": "subtraction_borrowing.smaller_from_larger",
+    "topic": "subtraction_with_borrowing",
+    "step_type": "subtract_column",
+    "bug_signature": { "buggy_rule_id": "subtraction_borrowing.smaller_from_larger" },
+    "typical_mindset": "Subtraction means take the smaller digit away from the bigger digit in that column, whichever number it belongs to — the idea that you must borrow before you're even 'allowed' to subtract hasn't taken hold yet.",
+    "explanation_strategy": "Re-anchor to place value and physical 'enough-ness' — ask what the top digit is actually worth in objects, and whether there are enough of them to take the bottom number away, so the child discovers they need to trade before subtracting rather than being told the rule outright.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "You wrote 3 here. If we have 2 apples, can we take away 5 of them?" },
+      { "role": "student", "text": "No..." },
+      { "role": "tutor", "text": "Right! So before we subtract, we need more apples in this pile. Where could we borrow some from?" }
+    ],
+    "source": "Brown & Burton 1978 (DEBUGGY); VanLehn 1990, Mind Bugs",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "subtraction_borrowing.no_decrement_after_borrow",
+    "topic": "subtraction_with_borrowing",
+    "step_type": "borrow",
+    "bug_signature": { "buggy_rule_id": "subtraction_borrowing.no_decrement_after_borrow" },
+    "typical_mindset": "Borrowing means the next column magically gets 10 more — the idea that the lending column has to give something up, and so becomes one smaller, hasn't connected yet.",
+    "explanation_strategy": "Make the trade physical and two-sided: ten ones for one ten, but the ten has to come from somewhere. Ask the child to point at the column that gave away the ten and check what's left there now.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "This column now has 12 — great, it borrowed a ten! Which column gave it that ten?" },
+      { "role": "student", "text": "The tens column." },
+      { "role": "tutor", "text": "If the tens column gave away a ten, does it still have as many as before, or one less?" }
+    ],
+    "source": "Brown & Burton 1978 (DEBUGGY); VanLehn 1980, Repair Theory",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "subtraction_borrowing.borrow_across_zero",
+    "topic": "subtraction_with_borrowing",
+    "step_type": "borrow",
+    "bug_signature": { "buggy_rule_id": "subtraction_borrowing.borrow_across_zero" },
+    "typical_mindset": "When the neighboring column is 0, there's nothing to borrow from it, so the child either gives up on that column or treats the 0 as if it were a small nonzero digit and applies the 'smaller from larger' shortcut there instead of looking further left.",
+    "explanation_strategy": "Explicitly walk the search for a lender past the zero: ask what a zero column has to offer, then guide the child to look one column further, borrow there first, and only then come back to fill the zero column.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "This column is 0 — does it have anything to lend us?" },
+      { "role": "student", "text": "No, it's empty." },
+      { "role": "tutor", "text": "Right, so let's look one column further left. Does that one have something to lend?" }
+    ],
+    "source": "Brown & Burton 1978 (DEBUGGY) — documented borrow-across-zero variant",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "subtraction_borrowing.stale_borrow_digit",
+    "topic": "subtraction_with_borrowing",
+    "step_type": "subtract_column",
+    "bug_signature": { "buggy_rule_id": "subtraction_borrowing.stale_borrow_digit" },
+    "typical_mindset": "When a column has to both lend to its right neighbor and borrow from its left neighbor, the child tracks only one of those two changes — usually reverting to the column's original digit instead of the value it was already left with after lending.",
+    "explanation_strategy": "Slow down at exactly that column and ask the child to state its value 'right now, after what already happened to it' before doing anything else with it — separating 'what it started as' from 'what it is now.'",
+    "example_dialogue": [
+      { "role": "tutor", "text": "A minute ago, this column gave away a ten. What did it become after that?" },
+      { "role": "student", "text": "3." },
+      { "role": "tutor", "text": "So when this column needs to borrow now, it's borrowing starting from 3, not from the number it used to be. What does it become now?" }
+    ],
+    "source": "VanLehn 1980, Repair Theory — impasse-driven repair across cascading borrows",
+    "version": 1,
+    "review_status": "seed_curated"
+  }
+]

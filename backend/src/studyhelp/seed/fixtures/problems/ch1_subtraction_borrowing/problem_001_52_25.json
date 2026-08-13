@@ -1,0 +1,53 @@
+{
+  "problem_id": "subtraction-borrow-001",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 1,
+    "chapter_title": "The Fish Tale",
+    "topic": "subtraction_with_borrowing"
+  },
+  "given": { "minuend": 52, "subtrahend": 25 },
+  "final_answer": 27,
+  "step_graph": [
+    {
+      "step_id": "s1_cmp_units",
+      "type": "compare_column",
+      "expected_state": { "column": "units", "minuend_digit": 2, "subtrahend_digit": 5, "borrow_needed": true },
+      "next": ["s2_borrow_units"]
+    },
+    {
+      "step_id": "s2_borrow_units",
+      "type": "borrow",
+      "expected_state": {
+        "from_column": "tens", "from_digit_before": 5, "from_digit_after": 4,
+        "to_column": "units", "to_digit_before": 2, "to_digit_after": 12
+      },
+      "next": ["s3_sub_units"]
+    },
+    {
+      "step_id": "s3_sub_units",
+      "type": "subtract_column",
+      "expected_state": { "column": "units", "minuend_digit": 12, "subtrahend_digit": 5, "result_digit": 7 },
+      "next": ["s4_cmp_tens"]
+    },
+    {
+      "step_id": "s4_cmp_tens",
+      "type": "compare_column",
+      "expected_state": { "column": "tens", "minuend_digit": 4, "subtrahend_digit": 2, "borrow_needed": false },
+      "next": ["s5_sub_tens"]
+    },
+    {
+      "step_id": "s5_sub_tens",
+      "type": "subtract_column",
+      "expected_state": { "column": "tens", "minuend_digit": 4, "subtrahend_digit": 2, "result_digit": 2 },
+      "next": ["s6_final"]
+    },
+    {
+      "step_id": "s6_final",
+      "type": "write_final_answer",
+      "expected_state": { "digits": { "tens": 2, "units": 7 }, "value": 27 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

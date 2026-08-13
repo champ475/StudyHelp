@@ -1,0 +1,95 @@
+{
+  "problem_id": "subtraction-borrow-004",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 1,
+    "chapter_title": "The Fish Tale",
+    "topic": "subtraction_with_borrowing"
+  },
+  "given": { "minuend": 1000, "subtrahend": 1 },
+  "final_answer": 999,
+  "step_graph": [
+    {
+      "step_id": "s1_cmp_units",
+      "type": "compare_column",
+      "expected_state": { "column": "units", "minuend_digit": 0, "subtrahend_digit": 1, "borrow_needed": true },
+      "next": ["s2_borrow_thousands_to_hundreds"]
+    },
+    {
+      "step_id": "s2_borrow_thousands_to_hundreds",
+      "type": "borrow",
+      "expected_state": {
+        "from_column": "thousands", "from_digit_before": 1, "from_digit_after": 0,
+        "to_column": "hundreds", "to_digit_before": 0, "to_digit_after": 10
+      },
+      "next": ["s3_borrow_hundreds_to_tens"]
+    },
+    {
+      "step_id": "s3_borrow_hundreds_to_tens",
+      "type": "borrow",
+      "expected_state": {
+        "from_column": "hundreds", "from_digit_before": 10, "from_digit_after": 9,
+        "to_column": "tens", "to_digit_before": 0, "to_digit_after": 10
+      },
+      "next": ["s4_borrow_tens_to_units"]
+    },
+    {
+      "step_id": "s4_borrow_tens_to_units",
+      "type": "borrow",
+      "expected_state": {
+        "from_column": "tens", "from_digit_before": 10, "from_digit_after": 9,
+        "to_column": "units", "to_digit_before": 0, "to_digit_after": 10
+      },
+      "next": ["s5_sub_units"]
+    },
+    {
+      "step_id": "s5_sub_units",
+      "type": "subtract_column",
+      "expected_state": { "column": "units", "minuend_digit": 10, "subtrahend_digit": 1, "result_digit": 9 },
+      "next": ["s6_cmp_tens"]
+    },
+    {
+      "step_id": "s6_cmp_tens",
+      "type": "compare_column",
+      "expected_state": { "column": "tens", "minuend_digit": 9, "subtrahend_digit": 0, "borrow_needed": false },
+      "next": ["s7_sub_tens"]
+    },
+    {
+      "step_id": "s7_sub_tens",
+      "type": "subtract_column",
+      "expected_state": { "column": "tens", "minuend_digit": 9, "subtrahend_digit": 0, "result_digit": 9 },
+      "next": ["s8_cmp_hundreds"]
+    },
+    {
+      "step_id": "s8_cmp_hundreds",
+      "type": "compare_column",
+      "expected_state": { "column": "hundreds", "minuend_digit": 9, "subtrahend_digit": 0, "borrow_needed": false },
+      "next": ["s9_sub_hundreds"]
+    },
+    {
+      "step_id": "s9_sub_hundreds",
+      "type": "subtract_column",
+      "expected_state": { "column": "hundreds", "minuend_digit": 9, "subtrahend_digit": 0, "result_digit": 9 },
+      "next": ["s10_cmp_thousands"]
+    },
+    {
+      "step_id": "s10_cmp_thousands",
+      "type": "compare_column",
+      "expected_state": { "column": "thousands", "minuend_digit": 0, "subtrahend_digit": 0, "borrow_needed": false },
+      "next": ["s11_sub_thousands"]
+    },
+    {
+      "step_id": "s11_sub_thousands",
+      "type": "subtract_column",
+      "expected_state": { "column": "thousands", "minuend_digit": 0, "subtrahend_digit": 0, "result_digit": 0 },
+      "next": ["s12_final"]
+    },
+    {
+      "step_id": "s12_final",
+      "type": "write_final_answer",
+      "expected_state": { "digits": { "hundreds": 9, "tens": 9, "units": 9 }, "value": 999 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

@@ -52,6 +52,8 @@ jobs:
         run: pip install -e ".[dev]"
       - name: Apply migrations
         run: alembic upgrade head
+      - name: Seed database
+        run: python scripts/seed_db.py
       - name: Unit tests
         run: pytest tests/unit -q
       - name: Integration tests

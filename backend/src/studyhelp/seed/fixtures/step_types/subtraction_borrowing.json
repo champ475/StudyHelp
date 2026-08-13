@@ -1,0 +1,47 @@
+[
+  {
+    "topic": "subtraction_with_borrowing",
+    "step_type_key": "compare_column",
+    "description": "Compare the minuend and subtrahend digits in one column and decide whether borrowing is needed.",
+    "structured_input_schema": {
+      "column": "enum[units,tens,hundreds,thousands,ten_thousands,lakhs]",
+      "minuend_digit": "int",
+      "subtrahend_digit": "int",
+      "borrow_needed": "bool"
+    }
+  },
+  {
+    "topic": "subtraction_with_borrowing",
+    "step_type_key": "borrow",
+    "description": "Borrow one ten from the column to the left: decrement the lending column, add ten to the receiving column.",
+    "structured_input_schema": {
+      "from_column": "enum[units,tens,hundreds,thousands,ten_thousands,lakhs]",
+      "from_digit_before": "int",
+      "from_digit_after": "int",
+      "to_column": "enum[units,tens,hundreds,thousands,ten_thousands,lakhs]",
+      "to_digit_before": "int",
+      "to_digit_after": "int",
+      "combined_result_digit": "int|null"
+    }
+  },
+  {
+    "topic": "subtraction_with_borrowing",
+    "step_type_key": "subtract_column",
+    "description": "Subtract the (possibly already-borrowed) subtrahend digit from the minuend digit in one column.",
+    "structured_input_schema": {
+      "column": "enum[units,tens,hundreds,thousands,ten_thousands,lakhs]",
+      "minuend_digit": "int",
+      "subtrahend_digit": "int",
+      "result_digit": "int"
+    }
+  },
+  {
+    "topic": "subtraction_with_borrowing",
+    "step_type_key": "write_final_answer",
+    "description": "Assemble the per-column result digits (omitting a leading zero, if any) into the final answer.",
+    "structured_input_schema": {
+      "digits": "dict[enum[units,tens,hundreds,thousands,ten_thousands,lakhs], int]",
+      "value": "int"
+    }
+  }
+]

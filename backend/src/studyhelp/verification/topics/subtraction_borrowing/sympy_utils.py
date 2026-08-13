@@ -7,7 +7,12 @@ from the right column, is not a question sympy answers — those are DAG
 position and field-matching concerns.
 """
 
+from typing import TYPE_CHECKING
+
 import sympy
+
+if TYPE_CHECKING:
+    from studyhelp.schemas.step_schema import Problem
 
 
 def check_final_identity(minuend: int, subtrahend: int, candidate_answer: int) -> bool:
@@ -39,3 +44,36 @@ def check_subtract_arithmetic(minuend_digit: int, subtrahend_digit: int, result_
             sympy.Integer(minuend_digit) - sympy.Integer(subtrahend_digit),
         )
     )
+
+
+def validate_problem_arithmetic(problem: "Problem") -> None:
+    """Seed-time gate: every `borrow`/`subtract_column` node in the graph is
+    internally arithmetic-consistent, and the graph's own final answer
+    agrees with the raw identity. Raises `ValueError` naming the offending
+    node — called from the seed loader so a bad fixture fails loudly before
+    ever being served to a student."""
+    minuend = problem.given["minuend"]
+    subtrahend = problem.given["subtrahend"]
+    if not check_final_identity(minuend, subtrahend, problem.final_answer):
+        raise ValueError(
+            f"{problem.problem_id}: final_answer {problem.final_answer} fails sympy identity "
+            f"check against {minuend} - {subtrahend}"
+        )
+    for node in problem.step_graph:
+        if node.type == "borrow" and not check_borrow_arithmetic(
+            node.expected_state["from_digit_before"],
+            node.expected_state["from_digit_after"],
+            node.expected_state["to_digit_before"],
+            node.expected_state["to_digit_after"],
+        ):
+            raise ValueError(
+                f"{problem.problem_id}/{node.step_id}: borrow arithmetic is inconsistent"
+            )
+        if node.type == "subtract_column" and not check_subtract_arithmetic(
+            node.expected_state["minuend_digit"],
+            node.expected_state["subtrahend_digit"],
+            node.expected_state["result_digit"],
+        ):
+            raise ValueError(
+                f"{problem.problem_id}/{node.step_id}: subtract arithmetic is inconsistent"
+            )

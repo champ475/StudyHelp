@@ -18,6 +18,16 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class StepTypeEntry(BaseModel):
+    """A `(topic, step_type_key)` vocabulary entry — validates seed fixtures
+    for the `step_types` table before DB insert."""
+
+    topic: str
+    step_type_key: str
+    description: str
+    structured_input_schema: dict[str, Any]
+
+
 class NcertRef(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 

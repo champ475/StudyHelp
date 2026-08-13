@@ -1,0 +1,118 @@
+[
+  {
+    "id": "subtraction_borrowing.smaller_from_larger",
+    "topic": "subtraction_with_borrowing",
+    "step_type": "subtract_column",
+    "bug_code": "B1-smaller-from-larger",
+    "signature_matcher": {
+      "applies_to": "subtract_column",
+      "precondition": { "corresponding_compare_column.borrow_needed": true },
+      "student_formula": "result_digit == abs(subtrahend_digit - pre_borrow_minuend_digit) AND minuend_digit == pre_borrow_minuend_digit",
+      "distinguishing_from": ["subtraction_borrowing.stale_borrow_digit"]
+    },
+    "citation": "Brown & Burton (1978), DEBUGGY — the headline catalogued bug; VanLehn (1990), Mind Bugs",
+    "misconception_id": "subtraction_borrowing.smaller_from_larger",
+    "example_pair": {
+      "problem_id": "subtraction-borrow-001",
+      "correct_step": {
+        "step_type": "subtract_column",
+        "fields": { "column": "units", "minuend_digit": 12, "subtrahend_digit": 5, "result_digit": 7 }
+      },
+      "student_step": {
+        "step_type": "subtract_column",
+        "fields": { "column": "units", "minuend_digit": 2, "subtrahend_digit": 5, "result_digit": 3 }
+      },
+      "note": "Student never borrows; subtracts the smaller digit from the larger one in the column regardless of which number (minuend or subtrahend) it belongs to. On 52-25 this produces 33 instead of 27."
+    }
+  },
+  {
+    "id": "subtraction_borrowing.no_decrement_after_borrow",
+    "topic": "subtraction_with_borrowing",
+    "step_type": "borrow",
+    "bug_code": "B2-no-decrement-after-borrow",
+    "signature_matcher": {
+      "applies_to": "borrow",
+      "precondition": {},
+      "student_formula": "to_digit_after == to_digit_before + 10 AND from_digit_after == from_digit_before",
+      "distinguishing_from": ["subtraction_borrowing.borrow_across_zero"]
+    },
+    "citation": "Brown & Burton (1978), DEBUGGY; VanLehn (1980), Repair Theory",
+    "misconception_id": "subtraction_borrowing.no_decrement_after_borrow",
+    "example_pair": {
+      "problem_id": "subtraction-borrow-001",
+      "correct_step": {
+        "step_type": "borrow",
+        "fields": {
+          "from_column": "tens", "from_digit_before": 5, "from_digit_after": 4,
+          "to_column": "units", "to_digit_before": 2, "to_digit_after": 12
+        }
+      },
+      "student_step": {
+        "step_type": "borrow",
+        "fields": {
+          "from_column": "tens", "from_digit_before": 5, "from_digit_after": 5,
+          "to_column": "units", "to_digit_before": 2, "to_digit_after": 12
+        }
+      },
+      "note": "The receiving half of the borrow is correct (units becomes 12), but the lending column is never decremented (tens stays 5 instead of 4) — the student 'borrows' without paying it back."
+    }
+  },
+  {
+    "id": "subtraction_borrowing.borrow_across_zero",
+    "topic": "subtraction_with_borrowing",
+    "step_type": "borrow",
+    "bug_code": "B3-borrow-across-zero",
+    "signature_matcher": {
+      "applies_to": "borrow",
+      "precondition": { "to_digit_before": 0 },
+      "student_formula": "(from_digit_after == from_digit_before) OR (to_digit_after == 9)",
+      "distinguishing_from": ["subtraction_borrowing.no_decrement_after_borrow"]
+    },
+    "citation": "Brown & Burton (1978), DEBUGGY — documented borrow-across-zero variant",
+    "misconception_id": "subtraction_borrowing.borrow_across_zero",
+    "example_pair": {
+      "problem_id": "subtraction-borrow-002",
+      "correct_step": {
+        "step_type": "borrow",
+        "fields": {
+          "from_column": "hundreds", "from_digit_before": 5, "from_digit_after": 4,
+          "to_column": "tens", "to_digit_before": 0, "to_digit_after": 10
+        }
+      },
+      "student_step": {
+        "step_type": "borrow",
+        "fields": {
+          "from_column": "hundreds", "from_digit_before": 5, "from_digit_after": 5,
+          "to_column": "tens", "to_digit_before": 0, "to_digit_after": 9
+        }
+      },
+      "note": "The zero column can't lend directly, so the cascade has to reach past it to hundreds. The student mishandles the zero column — hundreds is never decremented, and tens becomes 9 (as if it had simply 'become 9') instead of correctly receiving +10 as part of the cascade."
+    }
+  },
+  {
+    "id": "subtraction_borrowing.stale_borrow_digit",
+    "topic": "subtraction_with_borrowing",
+    "step_type": "subtract_column",
+    "bug_code": "B4-stale-borrow-digit",
+    "signature_matcher": {
+      "applies_to": "subtract_column",
+      "precondition": { "column_was_previously_decremented_as_lender": true },
+      "student_formula": "minuend_digit == pre_decrement_original_digit + 10",
+      "distinguishing_from": ["subtraction_borrowing.smaller_from_larger"]
+    },
+    "citation": "VanLehn (1980), Repair Theory — impasse-driven repair producing a stale intermediate value across cascading borrows",
+    "misconception_id": "subtraction_borrowing.stale_borrow_digit",
+    "example_pair": {
+      "problem_id": "subtraction-borrow-014",
+      "correct_step": {
+        "step_type": "subtract_column",
+        "fields": { "column": "tens", "minuend_digit": 13, "subtrahend_digit": 8, "result_digit": 5 }
+      },
+      "student_step": {
+        "step_type": "subtract_column",
+        "fields": { "column": "tens", "minuend_digit": 14, "subtrahend_digit": 8, "result_digit": 6 }
+      },
+      "note": "Tens was already decremented from 4 to 3 to lend a ten to units. When tens itself then needs to borrow from hundreds, the student re-uses the original pre-decrement digit (4+10=14) instead of the already-decremented one (3+10=13) — an off-by-one across a cascading borrow chain."
+    }
+  }
+]
