@@ -107,3 +107,11 @@ Append-only. Never rewrite or delete past entries. Newest entries at the bottom.
 - 5 new unit tests (114 total unit+golden): clustering signature properties (order-independence, differentiation by step_type/fields) and the rule-match short-circuit path (no DB/LLM touched). 5 new integration tests (18 total, all skipping gracefully here): LLM picks a real retrieved candidate, the adversarial closed-set-violation case is caught and logged, a step_type with zero candidates routes to novel, and clustering correctly groups 2-of-3 novel errors sharing a structural signature while leaving the third in its own cluster (plus an idempotency check).
 - Ruff+mypy --strict clean throughout.
 - **Phase 2 is now complete.** Continuing straight into Phase 3 (dialogue orchestrator) per the approved autonomous-until-Phase-4 build plan — no review pause.
+
+## 2026-08-14 13:30 — Phase 3 begins: timing policy + output gates
+
+- `dialogue/timing_policy.py`: `InterventionPolicy` (`immediate`/`after_nth_repeat`/`wait_for_completion`), consulted by the orchestrator before ever entering `ErrorDetected` (D10). Noted explicitly: the eventual "control" arm of the three-condition RCT means *not invoking the dialogue orchestrator at all*, not a fourth policy value — that routing decision belongs one layer up, Phase 6 scope.
+- `dialogue/leakage_filter.py`: deterministic leakage check (D8) — flags explicit answer-revealing phrases regardless of the number that follows, and flags bare mention of any caller-supplied `protected_values`. Deliberately topic-agnostic: the orchestrator (which knows the current step_type's schema) decides which field values constitute "the answer" for a given step; this module only does string/number matching.
+- `dialogue/readability_gate.py`: Flesch-Kincaid grade check via `textstat` (D9).
+- Regression sets for both gates, per `technical_architecture.md §9`'s explicit instruction: 5 known-leaky + 5 known-safe cases for the leakage filter; 2 known-over-complex + 4 known-simple cases for the readability gate, with the complex/simple Flesch-Kincaid grades checked directly against `textstat` first (~20 vs. ~0.8–2.3) rather than guessed, so the test fixtures are grounded in the tool's actual behavior.
+- 21 new tests (130 total unit+golden). Ruff+mypy --strict clean.
