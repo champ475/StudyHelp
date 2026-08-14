@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { StepType, StudentStep } from "../types";
 import { BorrowWidget } from "./widgets/BorrowWidget";
 import { CompareColumnWidget } from "./widgets/CompareColumnWidget";
@@ -29,6 +29,16 @@ interface StepWidgetSwitcherProps {
   availableStepTypes: string[];
   onSubmit: (step: StudentStep) => void;
   disabled: boolean;
+  /** The step type that naturally follows the most recently *accepted*
+   * step, if any. `availableStepTypes` deliberately still includes
+   * already-completed-but-nominally-reachable types (ARCHITECTURE.md
+   * D11's non-exclusion frontier) — without this hint, the switcher's
+   * default tab stays on whichever type happens to sort first, which
+   * can mean staying stuck on a step the student already completed
+   * instead of advancing. Caught by actually watching the app run: a
+   * student who correctly finished "Borrow" was left looking at the
+   * Borrow widget again instead of moving on to Subtract. */
+  preferredStepType?: string;
 }
 
 // The student can pick among every step type currently reachable in the
@@ -38,9 +48,19 @@ export function StepWidgetSwitcher({
   availableStepTypes,
   onSubmit,
   disabled,
+  preferredStepType,
 }: StepWidgetSwitcherProps) {
   const validTypes = availableStepTypes.filter(isKnownStepType);
   const [active, setActive] = useState<StepType | null>(validTypes[0] ?? null);
+
+  useEffect(() => {
+    if (preferredStepType && isKnownStepType(preferredStepType)) {
+      setActive(preferredStepType);
+    }
+    // Only re-run when the *preferred* type changes (i.e. a new step was
+    // just accepted) — not on every availableStepTypes recompute, so a
+    // manual tab click mid-fill-in isn't immediately overridden.
+  }, [preferredStepType]);
 
   if (validTypes.length === 0) {
     return <p className="no-steps-available">No more steps available for this problem.</p>;

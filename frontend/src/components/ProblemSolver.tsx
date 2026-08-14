@@ -105,6 +105,15 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
 
   const availableStepTypes = frontierStepTypes(problem, acceptedStepIds);
 
+  // The type that naturally follows the most recently accepted step —
+  // used to steer the widget switcher's default tab forward instead of
+  // leaving it on an already-completed-but-still-nominally-reachable
+  // type (see StepWidgetSwitcher's preferredStepType doc comment).
+  const lastAcceptedId = acceptedStepIds[acceptedStepIds.length - 1];
+  const lastAcceptedNode = problem.step_graph.find((node) => node.step_id === lastAcceptedId);
+  const nextNodeId = lastAcceptedNode?.next[0];
+  const preferredStepType = problem.step_graph.find((node) => node.step_id === nextNodeId)?.type;
+
   return (
     <div className="problem-solver">
       <h2>
@@ -117,6 +126,7 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
       ) : (
         <StepWidgetSwitcher
           availableStepTypes={availableStepTypes}
+          preferredStepType={preferredStepType}
           onSubmit={(step) => void handleSubmit(step)}
           disabled={isSubmitting}
         />

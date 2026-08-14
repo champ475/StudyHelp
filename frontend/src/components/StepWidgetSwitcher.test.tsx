@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { StepWidgetSwitcher } from "./StepWidgetSwitcher";
 
@@ -39,5 +40,35 @@ describe("StepWidgetSwitcher", () => {
       <StepWidgetSwitcher availableStepTypes={["subtract_column"]} onSubmit={vi.fn()} disabled={false} />,
     );
     expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+  });
+
+  it("advances to preferredStepType when it changes, even though the just-completed type is still nominally reachable — regression for a real UX bug", async () => {
+    // Reproduces ProblemSolver's real shape: the backend's frontier
+    // intentionally still includes an already-accepted step's type
+    // (ARCHITECTURE.md D11 — no exclusion), so after finishing "borrow"
+    // both "borrow" and "subtract_column" remain in availableStepTypes.
+    // Without a preferredStepType hint, a student who just correctly
+    // finished Borrow was left looking at the Borrow widget again.
+    function Harness() {
+      const [step, setStep] = useState<"initial" | "after_borrow">("initial");
+      return (
+        <>
+          <button onClick={() => setStep("after_borrow")}>simulate accepting the borrow step</button>
+          <StepWidgetSwitcher
+            availableStepTypes={["borrow", "subtract_column"]}
+            preferredStepType={step === "after_borrow" ? "subtract_column" : undefined}
+            onSubmit={vi.fn()}
+            disabled={false}
+          />
+        </>
+      );
+    }
+    const user = userEvent.setup();
+    render(<Harness />);
+    expect(screen.getByText("Borrow a ten")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /simulate accepting/i }));
+    expect(screen.getByText("Subtract a column")).toBeInTheDocument();
+    expect(screen.queryByText("Borrow a ten")).not.toBeInTheDocument();
   });
 });
