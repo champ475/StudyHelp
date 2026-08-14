@@ -29,9 +29,16 @@ async def test_all_tables_exist(db_session: AsyncSession) -> None:
 
 
 async def test_step_type_round_trips(db_session: AsyncSession) -> None:
+    """Uses a synthetic (topic, step_type_key) rather than a real seeded
+    one — CI's `test` job runs migrate -> seed -> test, so a real pair
+    like ("subtraction_with_borrowing", "borrow") already exists by the
+    time this test runs and would collide with the unique constraint.
+    This test's intent is "does the ORM model round-trip through
+    Postgres," not "does this specific seeded row exist" — synthetic
+    data decouples the two."""
     row = StepType(
-        topic="subtraction_with_borrowing",
-        step_type_key="borrow",
+        topic="_test_topic",
+        step_type_key="_test_step_type",
         description="Borrow ten from the column to the left.",
         structured_input_schema={
             "from_column": "str",
@@ -49,7 +56,7 @@ async def test_step_type_round_trips(db_session: AsyncSession) -> None:
 
     reloaded = await db_session.get(StepType, row.id)
     assert reloaded is not None
-    assert reloaded.step_type_key == "borrow"
+    assert reloaded.step_type_key == "_test_step_type"
     await db_session.rollback()
 
 

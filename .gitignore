@@ -12,6 +12,11 @@ venv/
 .env
 backend/.env
 
+# Local no-Docker verification infra (pgserver data dir, fakeredis TCP server
+# log) — a one-off convenience for this sandbox, not part of the shipped app;
+# docker-compose.yml is the real dev/deploy path (ARCHITECTURE.md D34).
+.local-e2e/
+
 # Node / frontend
 node_modules/
 frontend/dist/
