@@ -1,0 +1,39 @@
+{
+  "problem_id": "fractions-sub-002",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 4,
+    "chapter_title": "Parts and Wholes",
+    "topic": "fractions_addition"
+  },
+  "display_label": "5/6 − 1/2 (needs simplifying)",
+  "given": { "a_num": 5, "a_den": 6, "b_num": 1, "b_den": 2, "op": "-" },
+  "final_answer": { "num": 1, "den": 3 },
+  "step_graph": [
+    {
+      "step_id": "s1_common_denom",
+      "type": "rewrite_common_denominator",
+      "expected_state": { "left_num": 5, "left_den": 6, "op": "-", "right_num": 3, "right_den": 6 },
+      "next": ["s2_subtract_numerators"]
+    },
+    {
+      "step_id": "s2_subtract_numerators",
+      "type": "subtract_numerators",
+      "expected_state": { "num": 2, "den": 6 },
+      "next": ["s3_simplify"]
+    },
+    {
+      "step_id": "s3_simplify",
+      "type": "simplify_fraction",
+      "expected_state": { "num": 1, "den": 3 },
+      "next": ["s4_final"]
+    },
+    {
+      "step_id": "s4_final",
+      "type": "write_final_answer",
+      "expected_state": { "num": 1, "den": 3 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

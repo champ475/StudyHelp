@@ -76,5 +76,57 @@
       },
       "note": "Sum is correct (4/6) but the student re-submits it unsimplified instead of reducing to 2/3."
     }
+  },
+  {
+    "id": "fractions_addition.subtract_across",
+    "topic": "fractions_addition",
+    "step_type": "subtract_numerators",
+    "bug_code": "F4-subtract-across",
+    "signature_matcher": {
+      "applies_to": "subtract_numerators",
+      "precondition": {},
+      "student_formula": "num == correct.num AND den == correct.den * 2",
+      "distinguishing_from": []
+    },
+    "citation": "Behr, Wachsmuth, Post & Lesh (1984); Ni & Zhou (2005), 'freshman's dream'",
+    "misconception_id": "fractions_addition.subtract_across",
+    "example_pair": {
+      "problem_id": "fractions-sub-001",
+      "correct_step": {
+        "step_type": "subtract_numerators",
+        "fields": { "num": 7, "den": 12 }
+      },
+      "student_step": {
+        "step_type": "subtract_numerators",
+        "fields": { "num": 7, "den": 24 }
+      },
+      "note": "Student combines the (already-equal) denominators together (12+12=24) instead of keeping the common denominator."
+    }
+  },
+  {
+    "id": "fractions_addition.compares_numerators_only",
+    "topic": "fractions_addition",
+    "step_type": "compare_fractions",
+    "bug_code": "F5-compares-numerators-only",
+    "signature_matcher": {
+      "applies_to": "compare_fractions",
+      "precondition": {},
+      "student_formula": "op == naive_comparison(left_num, right_num) AND op != correct.op",
+      "distinguishing_from": []
+    },
+    "citation": "Ni & Zhou (2005), 'whole number bias' in fraction learning",
+    "misconception_id": "fractions_addition.compares_numerators_only",
+    "example_pair": {
+      "problem_id": "fractions-cmp-001",
+      "correct_step": {
+        "step_type": "compare_fractions",
+        "fields": { "left_num": 3, "left_den": 8, "op": "<", "right_num": 2, "right_den": 5 }
+      },
+      "student_step": {
+        "step_type": "compare_fractions",
+        "fields": { "left_num": 3, "left_den": 8, "op": ">", "right_num": 2, "right_den": 5 }
+      },
+      "note": "Student compares numerators directly (3 > 2) and concludes 3/8 > 2/5, ignoring that the denominators differ; the true comparison (via common denominator 40ths, 15/40 vs 16/40) is 3/8 < 2/5."
+    }
   }
 ]

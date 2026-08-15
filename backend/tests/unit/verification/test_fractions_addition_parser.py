@@ -3,6 +3,30 @@ import pytest
 from studyhelp.verification.topics.fractions_addition.free_text_parser import parse_student_text
 
 
+def test_compare_fractions_parses_less_than() -> None:
+    assert parse_student_text("compare_fractions", "3/8 < 2/5") == {
+        "left_num": 3,
+        "left_den": 8,
+        "op": "<",
+        "right_num": 2,
+        "right_den": 5,
+    }
+
+
+def test_compare_fractions_parses_greater_than_and_equal() -> None:
+    assert parse_student_text("compare_fractions", "5/6 > 3/4")["op"] == ">"
+    assert parse_student_text("compare_fractions", "1/2 = 2/4")["op"] == "="
+
+
+def test_compare_fractions_rejects_plus_minus_operators() -> None:
+    with pytest.raises(ValueError, match="not of the form"):
+        parse_student_text("compare_fractions", "3/8 + 2/5")
+
+
+def test_subtract_numerators_parses_single_fraction() -> None:
+    assert parse_student_text("subtract_numerators", "7/12") == {"num": 7, "den": 12}
+
+
 def test_rewrite_common_denominator_parses_plus_expression() -> None:
     fields = parse_student_text("rewrite_common_denominator", "3/12 + 2/12")
     assert fields == {"left_num": 3, "left_den": 12, "op": "+", "right_num": 2, "right_den": 12}

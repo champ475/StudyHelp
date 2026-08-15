@@ -11,7 +11,7 @@ from studyhelp.seed.loader import (
 )
 
 
-def test_step_types_load_and_cover_all_four_types() -> None:
+def test_step_types_load_and_cover_every_registered_step_type() -> None:
     step_types = load_step_types()
     keys = {(s.topic, s.step_type_key) for s in step_types}
     assert keys == {
@@ -21,6 +21,8 @@ def test_step_types_load_and_cover_all_four_types() -> None:
         ("subtraction_with_borrowing", "write_final_answer"),
         ("fractions_addition", "rewrite_common_denominator"),
         ("fractions_addition", "add_numerators"),
+        ("fractions_addition", "subtract_numerators"),
+        ("fractions_addition", "compare_fractions"),
         ("fractions_addition", "simplify_fraction"),
         ("fractions_addition", "write_final_answer"),
     }
@@ -31,14 +33,14 @@ def test_problems_load_and_pass_arithmetic_validation() -> None:
     fixture — if this doesn't raise, every seeded problem is internally
     consistent per the independent sympy cross-check."""
     problems = load_problems()
-    assert len(problems) >= 6
+    assert len(problems) >= 16
     problem_ids = {p.problem_id for p in problems}
     assert "subtraction-borrow-014" in problem_ids
 
 
-def test_misconceptions_load_with_seven_seed_entries() -> None:
+def test_misconceptions_load_with_nine_seed_entries() -> None:
     entries = load_misconceptions()
-    assert len(entries) == 7
+    assert len(entries) == 9
     ids = {e.id for e in entries}
     assert ids == {
         "subtraction_borrowing.smaller_from_larger",
@@ -48,12 +50,14 @@ def test_misconceptions_load_with_seven_seed_entries() -> None:
         "fractions_addition.no_common_denominator",
         "fractions_addition.add_across",
         "fractions_addition.forgot_to_simplify",
+        "fractions_addition.subtract_across",
+        "fractions_addition.compares_numerators_only",
     }
 
 
-def test_buggy_rules_load_with_seven_seed_entries() -> None:
+def test_buggy_rules_load_with_nine_seed_entries() -> None:
     entries = load_buggy_rules()
-    assert len(entries) == 7
+    assert len(entries) == 9
     bug_codes = {e.bug_code for e in entries}
     assert bug_codes == {
         "B1-smaller-from-larger",
@@ -63,6 +67,8 @@ def test_buggy_rules_load_with_seven_seed_entries() -> None:
         "F1-no-common-denominator",
         "F2-add-across",
         "F3-forgot-to-simplify",
+        "F4-subtract-across",
+        "F5-compares-numerators-only",
     }
 
 

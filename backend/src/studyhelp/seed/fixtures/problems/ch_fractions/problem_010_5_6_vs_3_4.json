@@ -1,0 +1,21 @@
+{
+  "problem_id": "fractions-cmp-002",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 4,
+    "chapter_title": "Parts and Wholes",
+    "topic": "fractions_addition"
+  },
+  "display_label": "Compare 5/6 and 3/4",
+  "given": { "a_num": 5, "a_den": 6, "b_num": 3, "b_den": 4, "op": "compare" },
+  "final_answer": { "op": ">" },
+  "step_graph": [
+    {
+      "step_id": "s1_compare",
+      "type": "compare_fractions",
+      "expected_state": { "left_num": 5, "left_den": 6, "op": ">", "right_num": 3, "right_den": 4 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

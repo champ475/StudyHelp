@@ -48,13 +48,15 @@ class DialogueTurnResult:
     expects_retry: bool
 
 
-def _protected_values(correct_fields: dict[str, Any]) -> list[int]:
+def _protected_values(correct_fields: dict[str, Any]) -> list[int | str]:
     """Which fields constitute "the answer" depends on the step's own
     shape: `result_digit`/`value`/`to_digit_after` are output-defining;
     input digits (already visible to the student on the widget) aren't
     secret. Topic-agnostic by construction — no field name here is
-    specific to a step *type* the way `verification/topics/...` is."""
-    values: list[int] = []
+    specific to a step *type* the way `verification/topics/...` is.
+    `op` is the one non-numeric answer (fractions' `compare_fractions`
+    step: "<"/">"/"=" is literally the answer to a comparison problem)."""
+    values: list[int | str] = []
     for key in (
         "result_digit",
         "value",
@@ -69,6 +71,9 @@ def _protected_values(correct_fields: dict[str, Any]) -> list[int]:
         value = correct_fields.get(key)
         if isinstance(value, int):
             values.append(value)
+    op = correct_fields.get("op")
+    if isinstance(op, str) and op in ("<", ">", "="):
+        values.append(op)
     digits = correct_fields.get("digits")
     if isinstance(digits, dict):
         values.extend(v for v in digits.values() if isinstance(v, int))

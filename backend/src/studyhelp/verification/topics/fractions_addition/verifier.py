@@ -148,9 +148,10 @@ class FractionsAdditionVerifier:
             return
         a_num, a_den = problem.given["a_num"], problem.given["a_den"]
         b_num, b_den = problem.given["b_num"], problem.given["b_den"]
-        if not check_final_identity(a_num, a_den, b_num, b_den, result_num, result_den):
+        op = problem.given.get("op", "+")
+        if not check_final_identity(a_num, a_den, b_num, b_den, result_num, result_den, op=op):
             raise ValueError(
                 f"Problem '{problem.problem_id}' data integrity error: "
-                f"{a_num}/{a_den} + {b_num}/{b_den} != {result_num}/{result_den} "
+                f"{a_num}/{a_den} {op} {b_num}/{b_den} != {result_num}/{result_den} "
                 "per independent sympy cross-check"
             )

@@ -119,6 +119,37 @@ def _f2_add_across(correct: _Fields, student: _Fields) -> bool:
     return bool(student_num == correct_num and student_den == correct_den * 2)
 
 
+def _f4_subtract_across(correct: _Fields, student: _Fields) -> bool:
+    """Same "freshman's dream" overgeneralization as F2, on a
+    `subtract_numerators` step: the student combines (adds) the
+    denominators together instead of keeping the shared common
+    denominator, regardless of the operation being subtraction."""
+    correct_num = _as_int(correct, "num")
+    correct_den = _as_int(correct, "den")
+    student_num = _as_int(student, "num")
+    student_den = _as_int(student, "den")
+    if correct_num is None or correct_den is None or student_num is None or student_den is None:
+        return False
+    return bool(student_num == correct_num and student_den == correct_den * 2)
+
+
+def _f5_compares_numerators_only(correct: _Fields, student: _Fields) -> bool:
+    """Whole-number bias applied to comparison: the student compares the
+    two original numerators directly (bigger numerator = bigger fraction)
+    and ignores that the denominators differ, landing on the comparison
+    that would be correct only if the denominators matched."""
+    left_num = _as_int(student, "left_num")
+    right_num = _as_int(student, "right_num")
+    correct_op = correct.get("op")
+    student_op = student.get("op")
+    if left_num is None or right_num is None or correct_op is None or student_op is None:
+        return False
+    if student_op == correct_op:
+        return False
+    naive_op = "<" if left_num < right_num else ">" if left_num > right_num else "="
+    return bool(student_op == naive_op)
+
+
 def _f3_forgot_to_simplify(correct: _Fields, student: _Fields) -> bool:
     """The value is right but the student re-submits the unsimplified
     fraction as if it were already in lowest terms — the concept of
@@ -187,6 +218,18 @@ _MATCHERS: list[_MatcherSpec] = [
         "F3-forgot-to-simplify",
         "simplify_fraction",
         _f3_forgot_to_simplify,
+    ),
+    _MatcherSpec(
+        "fractions_addition.subtract_across",
+        "F4-subtract-across",
+        "subtract_numerators",
+        _f4_subtract_across,
+    ),
+    _MatcherSpec(
+        "fractions_addition.compares_numerators_only",
+        "F5-compares-numerators-only",
+        "compare_fractions",
+        _f5_compares_numerators_only,
     ),
 ]
 

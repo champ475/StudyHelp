@@ -17,6 +17,22 @@
   },
   {
     "topic": "fractions_addition",
+    "step_type_key": "subtract_numerators",
+    "description": "Subtract the numerators of the two common-denominator fractions, keeping the denominator unchanged.",
+    "structured_input_schema": {
+      "text": "free_text: 'a/b'"
+    }
+  },
+  {
+    "topic": "fractions_addition",
+    "step_type_key": "compare_fractions",
+    "description": "Compare the two fractions using <, >, or = — e.g. '1/4 < 1/6'.",
+    "structured_input_schema": {
+      "text": "free_text: 'a/b < c/d', 'a/b > c/d', or 'a/b = c/d'"
+    }
+  },
+  {
+    "topic": "fractions_addition",
     "step_type_key": "simplify_fraction",
     "description": "Reduce the resulting fraction to lowest terms (or restate it unchanged if already in lowest terms).",
     "structured_input_schema": {

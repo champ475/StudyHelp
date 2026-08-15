@@ -23,6 +23,7 @@ _TWO_FRACTION_EXPR = re.compile(rf"^\s*{_FRACTION}\s*([+\-])\s*{_FRACTION}\s*$")
 _SINGLE_FRACTION = re.compile(rf"^\s*{_FRACTION}\s*$")
 _MIXED_NUMBER = re.compile(rf"^\s*(\d+)\s+{_FRACTION}\s*$")
 _WHOLE_NUMBER = re.compile(r"^\s*(\d+)\s*$")
+_FRACTION_COMPARISON = re.compile(rf"^\s*{_FRACTION}\s*(<|>|=)\s*{_FRACTION}\s*$")
 
 
 def _nonzero_denominator(den: int, raw: str) -> int:
@@ -81,11 +82,27 @@ def _reduce(num: int, den: int) -> dict[str, Any]:
     return {"num": num // divisor, "den": den // divisor}
 
 
+def parse_compare_fractions(text: str) -> dict[str, Any]:
+    match = _FRACTION_COMPARISON.match(text)
+    if not match:
+        raise ValueError(f"'{text}' is not of the form 'a/b < c/d', 'a/b > c/d', or 'a/b = c/d'")
+    left_num, left_den, op, right_num, right_den = match.groups()
+    return {
+        "left_num": int(left_num),
+        "left_den": _nonzero_denominator(int(left_den), text),
+        "op": op,
+        "right_num": int(right_num),
+        "right_den": _nonzero_denominator(int(right_den), text),
+    }
+
+
 _PARSERS = {
     "rewrite_common_denominator": parse_rewrite_common_denominator,
     "add_numerators": parse_single_fraction,
+    "subtract_numerators": parse_single_fraction,
     "simplify_fraction": parse_single_fraction,
     "write_final_answer": parse_final_answer,
+    "compare_fractions": parse_compare_fractions,
 }
 
 

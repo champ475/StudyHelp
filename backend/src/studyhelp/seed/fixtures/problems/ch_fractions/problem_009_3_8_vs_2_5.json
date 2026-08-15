@@ -1,0 +1,21 @@
+{
+  "problem_id": "fractions-cmp-001",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 4,
+    "chapter_title": "Parts and Wholes",
+    "topic": "fractions_addition"
+  },
+  "display_label": "Compare 3/8 and 2/5",
+  "given": { "a_num": 3, "a_den": 8, "b_num": 2, "b_den": 5, "op": "compare" },
+  "final_answer": { "op": "<" },
+  "step_graph": [
+    {
+      "step_id": "s1_compare",
+      "type": "compare_fractions",
+      "expected_state": { "left_num": 3, "left_den": 8, "op": "<", "right_num": 2, "right_den": 5 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

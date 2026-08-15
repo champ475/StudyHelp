@@ -46,5 +46,37 @@
     "source": "NCERT Class 5 Ch.7; general Class 5 fraction-simplification curricular emphasis",
     "version": 1,
     "review_status": "seed_curated"
+  },
+  {
+    "id": "fractions_addition.subtract_across",
+    "topic": "fractions_addition",
+    "step_type": "subtract_numerators",
+    "bug_signature": { "buggy_rule_id": "fractions_addition.subtract_across" },
+    "typical_mindset": "The same whole-number-pair overgeneralization as adding across, applied to subtraction: top-minus-top and bottom-minus-bottom are both treated as separate subtractions, so the (already-equal) denominators get combined instead of kept.",
+    "explanation_strategy": "Same anchor as the addition case: ask what would happen to the piece size if the bottoms changed too, and whether we're still counting the same kind of piece after subtracting.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "You rewrote both as twelfths — nice! When we subtract, are we changing the size of the pieces, or just how many we have left?" },
+      { "role": "student", "text": "Just how many are left." },
+      { "role": "tutor", "text": "Right — so the bottom number should stay the same. What should it be here?" }
+    ],
+    "source": "Behr, Wachsmuth, Post & Lesh 1984 on rational-number misconceptions; Ni & Zhou 2005",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "fractions_addition.compares_numerators_only",
+    "topic": "fractions_addition",
+    "step_type": "compare_fractions",
+    "bug_signature": { "buggy_rule_id": "fractions_addition.compares_numerators_only" },
+    "typical_mindset": "Comparing fractions is treated the same as comparing whole numbers — whichever top number is bigger is assumed to make the whole fraction bigger, ignoring that the denominators (piece sizes) differ.",
+    "explanation_strategy": "Make the piece-size difference concrete before comparing the counts: ask which fraction has bigger pieces, then guide the child to rewrite both with the same piece size before comparing which has more.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "One of these fractions is cut into bigger pieces than the other. Which one do you think has the bigger pieces?" },
+      { "role": "student", "text": "The one with the smaller bottom number." },
+      { "role": "tutor", "text": "Exactly! So before comparing how many pieces we have, let's make the pieces the same size first." }
+    ],
+    "source": "Ni & Zhou 2005, 'whole number bias' in fraction learning; NCERT Class 5 Ch.7 misconception notes",
+    "version": 1,
+    "review_status": "seed_curated"
   }
 ]
