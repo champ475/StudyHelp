@@ -1,0 +1,33 @@
+{
+  "problem_id": "measurement-002",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 14,
+    "chapter_title": "How Big? How Heavy?",
+    "topic": "measurement"
+  },
+  "display_label": "5000 m to km",
+  "given": { "value": 5000, "from_unit": "m", "to_unit": "km", "category": "length", "direction": "/", "factor": 1000 },
+  "final_answer": { "value": 5 },
+  "step_graph": [
+    {
+      "step_id": "s1_factor",
+      "type": "identify_conversion_factor",
+      "expected_state": { "direction": "/", "factor": 1000 },
+      "next": ["s2_convert"]
+    },
+    {
+      "step_id": "s2_convert",
+      "type": "convert_units",
+      "expected_state": { "value": 5 },
+      "next": ["s3_final"]
+    },
+    {
+      "step_id": "s3_final",
+      "type": "write_final_answer",
+      "expected_state": { "value": 5 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

@@ -1,0 +1,54 @@
+[
+  {
+    "id": "measurement.wrong_direction",
+    "topic": "measurement",
+    "step_type": "identify_conversion_factor",
+    "bug_code": "ME1-wrong-direction",
+    "signature_matcher": {
+      "applies_to": "identify_conversion_factor",
+      "precondition": {},
+      "student_formula": "direction != correct.direction AND factor == correct.factor",
+      "distinguishing_from": []
+    },
+    "citation": "Topic-authored; no direct literature-survey citation for unit-conversion direction confusion specifically.",
+    "misconception_id": "measurement.wrong_direction",
+    "example_pair": {
+      "problem_id": "measurement-001",
+      "correct_step": {
+        "step_type": "identify_conversion_factor",
+        "fields": { "direction": "x", "factor": 1000 }
+      },
+      "student_step": {
+        "step_type": "identify_conversion_factor",
+        "fields": { "direction": "/", "factor": 1000 }
+      },
+      "note": "Student divides by 1000 instead of multiplying when converting 3 km (a bigger unit) into m (a smaller unit)."
+    }
+  },
+  {
+    "id": "measurement.wrong_factor",
+    "topic": "measurement",
+    "step_type": "identify_conversion_factor",
+    "bug_code": "ME2-wrong-factor",
+    "signature_matcher": {
+      "applies_to": "identify_conversion_factor",
+      "precondition": {},
+      "student_formula": "direction == correct.direction AND factor != correct.factor AND factor in {10, 100, 1000}",
+      "distinguishing_from": []
+    },
+    "citation": "Topic-authored; no direct literature-survey citation for unit-conversion factor confusion specifically.",
+    "misconception_id": "measurement.wrong_factor",
+    "example_pair": {
+      "problem_id": "measurement-001",
+      "correct_step": {
+        "step_type": "identify_conversion_factor",
+        "fields": { "direction": "x", "factor": 1000 }
+      },
+      "student_step": {
+        "step_type": "identify_conversion_factor",
+        "fields": { "direction": "x", "factor": 100 }
+      },
+      "note": "Student uses the km-to-cm-style factor (100) instead of the correct km-to-m factor (1000)."
+    }
+  }
+]

@@ -35,6 +35,9 @@ from studyhelp.verification.topics.fractions_addition.sympy_utils import (
 from studyhelp.verification.topics.lcm_hcf.sympy_utils import (
     validate_problem_arithmetic as validate_lcm_hcf_arithmetic,
 )
+from studyhelp.verification.topics.measurement.sympy_utils import (
+    validate_problem_arithmetic as validate_measurement_arithmetic,
+)
 from studyhelp.verification.topics.multiplication_division.sympy_utils import (
     validate_problem_arithmetic as validate_multiplication_division_arithmetic,
 )
@@ -51,6 +54,7 @@ _ARITHMETIC_VALIDATORS = {
     "decimals": validate_decimals_arithmetic,
     "area_perimeter": validate_area_perimeter_arithmetic,
     "multiplication_division": validate_multiplication_division_arithmetic,
+    "measurement": validate_measurement_arithmetic,
 }
 """Per-topic seed-time arithmetic cross-check hook (ARCHITECTURE.md D19 —
 sequence, don't front-load: this became a dict the moment a second topic

@@ -1,0 +1,33 @@
+{
+  "problem_id": "measurement-007",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 14,
+    "chapter_title": "How Big? How Heavy?",
+    "topic": "measurement"
+  },
+  "display_label": "6 kg to g",
+  "given": { "value": 6, "from_unit": "kg", "to_unit": "g", "category": "weight", "direction": "x", "factor": 1000 },
+  "final_answer": { "value": 6000 },
+  "step_graph": [
+    {
+      "step_id": "s1_factor",
+      "type": "identify_conversion_factor",
+      "expected_state": { "direction": "x", "factor": 1000 },
+      "next": ["s2_convert"]
+    },
+    {
+      "step_id": "s2_convert",
+      "type": "convert_units",
+      "expected_state": { "value": 6000 },
+      "next": ["s3_final"]
+    },
+    {
+      "step_id": "s3_final",
+      "type": "write_final_answer",
+      "expected_state": { "value": 6000 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

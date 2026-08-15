@@ -270,3 +270,12 @@ Both fixes have dedicated regression tests. Recorded as D36. **This is the stron
 - 10 problems: 5 multiplication (34x6, 47x3, 58x4, 26x9, 73x5), 5 exact division (84/4, 96/8, 72/6, 65/5, 78/3).
 - **Verified**: 339 unit+golden tests passing (up from 303), `ruff`/`mypy` clean (one nested-if lint finding fixed during the build, before commit — not left for later).
 - Recorded as ARCHITECTURE.md D50.
+
+## 2026-08-16 00:00 — Phase E complete, topic 5/5: measurement (Ch.14)
+
+- New `measurement` topic (length/weight/volume unit conversion), built directly against the established pattern. 3-step DAG: `identify_conversion_factor` (`"x1000"`/`"/1000"`, ÷ also accepted as an alternate spelling) → `convert_units` → `write_final_answer`. `given` carries authoritative `direction`/`factor` fields directly rather than deriving them from a unit-name lookup table at validation time — simpler, no loss of safety since the sympy cross-check against `final_answer` still catches any mistake either way.
+- **2 new buggy-rule matchers**: ME1 (wrong direction — right factor, multiplies when should divide or vice versa) and ME2 (wrong factor — right direction, confuses 10/100/1000). Both checkable from a single step's own field pair.
+- 10 problems across all 3 categories (4 length, 3 weight, 3 volume), mixing both conversion directions.
+- **Verified**: 374 unit+golden tests passing (up from 339), `ruff`/`mypy` clean, all green on the first full run.
+- Recorded as ARCHITECTURE.md D51.
+- **Phase E is now complete**: 5 new topics (LCM/HCF, decimals, area/perimeter, multiplication/division, measurement) landed across 5 sequential commits, bringing the full-DAG topic count to 7 (alongside subtraction and fractions), matching the plan's chapter → treatment map. Two of the five (area/perimeter, multiplication/division, measurement) were built directly in-session rather than delegated, after the area/perimeter fork attempt returned with zero changes — LCM/HCF and decimals were successfully delegated and independently re-verified before each commit. Next: Phase F (7 light-check topics for the non-DAG chapters), then Phase G (real end-to-end verification) and Phase H (docs close-out).

@@ -1,0 +1,26 @@
+[
+  {
+    "topic": "measurement",
+    "step_type_key": "identify_conversion_factor",
+    "description": "Decide whether to multiply or divide, and by how much, to change units.",
+    "structured_input_schema": {
+      "text": "free_text: 'x<factor>' or '/<factor>', e.g. 'x1000'"
+    }
+  },
+  {
+    "topic": "measurement",
+    "step_type_key": "convert_units",
+    "description": "Do the multiplication or division to find the converted amount.",
+    "structured_input_schema": {
+      "text": "free_text: a whole number"
+    }
+  },
+  {
+    "topic": "measurement",
+    "step_type_key": "write_final_answer",
+    "description": "Write the final number as your answer.",
+    "structured_input_schema": {
+      "text": "free_text: a whole number"
+    }
+  }
+]

@@ -1,0 +1,34 @@
+[
+  {
+    "id": "measurement.wrong_direction",
+    "topic": "measurement",
+    "step_type": "identify_conversion_factor",
+    "bug_signature": { "buggy_rule_id": "measurement.wrong_direction" },
+    "typical_mindset": "Converting to a smaller unit should always give a bigger number, and converting to a bigger unit should always give a smaller number — but which operation (multiply or divide) produces that hasn't fully connected to the direction of the conversion, so the student picks the correct factor but applies it the wrong way.",
+    "explanation_strategy": "Ground the direction in a concrete comparison before touching the factor: ask whether the new unit is smaller or bigger than the one we started with, and what that should do to the number (more little pieces, or fewer big ones), before deciding multiply or divide.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "A metre is bigger than a centimetre, or smaller?" },
+      { "role": "student", "text": "Bigger." },
+      { "role": "tutor", "text": "Right — so if we're changing metres into centimetres, will we need more little pieces, or fewer? What should we do with the number?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for unit-conversion direction confusion specifically.",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "measurement.wrong_factor",
+    "topic": "measurement",
+    "step_type": "identify_conversion_factor",
+    "bug_signature": { "buggy_rule_id": "measurement.wrong_factor" },
+    "typical_mindset": "The specific conversion factor between two units (10, 100, or 1000) isn't yet firmly attached to the right unit pair — the student has the right idea about direction but reaches for a different power of ten than the one this particular pair of units actually uses.",
+    "explanation_strategy": "Ask the child to recall the specific relationship between exactly these two units (e.g. how many centimetres make a metre) rather than guessing among the powers of ten, anchoring the fact to the unit pair itself.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "How many centimetres are in 1 metre?" },
+      { "role": "student", "text": "100." },
+      { "role": "tutor", "text": "Right! So that's the number we use here — not 1000." }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for unit-conversion factor confusion specifically.",
+    "version": 1,
+    "review_status": "seed_curated"
+  }
+]

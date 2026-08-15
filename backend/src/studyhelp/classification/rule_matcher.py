@@ -204,6 +204,40 @@ def _md2_misplaced_remainder(correct: _Fields, student: _Fields) -> bool:
     return bool(student_group == correct_group % 10 and student_group != correct_group)
 
 
+def _me1_wrong_direction(correct: _Fields, student: _Fields) -> bool:
+    """Unit conversion `identify_conversion_factor` step: the student picks
+    the right factor but the wrong direction (multiplies when the correct
+    move was to divide, or vice versa)."""
+    correct_direction = correct.get("direction")
+    student_direction = student.get("direction")
+    correct_factor = _as_int(correct, "factor")
+    student_factor = _as_int(student, "factor")
+    if correct_direction is None or student_direction is None:
+        return False
+    if correct_factor is None or student_factor is None:
+        return False
+    return bool(student_direction != correct_direction and student_factor == correct_factor)
+
+
+def _me2_wrong_factor(correct: _Fields, student: _Fields) -> bool:
+    """Unit conversion `identify_conversion_factor` step: the student has
+    the right direction but reaches for a different power-of-ten factor
+    (10/100/1000 confusion) than the one this unit pair actually uses."""
+    correct_direction = correct.get("direction")
+    student_direction = student.get("direction")
+    correct_factor = _as_int(correct, "factor")
+    student_factor = _as_int(student, "factor")
+    if correct_direction is None or student_direction is None:
+        return False
+    if correct_factor is None or student_factor is None:
+        return False
+    return bool(
+        student_direction == correct_direction
+        and student_factor != correct_factor
+        and student_factor in (10, 100, 1000)
+    )
+
+
 def _f3_forgot_to_simplify(correct: _Fields, student: _Fields) -> bool:
     """The value is right but the student re-submits the unsimplified
     fraction as if it were already in lowest terms — the concept of
@@ -396,6 +430,18 @@ _MATCHERS: list[_MatcherSpec] = [
         "MD2-misplaced-remainder",
         "divide_units",
         _md2_misplaced_remainder,
+    ),
+    _MatcherSpec(
+        "measurement.wrong_direction",
+        "ME1-wrong-direction",
+        "identify_conversion_factor",
+        _me1_wrong_direction,
+    ),
+    _MatcherSpec(
+        "measurement.wrong_factor",
+        "ME2-wrong-factor",
+        "identify_conversion_factor",
+        _me2_wrong_factor,
     ),
 ]
 
