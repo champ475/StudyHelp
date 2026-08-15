@@ -1,0 +1,34 @@
+[
+  {
+    "id": "lcm_hcf.list_shifted_by_one",
+    "topic": "lcm_hcf",
+    "step_type": "find_common_values",
+    "bug_signature": { "buggy_rule_id": "lcm_hcf.list_shifted_by_one" },
+    "typical_mindset": "The child understands how to generate the list of common factors or multiples, but starts counting one step too late — skipping the very first (smallest) common value and tacking on an extra one at the end instead, as if the list always had to have a fixed number of entries rather than starting from the true smallest common value.",
+    "explanation_strategy": "Ask the child to go back to the very beginning and list multiples/factors of each number separately from the start, then point at the smallest value that appears in both lists, rather than being told 'you missed the first one.'",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Let's list the multiples of each number again, starting from the very first one. What's the smallest multiple of each number?" },
+      { "role": "student", "text": "Oh, I started from the second one!" },
+      { "role": "tutor", "text": "Good catch! What's the very first common one you see in both lists?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for LCM/HCF specifically (see ARCHITECTURE.md D20's note that this topic had weaker citation grounding than subtraction).",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "lcm_hcf.extra_non_common_value",
+    "topic": "lcm_hcf",
+    "step_type": "find_common_values",
+    "bug_signature": { "buggy_rule_id": "lcm_hcf.extra_non_common_value" },
+    "typical_mindset": "A value that divides (or is a multiple of) only one of the two numbers is mistakenly included as if it were common to both — the check 'does this divide/multiply into BOTH numbers' isn't consistently applied to every candidate value.",
+    "explanation_strategy": "Take the one extra value the child listed and ask them to check it against each of the two original numbers separately, one at a time, so they discover for themselves that it only works for one of them.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Let's check that number against both of our original numbers, one at a time. Does it divide evenly into the first one?" },
+      { "role": "student", "text": "Yes." },
+      { "role": "tutor", "text": "Good. Now check the second number — does it divide evenly into that one too?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for LCM/HCF specifically (see ARCHITECTURE.md D20's note that this topic had weaker citation grounding than subtraction).",
+    "version": 1,
+    "review_status": "seed_curated"
+  }
+]

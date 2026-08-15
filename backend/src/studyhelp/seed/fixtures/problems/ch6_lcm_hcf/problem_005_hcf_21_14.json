@@ -1,0 +1,27 @@
+{
+  "problem_id": "lcm-hcf-005",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 6,
+    "chapter_title": "Be My Multiple, I'll Be Your Factor",
+    "topic": "lcm_hcf"
+  },
+  "display_label": "HCF of 21 and 14",
+  "given": { "a": 21, "b": 14, "op": "hcf" },
+  "final_answer": { "value": 7 },
+  "step_graph": [
+    {
+      "step_id": "s1_common_factors",
+      "type": "find_common_values",
+      "expected_state": { "values": [1, 7] },
+      "next": ["s2_final"]
+    },
+    {
+      "step_id": "s2_final",
+      "type": "write_final_answer",
+      "expected_state": { "value": 7 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

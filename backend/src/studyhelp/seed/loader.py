@@ -26,6 +26,9 @@ from studyhelp.schemas.step_schema import Problem, StepTypeEntry
 from studyhelp.verification.topics.fractions_addition.sympy_utils import (
     validate_problem_arithmetic as validate_fractions_addition_arithmetic,
 )
+from studyhelp.verification.topics.lcm_hcf.sympy_utils import (
+    validate_problem_arithmetic as validate_lcm_hcf_arithmetic,
+)
 from studyhelp.verification.topics.subtraction_borrowing.sympy_utils import (
     validate_problem_arithmetic as validate_subtraction_borrowing_arithmetic,
 )
@@ -35,6 +38,7 @@ FIXTURES_ROOT = Path(__file__).parent / "fixtures"
 _ARITHMETIC_VALIDATORS = {
     "subtraction_with_borrowing": validate_subtraction_borrowing_arithmetic,
     "fractions_addition": validate_fractions_addition_arithmetic,
+    "lcm_hcf": validate_lcm_hcf_arithmetic,
 }
 """Per-topic seed-time arithmetic cross-check hook (ARCHITECTURE.md D19 —
 sequence, don't front-load: this became a dict the moment a second topic

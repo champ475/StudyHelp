@@ -1,0 +1,18 @@
+[
+  {
+    "topic": "lcm_hcf",
+    "step_type_key": "find_common_values",
+    "description": "List the numbers, smallest to largest, separated by commas: for HCF, every number that divides evenly into both numbers; for LCM, the three smallest numbers both can divide into evenly.",
+    "structured_input_schema": {
+      "text": "free_text: comma-separated integers, e.g. '1,2,3,6'"
+    }
+  },
+  {
+    "topic": "lcm_hcf",
+    "step_type_key": "write_final_answer",
+    "description": "Write the final LCM or HCF as a single number.",
+    "structured_input_schema": {
+      "text": "free_text: a whole number"
+    }
+  }
+]

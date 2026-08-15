@@ -239,3 +239,10 @@ Both fixes have dedicated regression tests. Recorded as D36. **This is the stron
 - **A real data-scoping decision made explicitly, not silently**: the Python package and `topic` string stay named `fractions_addition` despite now covering three operations — renaming touches ~15+ files for a cosmetic-only gain; documented as a deliberate scope cut in ARCHITECTURE.md D45, not an oversight.
 - **Verified**: 194 unit+golden tests passing (up from 180), `ruff`/`mypy` clean.
 - Recorded as ARCHITECTURE.md D45, D46.
+
+## 2026-08-15 22:00 — Phase E, topic 1/5: LCM/HCF (Ch.6)
+
+- New `lcm_hcf` topic, built against the established `fractions_addition` free-text pattern exactly: `find_common_values` (comma-separated integers, parser always returns them sorted ascending regardless of typed order) → `write_final_answer` (bare integer). 10 problems (5 HCF: 12&18, 24&36, 15&20, 8&12, 21&14; 5 LCM: 4&6, 3&5, 6&8, 9&12, 5&7).
+- **A real buggy-rule-matcher interface limitation found while building, not silently worked around**: the originally-planned "LCM/HCF operation confusion" bug can't be detected through `match_buggy_rule()`'s single-step-field-pair signature (no access to the problem's `a`/`b` from a bare `{"value": N}` correct-fields dict). Redesigned to two bugs genuinely checkable from the `find_common_values` step's own list data: LH1 (list shifted by one, skips the smallest common value) and LH2 (includes an extra value dividing only one of the two numbers). Recorded as ARCHITECTURE.md D47, including the general lesson for future topic slices.
+- Misconception bank entries honestly note this chapter's weaker literature-survey grounding (topic-authored, no direct citation) rather than inventing one, matching D20's own finding about LCM/HCF's citation strength.
+- **Verified**: 231 unit+golden tests passing (up from 194), `ruff`/`mypy` clean, independently re-run and confirmed (not just trusted from the build report).

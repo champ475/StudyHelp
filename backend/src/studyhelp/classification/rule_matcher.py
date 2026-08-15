@@ -168,6 +168,37 @@ def _f3_forgot_to_simplify(correct: _Fields, student: _Fields) -> bool:
     return bool(equal_value) and not_reduced
 
 
+def _f6_lcm_hcf_list_shifted_by_one(correct: _Fields, student: _Fields) -> bool:
+    """LCM/HCF `find_common_values` step: the student's list is the correct
+    list shifted by one position — they skip the smallest common
+    factor/multiple and tack on one extra at the end, as if counting
+    started one step too late (e.g. correct [12,24,36] -> student
+    [24,36,48])."""
+    correct_values = correct.get("values")
+    student_values = student.get("values")
+    if not isinstance(correct_values, list) or not isinstance(student_values, list):
+        return False
+    if len(correct_values) < 2 or len(student_values) != len(correct_values):
+        return False
+    step = correct_values[1] - correct_values[0]
+    expected_shifted = correct_values[1:] + [correct_values[-1] + step]
+    return bool(student_values == expected_shifted and student_values != correct_values)
+
+
+def _f7_lcm_hcf_extra_non_common_value(correct: _Fields, student: _Fields) -> bool:
+    """LCM/HCF `find_common_values` step: the student's list contains every
+    correct value plus exactly one extra spurious one — typically a value
+    that divides (or is a multiple of) only ONE of the two given numbers,
+    mistaken for a value common to both."""
+    correct_values = correct.get("values")
+    student_values = student.get("values")
+    if not isinstance(correct_values, list) or not isinstance(student_values, list):
+        return False
+    if len(student_values) != len(correct_values) + 1:
+        return False
+    return bool(set(correct_values).issubset(set(student_values)) and student_values != correct_values)
+
+
 @dataclass(frozen=True)
 class _MatcherSpec:
     buggy_rule_id: str
@@ -230,6 +261,18 @@ _MATCHERS: list[_MatcherSpec] = [
         "F5-compares-numerators-only",
         "compare_fractions",
         _f5_compares_numerators_only,
+    ),
+    _MatcherSpec(
+        "lcm_hcf.list_shifted_by_one",
+        "LH1-list-shifted-by-one",
+        "find_common_values",
+        _f6_lcm_hcf_list_shifted_by_one,
+    ),
+    _MatcherSpec(
+        "lcm_hcf.extra_non_common_value",
+        "LH2-extra-non-common-value",
+        "find_common_values",
+        _f7_lcm_hcf_extra_non_common_value,
     ),
 ]
 

@@ -1,0 +1,54 @@
+[
+  {
+    "id": "lcm_hcf.list_shifted_by_one",
+    "topic": "lcm_hcf",
+    "step_type": "find_common_values",
+    "bug_code": "LH1-list-shifted-by-one",
+    "signature_matcher": {
+      "applies_to": "find_common_values",
+      "precondition": {},
+      "student_formula": "values == correct.values[1:] + [correct.values[-1] + (correct.values[1] - correct.values[0])]",
+      "distinguishing_from": []
+    },
+    "citation": "Topic-authored; no direct literature-survey citation for LCM/HCF specifically (see ARCHITECTURE.md D20).",
+    "misconception_id": "lcm_hcf.list_shifted_by_one",
+    "example_pair": {
+      "problem_id": "lcm-hcf-006",
+      "correct_step": {
+        "step_type": "find_common_values",
+        "fields": { "values": [12, 24, 36] }
+      },
+      "student_step": {
+        "step_type": "find_common_values",
+        "fields": { "values": [24, 36, 48] }
+      },
+      "note": "Student skips the smallest common multiple (12) and lists the next three instead."
+    }
+  },
+  {
+    "id": "lcm_hcf.extra_non_common_value",
+    "topic": "lcm_hcf",
+    "step_type": "find_common_values",
+    "bug_code": "LH2-extra-non-common-value",
+    "signature_matcher": {
+      "applies_to": "find_common_values",
+      "precondition": {},
+      "student_formula": "set(correct.values) subset of set(values) AND len(values) == len(correct.values) + 1",
+      "distinguishing_from": []
+    },
+    "citation": "Topic-authored; no direct literature-survey citation for LCM/HCF specifically (see ARCHITECTURE.md D20).",
+    "misconception_id": "lcm_hcf.extra_non_common_value",
+    "example_pair": {
+      "problem_id": "lcm-hcf-001",
+      "correct_step": {
+        "step_type": "find_common_values",
+        "fields": { "values": [1, 2, 3, 6] }
+      },
+      "student_step": {
+        "step_type": "find_common_values",
+        "fields": { "values": [1, 2, 3, 4, 6] }
+      },
+      "note": "Student includes 4, which divides 12 (one of the two numbers) but not 18 -- not actually a common factor."
+    }
+  }
+]
