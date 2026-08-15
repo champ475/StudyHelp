@@ -1,0 +1,54 @@
+[
+  {
+    "id": "decimals.tenths_written_as_hundredths",
+    "topic": "decimals",
+    "step_type": "align_place_value",
+    "bug_code": "DEC1-tenths-written-as-hundredths",
+    "signature_matcher": {
+      "applies_to": "align_place_value",
+      "precondition": {},
+      "student_formula": "a_hundredths == (correct.a_hundredths // 100) * 100 + (correct.a_hundredths // 10 % 10) AND correct.a_hundredths % 10 == 0 (or the same pattern on b_hundredths)",
+      "distinguishing_from": []
+    },
+    "citation": "Topic-authored; no direct literature-survey citation for decimal place-value specifically.",
+    "misconception_id": "decimals.tenths_written_as_hundredths",
+    "example_pair": {
+      "problem_id": "decimals-001",
+      "correct_step": {
+        "step_type": "align_place_value",
+        "fields": { "a_hundredths": 340, "b_hundredths": 125 }
+      },
+      "student_step": {
+        "step_type": "align_place_value",
+        "fields": { "a_hundredths": 304, "b_hundredths": 125 }
+      },
+      "note": "3.4 padded as 3.04 instead of 3.40 -- the tenths digit (4) is written in the hundredths column."
+    }
+  },
+  {
+    "id": "decimals.decimal_point_shifted",
+    "topic": "decimals",
+    "step_type": "compute_result",
+    "bug_code": "DEC2-decimal-point-shifted",
+    "signature_matcher": {
+      "applies_to": "compute_result",
+      "precondition": {},
+      "student_formula": "result_hundredths == correct.result_hundredths * 10",
+      "distinguishing_from": []
+    },
+    "citation": "Topic-authored; no direct literature-survey citation for decimal place-value specifically.",
+    "misconception_id": "decimals.decimal_point_shifted",
+    "example_pair": {
+      "problem_id": "decimals-001",
+      "correct_step": {
+        "step_type": "compute_result",
+        "fields": { "result_hundredths": 465 }
+      },
+      "student_step": {
+        "step_type": "compute_result",
+        "fields": { "result_hundredths": 4650 }
+      },
+      "note": "3.40 + 1.25 correctly computed in magnitude but written as 46.50 instead of 4.65 -- the decimal point landed one place too far right."
+    }
+  }
+]

@@ -23,6 +23,9 @@ from studyhelp.db.models import StepType as StepTypeRow
 from studyhelp.schemas.buggy_rule import BuggyRuleEntry
 from studyhelp.schemas.misconception import MisconceptionEntry
 from studyhelp.schemas.step_schema import Problem, StepTypeEntry
+from studyhelp.verification.topics.decimals.sympy_utils import (
+    validate_problem_arithmetic as validate_decimals_arithmetic,
+)
 from studyhelp.verification.topics.fractions_addition.sympy_utils import (
     validate_problem_arithmetic as validate_fractions_addition_arithmetic,
 )
@@ -39,6 +42,7 @@ _ARITHMETIC_VALIDATORS = {
     "subtraction_with_borrowing": validate_subtraction_borrowing_arithmetic,
     "fractions_addition": validate_fractions_addition_arithmetic,
     "lcm_hcf": validate_lcm_hcf_arithmetic,
+    "decimals": validate_decimals_arithmetic,
 }
 """Per-topic seed-time arithmetic cross-check hook (ARCHITECTURE.md D19 —
 sequence, don't front-load: this became a dict the moment a second topic

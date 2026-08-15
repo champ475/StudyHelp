@@ -1,0 +1,26 @@
+[
+  {
+    "topic": "decimals",
+    "step_type_key": "align_place_value",
+    "description": "Write both numbers with two decimal places, like 3.40 and 1.25, separated by a comma.",
+    "structured_input_schema": {
+      "text": "free_text: 'a.bc, d.ef'"
+    }
+  },
+  {
+    "topic": "decimals",
+    "step_type_key": "compute_result",
+    "description": "Add or subtract the two aligned numbers and write the result as a decimal.",
+    "structured_input_schema": {
+      "text": "free_text: 'a.bc'"
+    }
+  },
+  {
+    "topic": "decimals",
+    "step_type_key": "write_final_answer",
+    "description": "Write the final answer as a decimal number.",
+    "structured_input_schema": {
+      "text": "free_text: 'a.bc'"
+    }
+  }
+]

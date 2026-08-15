@@ -1,0 +1,34 @@
+[
+  {
+    "id": "decimals.tenths_written_as_hundredths",
+    "topic": "decimals",
+    "step_type": "align_place_value",
+    "bug_signature": { "buggy_rule_id": "decimals.tenths_written_as_hundredths" },
+    "typical_mindset": "When padding a number like 3.4 to two decimal places, the digit after the decimal point is written straight after a zero (\"3.04\") instead of before it (\"3.40\") -- the tenths digit gets placed in the hundredths column, as if 'adding a zero to pad' means inserting it right after the decimal point rather than at the end.",
+    "explanation_strategy": "Ask the child to say the number out loud using place-value words -- 'three and four tenths' -- and then ask which column 'four tenths' belongs in, rather than telling them the padding rule directly.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Let's say this number out loud: three point four. Is that 'four tenths' or 'four hundredths'?" },
+      { "role": "student", "text": "Four tenths." },
+      { "role": "tutor", "text": "Right! So which column should the 4 go in when we write two decimal places?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for decimal place-value specifically.",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "decimals.decimal_point_shifted",
+    "topic": "decimals",
+    "step_type": "compute_result",
+    "bug_signature": { "buggy_rule_id": "decimals.decimal_point_shifted" },
+    "typical_mindset": "The addition or subtraction itself is done correctly on the digits, but the decimal point in the final answer ends up one place too far right -- the result is exactly ten times too large, as if the child added the digits like whole numbers and placed the decimal point back in by guesswork rather than aligning it with the numbers being combined.",
+    "explanation_strategy": "Ask the child to compare the size of their answer to the two numbers they started with -- is it about the same size, or much bigger? -- to help them notice the decimal point landed in the wrong place, without stating the correct value.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "You added 3.40 and 1.25. Take a look at your answer -- is it close in size to those two numbers, or a lot bigger?" },
+      { "role": "student", "text": "A lot bigger!" },
+      { "role": "tutor", "text": "Exactly. Where do you think the decimal point should really go?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for decimal place-value specifically.",
+    "version": 1,
+    "review_status": "seed_curated"
+  }
+]

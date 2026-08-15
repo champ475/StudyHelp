@@ -27,6 +27,9 @@ def test_step_types_load_and_cover_every_registered_step_type() -> None:
         ("fractions_addition", "write_final_answer"),
         ("lcm_hcf", "find_common_values"),
         ("lcm_hcf", "write_final_answer"),
+        ("decimals", "align_place_value"),
+        ("decimals", "compute_result"),
+        ("decimals", "write_final_answer"),
     }
 
 
@@ -35,14 +38,14 @@ def test_problems_load_and_pass_arithmetic_validation() -> None:
     fixture — if this doesn't raise, every seeded problem is internally
     consistent per the independent sympy cross-check."""
     problems = load_problems()
-    assert len(problems) >= 26
+    assert len(problems) >= 36
     problem_ids = {p.problem_id for p in problems}
     assert "subtraction-borrow-014" in problem_ids
 
 
-def test_misconceptions_load_with_eleven_seed_entries() -> None:
+def test_misconceptions_load_with_thirteen_seed_entries() -> None:
     entries = load_misconceptions()
-    assert len(entries) == 11
+    assert len(entries) == 13
     ids = {e.id for e in entries}
     assert ids == {
         "subtraction_borrowing.smaller_from_larger",
@@ -56,12 +59,14 @@ def test_misconceptions_load_with_eleven_seed_entries() -> None:
         "fractions_addition.compares_numerators_only",
         "lcm_hcf.list_shifted_by_one",
         "lcm_hcf.extra_non_common_value",
+        "decimals.tenths_written_as_hundredths",
+        "decimals.decimal_point_shifted",
     }
 
 
-def test_buggy_rules_load_with_eleven_seed_entries() -> None:
+def test_buggy_rules_load_with_thirteen_seed_entries() -> None:
     entries = load_buggy_rules()
-    assert len(entries) == 11
+    assert len(entries) == 13
     bug_codes = {e.bug_code for e in entries}
     assert bug_codes == {
         "B1-smaller-from-larger",
@@ -75,6 +80,8 @@ def test_buggy_rules_load_with_eleven_seed_entries() -> None:
         "F5-compares-numerators-only",
         "LH1-list-shifted-by-one",
         "LH2-extra-non-common-value",
+        "DEC1-tenths-written-as-hundredths",
+        "DEC2-decimal-point-shifted",
     }
 
 

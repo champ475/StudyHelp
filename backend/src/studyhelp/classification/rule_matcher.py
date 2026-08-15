@@ -199,6 +199,39 @@ def _f7_lcm_hcf_extra_non_common_value(correct: _Fields, student: _Fields) -> bo
     return bool(set(correct_values).issubset(set(student_values)) and student_values != correct_values)
 
 
+def _dec1_tenths_written_as_hundredths(correct: _Fields, student: _Fields) -> bool:
+    """Decimals `align_place_value` step: a number whose true decimal
+    representation has one significant digit after the point (a multiple
+    of 10 in hundredths, e.g. 3.40) gets padded wrong — the tenths digit is
+    written straight after the decimal point (in the hundredths column,
+    e.g. "3.04") instead of before it ("3.40"), on either the a or b
+    field."""
+
+    def _shifted(correct_value: object) -> int | None:
+        if not isinstance(correct_value, int) or correct_value % 10 != 0:
+            return None
+        whole, tenths_digit = divmod(correct_value, 100)
+        tenths_digit //= 10
+        return whole * 100 + tenths_digit
+
+    for key in ("a_hundredths", "b_hundredths"):
+        shifted = _shifted(correct.get(key))
+        if shifted is not None and student.get(key) == shifted and student.get(key) != correct.get(key):
+            return True
+    return False
+
+
+def _dec2_decimal_point_shifted(correct: _Fields, student: _Fields) -> bool:
+    """Decimals `compute_result` step: the digits are combined correctly in
+    magnitude, but the decimal point lands one place too far right — the
+    student's result is exactly ten times the correct one."""
+    correct_result = _as_int(correct, "result_hundredths")
+    student_result = _as_int(student, "result_hundredths")
+    if correct_result is None or student_result is None or correct_result == 0:
+        return False
+    return bool(student_result == correct_result * 10)
+
+
 @dataclass(frozen=True)
 class _MatcherSpec:
     buggy_rule_id: str
@@ -273,6 +306,18 @@ _MATCHERS: list[_MatcherSpec] = [
         "LH2-extra-non-common-value",
         "find_common_values",
         _f7_lcm_hcf_extra_non_common_value,
+    ),
+    _MatcherSpec(
+        "decimals.tenths_written_as_hundredths",
+        "DEC1-tenths-written-as-hundredths",
+        "align_place_value",
+        _dec1_tenths_written_as_hundredths,
+    ),
+    _MatcherSpec(
+        "decimals.decimal_point_shifted",
+        "DEC2-decimal-point-shifted",
+        "compute_result",
+        _dec2_decimal_point_shifted,
     ),
 ]
 

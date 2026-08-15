@@ -1,0 +1,28 @@
+{
+  "problem_id": "decimals-006",
+  "ncert_ref": { "class": 5, "chapter": 10, "chapter_title": "Tenths and Hundredths", "topic": "decimals" },
+  "display_label": "9.6 − 2.45",
+  "given": { "a_hundredths": 960, "b_hundredths": 245, "op": "-" },
+  "final_answer": { "result_hundredths": 715 },
+  "step_graph": [
+    {
+      "step_id": "s1_align",
+      "type": "align_place_value",
+      "expected_state": { "a_hundredths": 960, "b_hundredths": 245 },
+      "next": ["s2_compute"]
+    },
+    {
+      "step_id": "s2_compute",
+      "type": "compute_result",
+      "expected_state": { "result_hundredths": 715 },
+      "next": ["s3_final"]
+    },
+    {
+      "step_id": "s3_final",
+      "type": "write_final_answer",
+      "expected_state": { "result_hundredths": 715 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}
