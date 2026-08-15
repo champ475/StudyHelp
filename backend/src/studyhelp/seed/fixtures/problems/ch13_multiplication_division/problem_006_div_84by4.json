@@ -1,0 +1,33 @@
+{
+  "problem_id": "muldiv-006",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 13,
+    "chapter_title": "Ways to Multiply and Divide",
+    "topic": "multiplication_division"
+  },
+  "display_label": "84 / 4",
+  "given": { "a": 84, "b": 4, "op": "/" },
+  "final_answer": { "value": 21 },
+  "step_graph": [
+    {
+      "step_id": "s1_tens",
+      "type": "divide_tens",
+      "expected_state": { "dividend_group": 8, "divisor": 4, "quotient_digit": 2, "remainder": 0 },
+      "next": ["s2_units"]
+    },
+    {
+      "step_id": "s2_units",
+      "type": "divide_units",
+      "expected_state": { "dividend_group": 4, "divisor": 4, "quotient_digit": 1, "remainder": 0 },
+      "next": ["s3_final"]
+    },
+    {
+      "step_id": "s3_final",
+      "type": "write_final_answer",
+      "expected_state": { "value": 21 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

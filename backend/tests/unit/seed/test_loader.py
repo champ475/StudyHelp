@@ -33,6 +33,11 @@ def test_step_types_load_and_cover_every_registered_step_type() -> None:
         ("area_perimeter", "compute_area"),
         ("area_perimeter", "compute_perimeter"),
         ("area_perimeter", "write_final_answer"),
+        ("multiplication_division", "multiply_units"),
+        ("multiplication_division", "multiply_tens"),
+        ("multiplication_division", "divide_tens"),
+        ("multiplication_division", "divide_units"),
+        ("multiplication_division", "write_final_answer"),
     }
 
 
@@ -41,14 +46,14 @@ def test_problems_load_and_pass_arithmetic_validation() -> None:
     fixture — if this doesn't raise, every seeded problem is internally
     consistent per the independent sympy cross-check."""
     problems = load_problems()
-    assert len(problems) >= 46
+    assert len(problems) >= 56
     problem_ids = {p.problem_id for p in problems}
     assert "subtraction-borrow-014" in problem_ids
 
 
-def test_misconceptions_load_with_fifteen_seed_entries() -> None:
+def test_misconceptions_load_with_seventeen_seed_entries() -> None:
     entries = load_misconceptions()
-    assert len(entries) == 15
+    assert len(entries) == 17
     ids = {e.id for e in entries}
     assert ids == {
         "subtraction_borrowing.smaller_from_larger",
@@ -66,12 +71,14 @@ def test_misconceptions_load_with_fifteen_seed_entries() -> None:
         "decimals.decimal_point_shifted",
         "area_perimeter.formula_confusion",
         "area_perimeter.forgot_times_two",
+        "multiplication_division.forgot_carry",
+        "multiplication_division.misplaced_remainder",
     }
 
 
-def test_buggy_rules_load_with_fifteen_seed_entries() -> None:
+def test_buggy_rules_load_with_seventeen_seed_entries() -> None:
     entries = load_buggy_rules()
-    assert len(entries) == 15
+    assert len(entries) == 17
     bug_codes = {e.bug_code for e in entries}
     assert bug_codes == {
         "B1-smaller-from-larger",
@@ -89,6 +96,8 @@ def test_buggy_rules_load_with_fifteen_seed_entries() -> None:
         "DEC2-decimal-point-shifted",
         "AP1-formula-confusion",
         "AP2-forgot-times-two",
+        "MD1-forgot-carry",
+        "MD2-misplaced-remainder",
     }
 
 

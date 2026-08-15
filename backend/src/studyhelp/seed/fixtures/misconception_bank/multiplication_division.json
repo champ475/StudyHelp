@@ -1,0 +1,34 @@
+[
+  {
+    "id": "multiplication_division.forgot_carry",
+    "topic": "multiplication_division",
+    "step_type": "multiply_tens",
+    "bug_signature": { "buggy_rule_id": "multiplication_division.forgot_carry" },
+    "typical_mindset": "Multiplying the tens digit is treated as its own separate, self-contained fact, disconnected from the carry produced by the units column a moment ago — the carry is forgotten the same way a borrow can be forgotten in subtraction, because the student isn't yet thinking of the whole calculation as one connected process.",
+    "explanation_strategy": "Point back at the units step concretely: ask what number was carried over, and where that carried number needs to be added before multiplying — rather than restating the carry rule abstractly.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "A little while ago, you carried a number over from the units column. What was that number?" },
+      { "role": "student", "text": "2." },
+      { "role": "tutor", "text": "Right — that 2 needs to be added in here too, after you multiply. What do you get?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for multi-digit multiplication carrying specifically.",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "multiplication_division.misplaced_remainder",
+    "topic": "multiplication_division",
+    "step_type": "divide_units",
+    "bug_signature": { "buggy_rule_id": "multiplication_division.misplaced_remainder" },
+    "typical_mindset": "The 'bring down' step of long division is executed as if only the new digit matters, dropping the remainder from the previous column instead of combining it with the brought-down digit — the leftover amount from the tens column is treated as already used up rather than still needing to be divided.",
+    "explanation_strategy": "Make the leftover concrete before dividing again: ask how much was left over from the tens column, and what number that makes when placed together with the units digit, before dividing.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "You had some left over after dividing the tens. How much was left?" },
+      { "role": "student", "text": "1." },
+      { "role": "tutor", "text": "Right — now put that leftover together with the units digit. What number do you get to divide next?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for long-division remainder-carrying specifically.",
+    "version": 1,
+    "review_status": "seed_curated"
+  }
+]

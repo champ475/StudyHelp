@@ -1,0 +1,54 @@
+[
+  {
+    "id": "multiplication_division.forgot_carry",
+    "topic": "multiplication_division",
+    "step_type": "multiply_tens",
+    "bug_code": "MD1-forgot-carry",
+    "signature_matcher": {
+      "applies_to": "multiply_tens",
+      "precondition": { "correct_carry_in": "nonzero" },
+      "student_formula": "carry_in == 0 AND product == digit * multiplier",
+      "distinguishing_from": []
+    },
+    "citation": "Topic-authored; no direct literature-survey citation for multi-digit multiplication carrying specifically.",
+    "misconception_id": "multiplication_division.forgot_carry",
+    "example_pair": {
+      "problem_id": "muldiv-001",
+      "correct_step": {
+        "step_type": "multiply_tens",
+        "fields": { "digit": 3, "multiplier": 6, "carry_in": 2, "product": 20 }
+      },
+      "student_step": {
+        "step_type": "multiply_tens",
+        "fields": { "digit": 3, "multiplier": 6, "carry_in": 0, "product": 18 }
+      },
+      "note": "Student ignores the carry of 2 from the units column and multiplies 3 x 6 = 18 alone."
+    }
+  },
+  {
+    "id": "multiplication_division.misplaced_remainder",
+    "topic": "multiplication_division",
+    "step_type": "divide_units",
+    "bug_code": "MD2-misplaced-remainder",
+    "signature_matcher": {
+      "applies_to": "divide_units",
+      "precondition": { "correct_dividend_group": ">= 10" },
+      "student_formula": "dividend_group == correct.dividend_group % 10",
+      "distinguishing_from": []
+    },
+    "citation": "Topic-authored; no direct literature-survey citation for long-division remainder-carrying specifically.",
+    "misconception_id": "multiplication_division.misplaced_remainder",
+    "example_pair": {
+      "problem_id": "muldiv-007",
+      "correct_step": {
+        "step_type": "divide_units",
+        "fields": { "dividend_group": 16, "divisor": 8, "quotient_digit": 2, "remainder": 0 }
+      },
+      "student_step": {
+        "step_type": "divide_units",
+        "fields": { "dividend_group": 6, "divisor": 8, "quotient_digit": 0, "remainder": 6 }
+      },
+      "note": "Student drops the remainder of 1 carried from the tens column and divides just the bare units digit (6) instead of the combined 16."
+    }
+  }
+]

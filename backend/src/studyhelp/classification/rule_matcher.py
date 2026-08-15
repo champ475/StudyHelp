@@ -176,6 +176,34 @@ def _ap2_forgot_times_two(correct: _Fields, student: _Fields) -> bool:
     return bool(result == length + width and result != 2 * (length + width))
 
 
+def _md1_forgot_carry(correct: _Fields, student: _Fields) -> bool:
+    """Multiplication `multiply_tens` step: the correct carry from the
+    units column was nonzero, but the student states carry_in=0 and
+    multiplies the tens digit alone, ignoring the carry entirely."""
+    correct_carry = _as_int(correct, "carry_in")
+    if not correct_carry:
+        return False
+    digit = _as_int(student, "digit")
+    multiplier = _as_int(student, "multiplier")
+    carry_in = _as_int(student, "carry_in")
+    product = _as_int(student, "product")
+    if digit is None or multiplier is None or carry_in is None or product is None:
+        return False
+    return bool(carry_in == 0 and product == digit * multiplier)
+
+
+def _md2_misplaced_remainder(correct: _Fields, student: _Fields) -> bool:
+    """Division `divide_units` step: the correct dividend_group combines
+    the tens remainder with the units digit (>= 10), but the student uses
+    just the bare units digit alone, dropping the remainder from the
+    previous column."""
+    correct_group = _as_int(correct, "dividend_group")
+    student_group = _as_int(student, "dividend_group")
+    if correct_group is None or student_group is None or correct_group < 10:
+        return False
+    return bool(student_group == correct_group % 10 and student_group != correct_group)
+
+
 def _f3_forgot_to_simplify(correct: _Fields, student: _Fields) -> bool:
     """The value is right but the student re-submits the unsimplified
     fraction as if it were already in lowest terms — the concept of
@@ -356,6 +384,18 @@ _MATCHERS: list[_MatcherSpec] = [
         "AP2-forgot-times-two",
         "compute_perimeter",
         _ap2_forgot_times_two,
+    ),
+    _MatcherSpec(
+        "multiplication_division.forgot_carry",
+        "MD1-forgot-carry",
+        "multiply_tens",
+        _md1_forgot_carry,
+    ),
+    _MatcherSpec(
+        "multiplication_division.misplaced_remainder",
+        "MD2-misplaced-remainder",
+        "divide_units",
+        _md2_misplaced_remainder,
     ),
 ]
 

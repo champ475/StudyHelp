@@ -1,0 +1,33 @@
+{
+  "problem_id": "muldiv-009",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 13,
+    "chapter_title": "Ways to Multiply and Divide",
+    "topic": "multiplication_division"
+  },
+  "display_label": "65 / 5",
+  "given": { "a": 65, "b": 5, "op": "/" },
+  "final_answer": { "value": 13 },
+  "step_graph": [
+    {
+      "step_id": "s1_tens",
+      "type": "divide_tens",
+      "expected_state": { "dividend_group": 6, "divisor": 5, "quotient_digit": 1, "remainder": 1 },
+      "next": ["s2_units"]
+    },
+    {
+      "step_id": "s2_units",
+      "type": "divide_units",
+      "expected_state": { "dividend_group": 15, "divisor": 5, "quotient_digit": 3, "remainder": 0 },
+      "next": ["s3_final"]
+    },
+    {
+      "step_id": "s3_final",
+      "type": "write_final_answer",
+      "expected_state": { "value": 13 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

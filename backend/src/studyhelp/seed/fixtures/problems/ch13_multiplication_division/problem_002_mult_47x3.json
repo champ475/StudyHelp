@@ -1,0 +1,33 @@
+{
+  "problem_id": "muldiv-002",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 13,
+    "chapter_title": "Ways to Multiply and Divide",
+    "topic": "multiplication_division"
+  },
+  "display_label": "47 x 3",
+  "given": { "a": 47, "b": 3, "op": "x" },
+  "final_answer": { "value": 141 },
+  "step_graph": [
+    {
+      "step_id": "s1_units",
+      "type": "multiply_units",
+      "expected_state": { "digit": 7, "multiplier": 3, "product": 21 },
+      "next": ["s2_tens"]
+    },
+    {
+      "step_id": "s2_tens",
+      "type": "multiply_tens",
+      "expected_state": { "digit": 4, "multiplier": 3, "carry_in": 2, "product": 14 },
+      "next": ["s3_final"]
+    },
+    {
+      "step_id": "s3_final",
+      "type": "write_final_answer",
+      "expected_state": { "value": 141 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

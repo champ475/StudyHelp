@@ -262,3 +262,11 @@ Both fixes have dedicated regression tests. Recorded as D36. **This is the stron
 - **2 new buggy-rule matchers**, both designed from the outset to respect the D47 interface lesson (checkable from a single step's own field pair): AP1 (formula confusion — student's result on an area step matches what the perimeter formula would give from their own submitted length/width, or vice versa) and AP2 (forgot the ×2 on perimeter — adds length+width once and stops).
 - **Verified**: 303 unit+golden tests passing (up from 268), `ruff`/`mypy` clean, all green on the first full run — no arithmetic mistakes found.
 - Recorded as ARCHITECTURE.md D49.
+
+## 2026-08-15 23:30 — Phase E, topic 4/5: multiplication/division (Ch.13)
+
+- New `multiplication_division` topic, built directly against the established pattern (again, not delegated). The richest DAG in the syllabus per the original Phase-0 audit — deliberately scoped to 2-digit x 1-digit multiplication with carrying and 2-digit / 1-digit exact division (no remainder), giving a uniform 3-step DAG across every problem rather than branching shape by digit count. Carry-in / dividend-group must be stated explicitly by the student (`"3 x 6 + 2 = 20"`), which is what makes the two seeded bugs checkable at the moment they actually occur, not just at the final answer.
+- **2 new buggy-rule matchers**: MD1 (forgot the carry — states carry_in=0 and multiplies the tens digit alone) and MD2 (misplaced remainder — drops the tens remainder when bringing down the units digit, dividing the bare digit instead of the combined group). Both checkable from a single step's own field pair.
+- 10 problems: 5 multiplication (34x6, 47x3, 58x4, 26x9, 73x5), 5 exact division (84/4, 96/8, 72/6, 65/5, 78/3).
+- **Verified**: 339 unit+golden tests passing (up from 303), `ruff`/`mypy` clean (one nested-if lint finding fixed during the build, before commit — not left for later).
+- Recorded as ARCHITECTURE.md D50.

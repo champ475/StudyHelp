@@ -1,0 +1,42 @@
+[
+  {
+    "topic": "multiplication_division",
+    "step_type_key": "multiply_units",
+    "description": "Multiply the units digit by the multiplier.",
+    "structured_input_schema": {
+      "text": "free_text: '<digit> x <multiplier> = <product>'"
+    }
+  },
+  {
+    "topic": "multiplication_division",
+    "step_type_key": "multiply_tens",
+    "description": "Multiply the tens digit by the multiplier, then add the carry from the units column.",
+    "structured_input_schema": {
+      "text": "free_text: '<digit> x <multiplier> + <carry_in> = <product>'"
+    }
+  },
+  {
+    "topic": "multiplication_division",
+    "step_type_key": "divide_tens",
+    "description": "Divide the tens digit by the divisor, and note what's left over.",
+    "structured_input_schema": {
+      "text": "free_text: '<dividend_group> / <divisor> = <quotient_digit> remainder <remainder>'"
+    }
+  },
+  {
+    "topic": "multiplication_division",
+    "step_type_key": "divide_units",
+    "description": "Bring down the units digit next to what's left over, then divide by the divisor.",
+    "structured_input_schema": {
+      "text": "free_text: '<dividend_group> / <divisor> = <quotient_digit> remainder <remainder>'"
+    }
+  },
+  {
+    "topic": "multiplication_division",
+    "step_type_key": "write_final_answer",
+    "description": "Write the final number as your answer.",
+    "structured_input_schema": {
+      "text": "free_text: a whole number"
+    }
+  }
+]

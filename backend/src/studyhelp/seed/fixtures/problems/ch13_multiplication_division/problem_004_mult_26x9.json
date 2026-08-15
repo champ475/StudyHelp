@@ -1,0 +1,33 @@
+{
+  "problem_id": "muldiv-004",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 13,
+    "chapter_title": "Ways to Multiply and Divide",
+    "topic": "multiplication_division"
+  },
+  "display_label": "26 x 9",
+  "given": { "a": 26, "b": 9, "op": "x" },
+  "final_answer": { "value": 234 },
+  "step_graph": [
+    {
+      "step_id": "s1_units",
+      "type": "multiply_units",
+      "expected_state": { "digit": 6, "multiplier": 9, "product": 54 },
+      "next": ["s2_tens"]
+    },
+    {
+      "step_id": "s2_tens",
+      "type": "multiply_tens",
+      "expected_state": { "digit": 2, "multiplier": 9, "carry_in": 5, "product": 23 },
+      "next": ["s3_final"]
+    },
+    {
+      "step_id": "s3_final",
+      "type": "write_final_answer",
+      "expected_state": { "value": 234 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

@@ -8,6 +8,9 @@ from studyhelp.verification.topics.area_perimeter.verifier import AreaPerimeterV
 from studyhelp.verification.topics.decimals.verifier import DecimalsVerifier
 from studyhelp.verification.topics.fractions_addition.verifier import FractionsAdditionVerifier
 from studyhelp.verification.topics.lcm_hcf.verifier import LcmHcfVerifier
+from studyhelp.verification.topics.multiplication_division.verifier import (
+    MultiplicationDivisionVerifier,
+)
 from studyhelp.verification.topics.subtraction_borrowing.verifier import (
     SubtractionBorrowingVerifier,
 )
@@ -17,5 +20,6 @@ registry.register(FractionsAdditionVerifier())
 registry.register(LcmHcfVerifier())
 registry.register(DecimalsVerifier())
 registry.register(AreaPerimeterVerifier())
+registry.register(MultiplicationDivisionVerifier())
 
 __all__ = ["registry"]
