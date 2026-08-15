@@ -5,14 +5,9 @@
     "s1_cmp_units"
   ],
   "student_step": {
-    "step_type": "borrow",
+    "step_type": "free_text_step",
     "fields": {
-      "from_column": "tens",
-      "from_digit_before": 5,
-      "from_digit_after": 5,
-      "to_column": "units",
-      "to_digit_before": 2,
-      "to_digit_after": 12
+      "text": "tens 5->5, units 2->12"
     }
   },
   "expected": {

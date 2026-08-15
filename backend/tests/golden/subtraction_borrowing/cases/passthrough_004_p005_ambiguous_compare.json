@@ -7,12 +7,9 @@
     "s3_sub_units"
   ],
   "student_step": {
-    "step_type": "compare_column",
+    "step_type": "free_text_step",
     "fields": {
-      "column": "tens",
-      "minuend_digit": 9,
-      "subtrahend_digit": 1,
-      "borrow_needed": false
+      "text": "tens 9 >= 1"
     }
   },
   "expected": {

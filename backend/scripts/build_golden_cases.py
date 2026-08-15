@@ -4,6 +4,12 @@
 hand-transcribed, so case digits can't drift from the problems they're
 tested against.
 
+Cases are expressed as free text (ARCHITECTURE.md D41/D43 -- this topic's
+port off tap-widget input), rendered from the same structured field dicts
+via `_render_text()` (the inverse of `free_text_parser.parse_student_text`)
+so the *semantics* each case exercises (which fields are right/wrong) stay
+identical to the pre-port suite; only the wire encoding changed.
+
 Not run automatically (the golden suite is a committed, reviewed artifact,
 not regenerated on every test run) — re-run deliberately when adding new
 cases, then review the diff before committing.
@@ -16,6 +22,9 @@ from pathlib import Path
 
 from studyhelp.schemas.step_schema import Problem
 from studyhelp.seed.loader import load_problems
+from studyhelp.verification.topics.subtraction_borrowing.free_text_parser import (
+    render_student_text as _render_text,
+)
 
 OUT_DIR = Path(__file__).parents[1] / "tests" / "golden" / "subtraction_borrowing" / "cases"
 
@@ -46,13 +55,23 @@ cases = []
 
 
 def add(case_id, problem_id, target_step_id_or_none, student_type, student_fields, expected):
+    add_raw_text(
+        case_id,
+        problem_id,
+        target_step_id_or_none,
+        _render_text(student_type, student_fields),
+        expected,
+    )
+
+
+def add_raw_text(case_id, problem_id, target_step_id_or_none, raw_text, expected):
     prior = path_to(problem_id, target_step_id_or_none) if target_step_id_or_none else []
     cases.append(
         {
             "case_id": case_id,
             "problem_id": problem_id,
             "prior_accepted_steps": prior,
-            "student_step": {"step_type": student_type, "fields": student_fields},
+            "student_step": {"step_type": "free_text_step", "fields": {"text": raw_text}},
             "expected": expected,
         }
     )
@@ -418,17 +437,20 @@ passthrough_case(
 )
 
 # ============================== STRUCTURAL REJECTION ==========================
-add(
-    "structural_001_p001_unknown_step_type",
+# Free text that doesn't match ANY of the four step grammars at all --
+# with tap widgets, an explicit unrecognized step_type used to trigger
+# this; with free text, the analogous "structurally not a step at all"
+# case is text with no grammar match whatsoever (ARCHITECTURE.md D41/D43).
+add_raw_text(
+    "structural_001_p001_text_matches_no_grammar",
     "subtraction-borrow-001",
     None,
-    "multiply",
-    {},
+    "please multiply everything",
     {
         "is_valid": False,
         "matched_step_id": None,
         "confidence_band": "structural",
-        "error_kind": "wrong_step_type",
+        "error_kind": "malformed",
         "error_note": None,
     },
 )

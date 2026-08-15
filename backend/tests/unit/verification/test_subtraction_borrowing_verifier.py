@@ -1,7 +1,9 @@
 """Unit tests against the canonical 542-187 DAG: happy path plus a handful
-of hand-picked bad/ambiguous submissions. The full ~30-case golden
-regression suite lives in tests/golden/ (built separately, once this
-verifier's behavior is settled)."""
+of hand-picked bad/ambiguous submissions, now exercised through free text
+(ARCHITECTURE.md D41/D43 — this topic's port off tap-widget input) rather
+than pre-structured fields, matching what a real student actually types.
+The full ~30-case golden regression suite lives in tests/golden/ (rebuilt
+for free text in the same unit of work as this file)."""
 
 import pytest
 
@@ -18,79 +20,45 @@ def verifier() -> SubtractionBorrowingVerifier:
     return SubtractionBorrowingVerifier()
 
 
+def _text(value: str) -> StudentStep:
+    return StudentStep(step_type="free_text_step", fields={"text": value})
+
+
 def test_first_step_correct_matches_frontier(
     verifier: SubtractionBorrowingVerifier, problem_542_187: Problem
 ) -> None:
     state = ProblemState(problem=problem_542_187)
-    step = StudentStep(
-        step_type="compare_column",
-        fields={
-            "column": "units",
-            "minuend_digit": 2,
-            "subtrahend_digit": 7,
-            "borrow_needed": True,
-        },
-    )
-    result = verifier.verify_step(state, step)
+    result = verifier.verify_step(state, _text("units 2 < 7"))
     assert result.is_valid is True
     assert result.matched_step_id == "s1_cmp_units"
     assert result.confidence == 1.0
     assert result.error_signal is None
+    assert result.parsed_fields == {
+        "column": "units",
+        "minuend_digit": 2,
+        "subtrahend_digit": 7,
+        "borrow_needed": True,
+    }
 
 
 def test_full_correct_walkthrough_reaches_final_answer(
     verifier: SubtractionBorrowingVerifier, problem_542_187: Problem
 ) -> None:
     submissions = [
-        (
-            "compare_column",
-            {"column": "units", "minuend_digit": 2, "subtrahend_digit": 7, "borrow_needed": True},
-        ),
-        (
-            "borrow",
-            {
-                "from_column": "tens",
-                "from_digit_before": 4,
-                "from_digit_after": 3,
-                "to_column": "units",
-                "to_digit_before": 2,
-                "to_digit_after": 12,
-            },
-        ),
-        (
-            "subtract_column",
-            {"column": "units", "minuend_digit": 12, "subtrahend_digit": 7, "result_digit": 5},
-        ),
-        (
-            "compare_column",
-            {"column": "tens", "minuend_digit": 3, "subtrahend_digit": 8, "borrow_needed": True},
-        ),
-        (
-            "borrow",
-            {
-                "from_column": "hundreds",
-                "from_digit_before": 5,
-                "from_digit_after": 4,
-                "to_column": "tens",
-                "to_digit_before": 3,
-                "to_digit_after": 13,
-            },
-        ),
-        (
-            "subtract_column",
-            {"column": "tens", "minuend_digit": 13, "subtrahend_digit": 8, "result_digit": 5},
-        ),
-        (
-            "subtract_column",
-            {"column": "hundreds", "minuend_digit": 4, "subtrahend_digit": 1, "result_digit": 3},
-        ),
-        ("write_final_answer", {"digits": {"hundreds": 3, "tens": 5, "units": 5}, "value": 355}),
+        "units 2 < 7",
+        "tens 4->3, units 2->12",
+        "units 12 - 7 = 5",
+        "tens 3 < 8",
+        "hundreds 5->4, tens 3->13",
+        "tens 13 - 8 = 5",
+        "hundreds 4 - 1 = 3",
+        "355",
     ]
     accepted: list[str] = []
     state = ProblemState(problem=problem_542_187, accepted_step_ids=accepted)
-    for step_type, fields in submissions:
-        result = verifier.verify_step(state, StudentStep(step_type=step_type, fields=fields))
-        assert result.is_valid is True, f"expected valid for {step_type}/{fields}, got {result}"
+    for text in submissions:
+        result = verifier.verify_step(state, _text(text))
+        assert result.is_valid is True, f"expected valid for {text!r}, got {result}"
         assert result.matched_step_id is not None
         accepted.append(result.matched_step_id)
         state = ProblemState(problem=problem_542_187, accepted_step_ids=accepted)
@@ -102,9 +70,10 @@ def test_no_borrow_needed_case_does_not_force_a_spurious_borrow(
 ) -> None:
     """A problem where no column needs borrowing shouldn't have a 'borrow'
     frontier node at all — this fixture-independent check just confirms the
-    verifier rejects a gratuitous borrow submission as wrong-step-type-ish
-    (no matching candidate) rather than accepting it. Uses a minimal ad hoc
-    problem rather than the canonical fixture, since 542-187 always borrows."""
+    verifier rejects a gratuitous (but grammatically valid) borrow
+    submission as wrong-step-type-ish (no matching candidate) rather than
+    accepting it. Uses a minimal ad hoc problem rather than the canonical
+    fixture, since 542-187 always borrows."""
     problem = Problem.model_validate(
         {
             "problem_id": "no-borrow-demo",
@@ -144,20 +113,7 @@ def test_no_borrow_needed_case_does_not_force_a_spurious_borrow(
         }
     )
     state = ProblemState(problem=problem)
-    result = verifier.verify_step(
-        state,
-        StudentStep(
-            step_type="borrow",
-            fields={
-                "from_column": "tens",
-                "from_digit_before": 8,
-                "from_digit_after": 7,
-                "to_column": "units",
-                "to_digit_before": 9,
-                "to_digit_after": 19,
-            },
-        ),
-    )
+    result = verifier.verify_step(state, _text("tens 8->7, units 9->19"))
     assert result.is_valid is False
     assert result.error_signal is not None
     assert result.error_signal.kind == "wrong_step_type"
@@ -170,18 +126,7 @@ def test_non_adjacent_but_valid_match_is_accepted_and_flagged(
     (skipping the borrow submission) exact-matches a real graph node that
     isn't on the current frontier — D11's non-adjacent-but-valid case."""
     state = ProblemState(problem=problem_542_187, accepted_step_ids=["s1_cmp_units"])
-    result = verifier.verify_step(
-        state,
-        StudentStep(
-            step_type="subtract_column",
-            fields={
-                "column": "units",
-                "minuend_digit": 12,
-                "subtrahend_digit": 7,
-                "result_digit": 5,
-            },
-        ),
-    )
+    result = verifier.verify_step(state, _text("units 12 - 7 = 5"))
     assert result.is_valid is True
     assert result.matched_step_id == "s3_sub_units"
     assert result.confidence == NON_ADJACENT_MATCH_CONFIDENCE
@@ -197,18 +142,7 @@ def test_unambiguous_wrong_result_digit_is_rejected(
     state = ProblemState(
         problem=problem_542_187, accepted_step_ids=["s1_cmp_units", "s2_borrow_units"]
     )
-    result = verifier.verify_step(
-        state,
-        StudentStep(
-            step_type="subtract_column",
-            fields={
-                "column": "units",
-                "minuend_digit": 12,
-                "subtrahend_digit": 7,
-                "result_digit": 9,
-            },
-        ),
-    )
+    result = verifier.verify_step(state, _text("units 12 - 7 = 9"))
     assert result.is_valid is False
     assert result.confidence == pytest.approx(REJECT_THRESHOLD)
     assert result.error_signal is not None
@@ -225,57 +159,32 @@ def test_ambiguous_submission_does_not_interrupt(
     to confidently call it wrong, so the false-negative bias (D2) kicks in:
     is_valid stays True, but it's logged as a low-confidence passthrough."""
     state = ProblemState(problem=problem_542_187, accepted_step_ids=["s1_cmp_units"])
-    result = verifier.verify_step(
-        state,
-        StudentStep(
-            step_type="borrow",
-            fields={
-                "from_column": "hundreds",
-                "from_digit_before": 9,
-                "from_digit_after": 8,
-                "to_column": "units",
-                "to_digit_before": 2,
-                "to_digit_after": 12,
-            },
-        ),
-    )
+    result = verifier.verify_step(state, _text("hundreds 9->8, units 2->12"))
     assert result.is_valid is True
     assert result.confidence < REJECT_THRESHOLD
     assert result.error_signal is not None
     assert result.error_signal.note == "low_confidence_passthrough"
 
 
-def test_unknown_step_type_is_rejected_regardless_of_confidence_bias(
+def test_text_matching_no_grammar_at_all_is_rejected_regardless_of_confidence_bias(
     verifier: SubtractionBorrowingVerifier, problem_542_187: Problem
 ) -> None:
-    """A structurally nonexistent step type is not an ambiguous math
-    judgment — the false-negative bias doesn't apply here."""
+    """Text that doesn't match any of the four step grammars at all is a
+    structural rejection, not an ambiguous math judgment — the
+    false-negative bias doesn't apply here."""
     state = ProblemState(problem=problem_542_187)
-    result = verifier.verify_step(state, StudentStep(step_type="multiply", fields={}))
+    result = verifier.verify_step(state, _text("please multiply everything"))
     assert result.is_valid is False
     assert result.confidence == 1.0
     assert result.error_signal is not None
-    assert result.error_signal.kind == "wrong_step_type"
+    assert result.error_signal.kind == "malformed"
 
 
 def test_malformed_input_is_rejected(
     verifier: SubtractionBorrowingVerifier, problem_542_187: Problem
 ) -> None:
     state = ProblemState(problem=problem_542_187)
-    result = verifier.verify_step(
-        state,
-        StudentStep(
-            step_type="borrow",
-            fields={
-                "from_column": "tens",
-                "from_digit_before": "four",  # wrong type, not a real submission
-                "from_digit_after": 3,
-                "to_column": "units",
-                "to_digit_before": 2,
-                "to_digit_after": 12,
-            },
-        ),
-    )
+    result = verifier.verify_step(state, _text("tens four->3, units 2->12"))
     assert result.is_valid is False
     assert result.confidence == 1.0
     assert result.error_signal is not None
@@ -297,12 +206,7 @@ def test_final_answer_matches_and_passes_sympy_cross_check(
             "s7_sub_hundreds",
         ],
     )
-    result = verifier.verify_step(
-        state,
-        StudentStep(
-            step_type="write_final_answer",
-            fields={"digits": {"hundreds": 3, "tens": 5, "units": 5}, "value": 355},
-        ),
-    )
+    result = verifier.verify_step(state, _text("355"))
     assert result.is_valid is True
     assert result.matched_step_id == "s8_final"
+    assert result.parsed_fields == {"digits": {"hundreds": 3, "tens": 5, "units": 5}, "value": 355}

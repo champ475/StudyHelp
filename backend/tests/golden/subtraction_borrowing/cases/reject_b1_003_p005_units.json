@@ -6,12 +6,9 @@
     "s2_borrow_units"
   ],
   "student_step": {
-    "step_type": "subtract_column",
+    "step_type": "free_text_step",
     "fields": {
-      "column": "units",
-      "minuend_digit": 12,
-      "subtrahend_digit": 9,
-      "result_digit": 7
+      "text": "units 12 - 9 = 7"
     }
   },
   "expected": {

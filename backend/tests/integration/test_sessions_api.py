@@ -56,13 +56,8 @@ async def test_full_wrong_then_correct_step_round_trip(client: AsyncClient) -> N
             "problem_id": "subtraction-borrow-001",
             "accepted_step_ids": ["s1_cmp_units", "s2_borrow_units"],
             "student_step": {
-                "step_type": "subtract_column",
-                "fields": {
-                    "column": "units",
-                    "minuend_digit": 12,
-                    "subtrahend_digit": 5,
-                    "result_digit": 3,
-                },
+                "step_type": "free_text_step",
+                "fields": {"text": "units 12 - 5 = 3"},
             },
             "timing_policy": "immediate",
         },
@@ -90,13 +85,8 @@ async def test_full_wrong_then_correct_step_round_trip(client: AsyncClient) -> N
             "problem_id": "subtraction-borrow-001",
             "accepted_step_ids": ["s1_cmp_units", "s2_borrow_units"],
             "student_step": {
-                "step_type": "subtract_column",
-                "fields": {
-                    "column": "units",
-                    "minuend_digit": 12,
-                    "subtrahend_digit": 5,
-                    "result_digit": 7,
-                },
+                "step_type": "free_text_step",
+                "fields": {"text": "units 12 - 5 = 7"},
             },
             "timing_policy": "immediate",
         },
@@ -118,15 +108,7 @@ async def test_correct_step_with_no_prior_error_is_a_no_op(client: AsyncClient) 
         json={
             "problem_id": "subtraction-borrow-001",
             "accepted_step_ids": [],
-            "student_step": {
-                "step_type": "compare_column",
-                "fields": {
-                    "column": "units",
-                    "minuend_digit": 2,
-                    "subtrahend_digit": 5,
-                    "borrow_needed": True,
-                },
-            },
+            "student_step": {"step_type": "free_text_step", "fields": {"text": "units 2 < 5"}},
         },
     )
     assert response.status_code == 200

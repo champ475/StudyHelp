@@ -1,8 +1,10 @@
 """Walks every seeded problem fixture end-to-end through the real verifier,
-submitting each node's own `expected_state` in canonical order. This is the
-strongest available check that hand-authored fixture arithmetic is actually
-self-consistent — it doesn't just eyeball the JSON, it runs it through the
-same verify_step() the pipeline uses."""
+submitting each node's own `expected_state` (rendered as the free text a
+student would actually type — ARCHITECTURE.md D41/D43) in canonical order.
+This is the strongest available check that hand-authored fixture arithmetic
+is actually self-consistent — it doesn't just eyeball the JSON, it runs it
+through the same verify_step() the pipeline uses, via the same input path
+a real browser submission takes."""
 
 import json
 from pathlib import Path
@@ -11,6 +13,9 @@ import pytest
 
 from studyhelp.schemas.step_schema import Problem, StepNode
 from studyhelp.schemas.verify import ProblemState, StudentStep
+from studyhelp.verification.topics.subtraction_borrowing.free_text_parser import (
+    render_student_text,
+)
 from studyhelp.verification.topics.subtraction_borrowing.verifier import (
     SubtractionBorrowingVerifier,
 )
@@ -52,8 +57,9 @@ def test_canonical_path_walks_cleanly_to_final_answer(problem: Problem) -> None:
 
     for node in _canonical_path(problem):
         state = ProblemState(problem=problem, accepted_step_ids=accepted)
+        text = render_student_text(node.type, node.expected_state)
         result = verifier.verify_step(
-            state, StudentStep(step_type=node.type, fields=node.expected_state)
+            state, StudentStep(step_type="free_text_step", fields={"text": text})
         )
         assert result.is_valid is True, (
             f"{problem.problem_id}/{node.step_id} unexpectedly invalid: {result}"

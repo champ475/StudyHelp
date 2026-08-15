@@ -53,13 +53,6 @@ STEP_TYPE_FIELD_MODELS: dict[str, type[BaseModel]] = {
 }
 
 
-def parse_student_fields(step_type: str, fields: dict[str, Any]) -> BaseModel:
-    """Raises `pydantic.ValidationError` on malformed structured input —
-    caught by the verifier and reported as `ErrorSignal(kind="malformed")`.
-    Caller must confirm `step_type in STEP_TYPE_FIELD_MODELS` first."""
-    return STEP_TYPE_FIELD_MODELS[step_type].model_validate(fields)
-
-
 def compare_to_expected(
     expected_state: dict[str, Any], student_fields: dict[str, Any]
 ) -> tuple[list[FieldDiscrepancy], float]:

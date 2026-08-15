@@ -3,14 +3,9 @@
   "problem_id": "subtraction-borrow-002",
   "prior_accepted_steps": [],
   "student_step": {
-    "step_type": "borrow",
+    "step_type": "free_text_step",
     "fields": {
-      "from_column": "hundreds",
-      "from_digit_before": "five",
-      "from_digit_after": 4,
-      "to_column": "tens",
-      "to_digit_before": 0,
-      "to_digit_after": 10
+      "text": "hundreds five->4, tens 0->10"
     }
   },
   "expected": {

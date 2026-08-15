@@ -5,14 +5,9 @@
     "s1_cmp_units"
   ],
   "student_step": {
-    "step_type": "borrow",
+    "step_type": "free_text_step",
     "fields": {
-      "from_column": "hundreds",
-      "from_digit_before": 9,
-      "from_digit_after": 8,
-      "to_column": "units",
-      "to_digit_before": 2,
-      "to_digit_after": 12
+      "text": "hundreds 9->8, units 2->12"
     }
   },
   "expected": {

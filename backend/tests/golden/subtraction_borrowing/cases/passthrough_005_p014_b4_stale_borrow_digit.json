@@ -9,12 +9,9 @@
     "s5_borrow_tens"
   ],
   "student_step": {
-    "step_type": "subtract_column",
+    "step_type": "free_text_step",
     "fields": {
-      "column": "tens",
-      "minuend_digit": 14,
-      "subtrahend_digit": 8,
-      "result_digit": 6
+      "text": "tens 14 - 8 = 6"
     }
   },
   "expected": {

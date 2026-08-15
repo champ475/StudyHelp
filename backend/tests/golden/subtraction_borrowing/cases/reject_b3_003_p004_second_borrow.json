@@ -6,14 +6,9 @@
     "s2_borrow_thousands_to_hundreds"
   ],
   "student_step": {
-    "step_type": "borrow",
+    "step_type": "free_text_step",
     "fields": {
-      "from_column": "hundreds",
-      "from_digit_before": 10,
-      "from_digit_after": 9,
-      "to_column": "tens",
-      "to_digit_before": 0,
-      "to_digit_after": 9
+      "text": "hundreds 10->9, tens 0->9"
     }
   },
   "expected": {

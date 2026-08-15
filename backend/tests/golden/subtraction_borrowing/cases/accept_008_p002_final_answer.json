@@ -12,14 +12,9 @@
     "s8_sub_hundreds"
   ],
   "student_step": {
-    "step_type": "write_final_answer",
+    "step_type": "free_text_step",
     "fields": {
-      "digits": {
-        "hundreds": 3,
-        "tens": 2,
-        "units": 5
-      },
-      "value": 325
+      "text": "325"
     }
   },
   "expected": {

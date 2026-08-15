@@ -28,15 +28,7 @@ async def test_verify_step_end_to_end_via_api_correct_step(client: AsyncClient) 
         "/problems/subtraction-borrow-001/verify-step",
         json={
             "accepted_step_ids": [],
-            "student_step": {
-                "step_type": "compare_column",
-                "fields": {
-                    "column": "units",
-                    "minuend_digit": 2,
-                    "subtrahend_digit": 5,
-                    "borrow_needed": True,
-                },
-            },
+            "student_step": {"step_type": "free_text_step", "fields": {"text": "units 2 < 5"}},
         },
     )
     assert response.status_code == 200
@@ -52,13 +44,8 @@ async def test_verify_step_end_to_end_via_api_wrong_step(client: AsyncClient) ->
         json={
             "accepted_step_ids": ["s1_cmp_units", "s2_borrow_units"],
             "student_step": {
-                "step_type": "subtract_column",
-                "fields": {
-                    "column": "units",
-                    "minuend_digit": 12,
-                    "subtrahend_digit": 5,
-                    "result_digit": 3,
-                },
+                "step_type": "free_text_step",
+                "fields": {"text": "units 12 - 5 = 3"},
             },
         },
     )
@@ -73,7 +60,7 @@ async def test_verify_step_unknown_problem_returns_404(client: AsyncClient) -> N
         "/problems/does-not-exist/verify-step",
         json={
             "accepted_step_ids": [],
-            "student_step": {"step_type": "compare_column", "fields": {}},
+            "student_step": {"step_type": "free_text_step", "fields": {"text": "anything"}},
         },
     )
     assert response.status_code == 404
@@ -90,11 +77,13 @@ async def test_public_problem_endpoint_never_exposes_answers(client: AsyncClient
 
     assert "final_answer" not in body
     assert body["problem_id"] == "subtraction-borrow-001"
+    assert body["display_label"] == "52 − 25 (single borrow)"
     assert body["given"] == {"minuend": 52, "subtrahend": 25}
 
     for node in body["step_graph"]:
-        assert set(node.keys()) == {"step_id", "type", "next"}
+        assert set(node.keys()) == {"step_id", "type", "next", "hint"}
         assert "expected_state" not in node
+        assert node["hint"]  # every step type has a seed-authored description
 
     raw_body = response.text
     assert "27" not in raw_body  # the final answer to 52-25, must never appear

@@ -5,12 +5,9 @@
     "s1_cmp_units"
   ],
   "student_step": {
-    "step_type": "subtract_column",
+    "step_type": "free_text_step",
     "fields": {
-      "column": "units",
-      "minuend_digit": 3,
-      "subtrahend_digit": 5,
-      "result_digit": 0
+      "text": "units 3 - 5 = 0"
     }
   },
   "expected": {

@@ -8,12 +8,9 @@
     "s4_borrow_tens_to_units"
   ],
   "student_step": {
-    "step_type": "subtract_column",
+    "step_type": "free_text_step",
     "fields": {
-      "column": "units",
-      "minuend_digit": 10,
-      "subtrahend_digit": 1,
-      "result_digit": 1
+      "text": "units 10 - 1 = 1"
     }
   },
   "expected": {

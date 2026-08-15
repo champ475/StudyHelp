@@ -3,12 +3,9 @@
   "problem_id": "subtraction-borrow-001",
   "prior_accepted_steps": [],
   "student_step": {
-    "step_type": "compare_column",
+    "step_type": "free_text_step",
     "fields": {
-      "column": "units",
-      "minuend_digit": 2,
-      "subtrahend_digit": 5,
-      "borrow_needed": true
+      "text": "units 2 < 5"
     }
   },
   "expected": {

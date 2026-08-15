@@ -3,12 +3,9 @@
   "problem_id": "subtraction-borrow-002",
   "prior_accepted_steps": [],
   "student_step": {
-    "step_type": "subtract_column",
+    "step_type": "free_text_step",
     "fields": {
-      "column": "units",
-      "minuend_digit": 13,
-      "subtrahend_digit": 8,
-      "result_digit": 5
+      "text": "units 13 - 8 = 5"
     }
   },
   "expected": {

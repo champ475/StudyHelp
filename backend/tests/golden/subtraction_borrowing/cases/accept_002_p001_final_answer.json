@@ -9,13 +9,9 @@
     "s5_sub_tens"
   ],
   "student_step": {
-    "step_type": "write_final_answer",
+    "step_type": "free_text_step",
     "fields": {
-      "digits": {
-        "tens": 2,
-        "units": 7
-      },
-      "value": 27
+      "text": "27"
     }
   },
   "expected": {

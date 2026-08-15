@@ -15,14 +15,9 @@
     "s11_sub_thousands"
   ],
   "student_step": {
-    "step_type": "write_final_answer",
+    "step_type": "free_text_step",
     "fields": {
-      "digits": {
-        "hundreds": 9,
-        "tens": 9,
-        "units": 9
-      },
-      "value": 999
+      "text": "999"
     }
   },
   "expected": {
