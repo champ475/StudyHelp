@@ -6,6 +6,7 @@
     "chapter_title": "The Fish Tale",
     "topic": "subtraction_with_borrowing"
   },
+  "display_label": "1000 − 1 (borrow across multiple zeros)",
   "given": { "minuend": 1000, "subtrahend": 1 },
   "final_answer": 999,
   "step_graph": [

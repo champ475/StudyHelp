@@ -24,8 +24,3 @@ export function computeFrontier(problem: PublicProblem, acceptedStepIds: string[
   }
   return problem.step_graph.filter((node) => frontierIds.has(node.step_id));
 }
-
-export function frontierStepTypes(problem: PublicProblem, acceptedStepIds: string[]): string[] {
-  const types = new Set(computeFrontier(problem, acceptedStepIds).map((node) => node.type));
-  return Array.from(types);
-}

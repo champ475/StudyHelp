@@ -21,6 +21,7 @@ class ProblemModel(Base):
     ncert_chapter: Mapped[int] = mapped_column(Integer)
     ncert_chapter_title: Mapped[str] = mapped_column(String(256))
     topic: Mapped[str] = mapped_column(String(128), index=True)
+    display_label: Mapped[str] = mapped_column(String(256))
     given: Mapped[dict[str, Any]] = mapped_column(JSONB)
     final_answer: Mapped[Any] = mapped_column(JSONB)
     step_graph: Mapped[list[dict[str, Any]]] = mapped_column(JSONB)

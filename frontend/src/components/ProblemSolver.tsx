@@ -1,15 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchProblem, submitStep } from "../api/client";
-import { frontierStepTypes } from "../frontier";
+import { computeFrontier } from "../frontier";
 import type { PublicProblem, StudentStep, VerifyResult } from "../types";
 import { ChatPanel, type ChatMessage } from "./ChatPanel";
 import { FreeTextStepper } from "./FreeTextStepper";
-import { StepWidgetSwitcher } from "./StepWidgetSwitcher";
-
-// Topics whose steps are typed free text (one box per step) rather than a
-// math-aware structured widget — see FreeTextStepper's doc comment for why
-// this deviates from ARCHITECTURE.md's original D12.
-const FREE_TEXT_TOPICS = new Set(["fractions_addition"]);
 
 interface ProblemSolverProps {
   sessionId: string;
@@ -32,7 +26,6 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
   const [solved, setSolved] = useState(false);
   const [lockedTexts, setLockedTexts] = useState<string[]>([]);
   const [activeText, setActiveText] = useState("");
-  const isFreeTextTopic = problem !== null && FREE_TEXT_TOPICS.has(problem.ncert_ref.topic);
 
   useEffect(() => {
     let cancelled = false;
@@ -110,16 +103,15 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
   // count (not the verdict object) so a resubmission that fails doesn't
   // touch this at all — only an actual advance does.
   useEffect(() => {
-    if (!isFreeTextTopic) return;
     if (acceptedStepIds.length > lockedTexts.length) {
       setLockedTexts((prev) => [...prev, activeText]);
       setActiveText("");
     }
-  }, [acceptedStepIds, lockedTexts.length, activeText, isFreeTextTopic]);
+  }, [acceptedStepIds, lockedTexts.length, activeText]);
 
   const handleFreeTextCommit = useCallback(() => {
     if (!activeText.trim()) return;
-    void handleSubmit({ step_type: "fraction_step", fields: { text: activeText } });
+    void handleSubmit({ step_type: "free_text_step", fields: { text: activeText } });
   }, [activeText, handleSubmit]);
 
   if (loadError) {
@@ -129,47 +121,30 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
     return <p>Loading problem…</p>;
   }
 
-  const availableStepTypes = frontierStepTypes(problem, acceptedStepIds);
-
-  // The type that naturally follows the most recently accepted step —
-  // used to steer the widget switcher's default tab forward instead of
-  // leaving it on an already-completed-but-still-nominally-reachable
-  // type (see StepWidgetSwitcher's preferredStepType doc comment).
-  const lastAcceptedId = acceptedStepIds[acceptedStepIds.length - 1];
-  const lastAcceptedNode = problem.step_graph.find((node) => node.step_id === lastAcceptedId);
-  const nextNodeId = lastAcceptedNode?.next[0];
-  const preferredStepType = problem.step_graph.find((node) => node.step_id === nextNodeId)?.type;
-
-  const heading = isFreeTextTopic
-    ? `${problem.given.a_num as number}/${problem.given.a_den as number} + ${problem.given.b_num as number}/${problem.given.b_den as number}`
-    : `${problem.given.minuend as number} − ${problem.given.subtrahend as number}`;
+  // The current step's hint (placeholder + helper text) comes from
+  // whichever type is first in the DAG frontier. Multiple types can be
+  // simultaneously reachable (alt paths, D11) — the frontend doesn't need
+  // to disambiguate which one the student means, since the backend tries
+  // every reachable type's grammar against the typed text (D41); this is
+  // just UI copy, not a correctness decision.
+  const frontierHint = computeFrontier(problem, acceptedStepIds)[0]?.hint;
 
   return (
     <div className="problem-solver">
-      <h2>{heading}</h2>
+      <h2>{problem.display_label}</h2>
       <p className="progress-note">Steps completed: {acceptedStepIds.length}</p>
 
-      {isFreeTextTopic ? (
-        <FreeTextStepper
-          lockedTexts={lockedTexts}
-          activeText={activeText}
-          onActiveTextChange={setActiveText}
-          onCommit={handleFreeTextCommit}
-          disabled={isSubmitting}
-          solved={solved}
-        />
-      ) : solved ? (
-        <p className="solved-banner">Solved! Great work.</p>
-      ) : (
-        <StepWidgetSwitcher
-          availableStepTypes={availableStepTypes}
-          preferredStepType={preferredStepType}
-          onSubmit={(step) => void handleSubmit(step)}
-          disabled={isSubmitting}
-        />
-      )}
+      <FreeTextStepper
+        lockedTexts={lockedTexts}
+        activeText={activeText}
+        onActiveTextChange={setActiveText}
+        onCommit={handleFreeTextCommit}
+        disabled={isSubmitting}
+        solved={solved}
+        hint={frontierHint}
+      />
 
-      {isFreeTextTopic && solved && <p className="solved-banner">Solved! Great work.</p>}
+      {solved && <p className="solved-banner">Solved! Great work.</p>}
 
       {lastVerdict && !lastVerdict.is_valid && (
         <p className="verdict-banner incorrect" role="alert">

@@ -1,31 +1,56 @@
-import { useState } from "react";
-import { createSession } from "./api/client";
+import { useEffect, useMemo, useState } from "react";
+import { createSession, fetchProblems } from "./api/client";
 import { IdentityPicker } from "./components/IdentityPicker";
 import { ProblemSolver } from "./components/ProblemSolver";
+import type { ProblemSummary } from "./types";
 
-// Hardcoded for the dev/demo picker — there's no "list problems" endpoint
-// yet (Phase 4 scope; a real catalog browsing UI is a fair later addition).
-// Matches backend/src/studyhelp/seed/fixtures/problems/ch1_subtraction_borrowing/.
-const DEFAULT_PROBLEM_ID = "subtraction-borrow-001";
+interface Chapter {
+  chapter: number;
+  chapterTitle: string;
+  problems: ProblemSummary[];
+}
 
-const DEMO_PROBLEMS = [
-  { id: DEFAULT_PROBLEM_ID, label: "52 − 25 (single borrow)" },
-  { id: "subtraction-borrow-002", label: "503 − 178 (borrow across a zero)" },
-  { id: "subtraction-borrow-003", label: "89 − 45 (no borrow needed)" },
-  { id: "subtraction-borrow-004", label: "1000 − 1 (borrow across multiple zeros)" },
-  { id: "subtraction-borrow-005", label: "542 − 89 (fewer digits in the subtrahend)" },
-  { id: "subtraction-borrow-014", label: "542 − 187 (double cascading borrow)" },
-  { id: "fractions-add-001", label: "1/4 + 1/6 (fractions, free text)" },
-  { id: "fractions-add-002", label: "2/3 + 1/6 (fractions, free text)" },
-  { id: "fractions-add-003", label: "1/2 + 1/6 (fractions, needs simplifying)" },
-  { id: "fractions-add-004", label: "3/8 + 1/4 (fractions, free text)" },
-];
+function groupByChapter(problems: ProblemSummary[]): Chapter[] {
+  const byChapter = new Map<number, Chapter>();
+  for (const problem of problems) {
+    const { chapter, chapter_title: chapterTitle } = problem.ncert_ref;
+    const existing = byChapter.get(chapter);
+    if (existing) {
+      existing.problems.push(problem);
+    } else {
+      byChapter.set(chapter, { chapter, chapterTitle, problems: [problem] });
+    }
+  }
+  return Array.from(byChapter.values()).sort((a, b) => a.chapter - b.chapter);
+}
 
 export default function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
-  const [problemId, setProblemId] = useState<string>(DEFAULT_PROBLEM_ID);
+
+  const [problems, setProblems] = useState<ProblemSummary[] | null>(null);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
+  const [problemId, setProblemId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchProblems()
+      .then((loaded) => {
+        setProblems(loaded);
+        const first = loaded[0];
+        if (first) {
+          setSelectedChapter(first.ncert_ref.chapter);
+          setProblemId(first.problem_id);
+        }
+      })
+      .catch((error: unknown) =>
+        setCatalogError(error instanceof Error ? error.message : String(error)),
+      );
+  }, []);
+
+  const chapters = useMemo(() => groupByChapter(problems ?? []), [problems]);
+  const currentChapter = chapters.find((c) => c.chapter === selectedChapter);
 
   const handleCreateSession = (displayName: string) => {
     setIsCreatingSession(true);
@@ -44,18 +69,42 @@ export default function App() {
           <IdentityPicker onCreate={handleCreateSession} isCreating={isCreatingSession} />
           {sessionError && <p className="error-banner">{sessionError}</p>}
         </>
+      ) : catalogError ? (
+        <p className="error-banner">Could not load the problem catalog: {catalogError}</p>
+      ) : !problems || !problemId ? (
+        <p>Loading problems…</p>
       ) : (
         <>
-          <label className="problem-picker">
-            Problem:
-            <select value={problemId} onChange={(event) => setProblemId(event.target.value)}>
-              {DEMO_PROBLEMS.map((problem) => (
-                <option key={problem.id} value={problem.id}>
-                  {problem.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="catalog-picker">
+            <label>
+              Chapter:
+              <select
+                value={selectedChapter ?? ""}
+                onChange={(event) => {
+                  const chapter = Number(event.target.value);
+                  setSelectedChapter(chapter);
+                  const first = chapters.find((c) => c.chapter === chapter)?.problems[0];
+                  if (first) setProblemId(first.problem_id);
+                }}
+              >
+                {chapters.map((chapter) => (
+                  <option key={chapter.chapter} value={chapter.chapter}>
+                    {chapter.chapter}. {chapter.chapterTitle}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Problem:
+              <select value={problemId} onChange={(event) => setProblemId(event.target.value)}>
+                {currentChapter?.problems.map((problem) => (
+                  <option key={problem.problem_id} value={problem.problem_id}>
+                    {problem.display_label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
           <ProblemSolver key={problemId} sessionId={sessionId} problemId={problemId} />
         </>
       )}

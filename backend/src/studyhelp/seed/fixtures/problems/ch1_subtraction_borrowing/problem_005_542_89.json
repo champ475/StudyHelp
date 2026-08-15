@@ -6,6 +6,7 @@
     "chapter_title": "The Fish Tale",
     "topic": "subtraction_with_borrowing"
   },
+  "display_label": "542 − 89 (fewer digits in the subtrahend)",
   "given": { "minuend": 542, "subtrahend": 89 },
   "final_answer": 453,
   "step_graph": [

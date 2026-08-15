@@ -53,6 +53,7 @@ class AltPath(BaseModel):
 class Problem(BaseModel):
     problem_id: str
     ncert_ref: NcertRef
+    display_label: str
     given: dict[str, Any]
     final_answer: Any
     step_graph: list[StepNode]

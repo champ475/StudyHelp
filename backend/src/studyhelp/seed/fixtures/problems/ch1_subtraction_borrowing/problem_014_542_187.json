@@ -6,6 +6,7 @@
     "chapter_title": "The Fish Tale",
     "topic": "subtraction_with_borrowing"
   },
+  "display_label": "542 − 187 (double cascading borrow)",
   "given": { "minuend": 542, "subtrahend": 187 },
   "final_answer": 355,
   "step_graph": [

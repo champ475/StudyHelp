@@ -6,6 +6,7 @@
     "chapter_title": "The Fish Tale",
     "topic": "subtraction_with_borrowing"
   },
+  "display_label": "52 − 25 (single borrow)",
   "given": { "minuend": 52, "subtrahend": 25 },
   "final_answer": 27,
   "step_graph": [

@@ -108,6 +108,7 @@ def test_no_borrow_needed_case_does_not_force_a_spurious_borrow(
     problem = Problem.model_validate(
         {
             "problem_id": "no-borrow-demo",
+            "display_label": "89 − 45 (no borrow demo)",
             "ncert_ref": {
                 "class": 5,
                 "chapter": 1,

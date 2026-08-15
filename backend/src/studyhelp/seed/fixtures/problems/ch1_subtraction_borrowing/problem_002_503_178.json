@@ -6,6 +6,7 @@
     "chapter_title": "The Fish Tale",
     "topic": "subtraction_with_borrowing"
   },
+  "display_label": "503 − 178 (borrow across a zero)",
   "given": { "minuend": 503, "subtrahend": 178 },
   "final_answer": 325,
   "step_graph": [

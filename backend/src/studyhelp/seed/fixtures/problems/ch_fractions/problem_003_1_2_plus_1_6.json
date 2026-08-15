@@ -2,10 +2,11 @@
   "problem_id": "fractions-add-003",
   "ncert_ref": {
     "class": 5,
-    "chapter": 7,
-    "chapter_title": "How Many Squares?",
+    "chapter": 4,
+    "chapter_title": "Parts and Wholes",
     "topic": "fractions_addition"
   },
+  "display_label": "1/2 + 1/6 (needs simplifying)",
   "given": { "a_num": 1, "a_den": 2, "b_num": 1, "b_den": 6 },
   "final_answer": { "num": 2, "den": 3 },
   "step_graph": [

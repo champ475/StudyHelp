@@ -1,5 +1,11 @@
 import { parseSseStream } from "./sse";
-import type { CreateSessionResponse, PublicProblem, SseEventPayload, StudentStep } from "../types";
+import type {
+  CreateSessionResponse,
+  ProblemSummary,
+  PublicProblem,
+  SseEventPayload,
+  StudentStep,
+} from "../types";
 
 const API_BASE = "/api";
 
@@ -13,6 +19,14 @@ export async function createSession(displayName: string): Promise<CreateSessionR
     throw new Error(`Failed to create session: ${response.status}`);
   }
   return (await response.json()) as CreateSessionResponse;
+}
+
+export async function fetchProblems(): Promise<ProblemSummary[]> {
+  const response = await fetch(`${API_BASE}/problems`);
+  if (!response.ok) {
+    throw new Error(`Failed to load problem catalog: ${response.status}`);
+  }
+  return (await response.json()) as ProblemSummary[];
 }
 
 export async function fetchProblem(problemId: string): Promise<PublicProblem> {

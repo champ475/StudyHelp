@@ -4,17 +4,21 @@
 // consumer; revisit generating these from the OpenAPI schema if that
 // stops being true.
 
-export type Column = "units" | "tens" | "hundreds" | "thousands" | "ten_thousands" | "lakhs";
-
 // Mirrors the backend's PublicProblem/PublicStepNode (GET /problems/{id})
 // — deliberately missing `expected_state` and `final_answer`. That's not
 // an oversight: exposing them from a browser-reachable endpoint would let
 // a student read every correct answer straight out of devtools, directly
 // undermining the leakage filter (backend/.../api/routes/problems.py).
+//
+// `hint` is that step type's `step_types.description` (seed-authored,
+// topic-agnostic) — what lets the universal `FreeTextStepper` show a
+// meaningful placeholder for *any* topic's step type without this frontend
+// knowing anything topic-specific (ARCHITECTURE.md D43).
 export interface PublicStepNode {
   step_id: string;
   type: string;
   next: string[];
+  hint: string;
 }
 
 export interface NcertRef {
@@ -27,52 +31,31 @@ export interface NcertRef {
 export interface PublicProblem {
   problem_id: string;
   ncert_ref: NcertRef;
+  display_label: string;
   given: Record<string, unknown>;
   step_graph: PublicStepNode[];
   alt_paths: { path_id: string; entry: string; note?: string | null }[];
 }
 
-// --- structured per-step-type fields (never a raw string) -----------------
-
-export interface CompareColumnFields {
-  column: Column;
-  minuend_digit: number;
-  subtrahend_digit: number;
-  borrow_needed: boolean;
+// One row of the GET /problems catalog — thin on purpose (no step graph,
+// no `given`) so the chapter/problem picker can list all ~140 problems
+// without pulling every DAG.
+export interface ProblemSummary {
+  problem_id: string;
+  ncert_ref: NcertRef;
+  display_label: string;
 }
 
-export interface BorrowFields {
-  from_column: Column;
-  from_digit_before: number;
-  from_digit_after: number;
-  to_column: Column;
-  to_digit_before: number;
-  to_digit_after: number;
-  combined_result_digit?: number | null;
-}
-
-export interface SubtractColumnFields {
-  column: Column;
-  minuend_digit: number;
-  subtrahend_digit: number;
-  result_digit: number;
-}
-
-export interface WriteFinalAnswerFields {
-  digits: Partial<Record<Column, number>>;
-  value: number;
-}
-
-export type StepType = "compare_column" | "borrow" | "subtract_column" | "write_final_answer";
-
+// Free-text input is universal across every topic (ARCHITECTURE.md D41,
+// superseding D12/D32's structured-widget default) — the student never
+// declares a step type; the backend verifier infers it from the DAG
+// frontier by trying each reachable step type's grammar against the typed
+// text (see any `verification/topics/<topic>/verifier.py`). `step_type`
+// here is therefore always the fixed placeholder below; only `fields.text`
+// carries real information.
 export interface StudentStep {
-  // Structured-widget topics send one of `StepType`; free-text topics
-  // (fractions_addition) send a fixed placeholder ("fraction_step") since
-  // the student never declares a type — the backend verifier infers it
-  // from the DAG frontier instead (verification/topics/fractions_addition/
-  // verifier.py). Mirrors the backend's `StudentStep.step_type: str`.
-  step_type: StepType | "fraction_step";
-  fields: Record<string, unknown>;
+  step_type: "free_text_step";
+  fields: { text: string };
 }
 
 // --- verifier / pipeline response shapes -----------------------------------
