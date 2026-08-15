@@ -1,15 +1,15 @@
 """Real Groq provider.
 
-**Not verified against a live API.** No Groq API key has been provided yet
-(ARCHITECTURE.md D17); this module is written to the shape of Groq's
-OpenAI-compatible chat-completions API (JSON mode for structured output),
-but its actual structured-output reliability for the configured
-`GROQ_MODEL` has not been tested. Per CLAUDE.md's explicit instruction,
-verify this directly — don't assume — before `LLM_PROVIDER=groq` is used
-anywhere beyond local, supervised testing. `build_llm_client()`
-(llm/client.py) refuses to construct this provider at all unless both
-`GROQ_API_KEY` and `GROQ_MODEL` are explicitly set, so nothing silently
-ships with an unverified default model.
+Structured-output/tool-calling reliability for the configured `GROQ_MODEL`
+must be verified with `backend/scripts/verify_groq_structured_output.py`
+before this provider is trusted anywhere beyond local, supervised testing
+(CLAUDE.md, ARCHITECTURE.md D17/D25) — see that script's output for the
+verification result recorded for the current default model. `decide()` and
+`generate()` share the tutor persona system prompts in `llm/prompts.py`
+(ARCHITECTURE.md D7) so both calls sound like the same tutor.
+`build_llm_client()` (llm/client.py) refuses to construct this provider at
+all unless both `GROQ_API_KEY` and `GROQ_MODEL` are explicitly set, so
+nothing silently ships with an unverified default model.
 """
 
 import json
@@ -24,6 +24,7 @@ from studyhelp.llm.client import (
     GenerateRequest,
     GenerateResponse,
 )
+from studyhelp.llm.prompts import DECIDE_SYSTEM_PROMPT, GENERATE_SYSTEM_PROMPT
 
 _CLASSIFY_SYSTEM_PROMPT = """You are a diagnostic assistant for a Class 5 (age ~10) math tutor. \
 You are NOT solving this problem — the correct answer is given to you. Your only job is to \
@@ -57,15 +58,30 @@ class GroqLLMProvider:
         return ClassifyResponse.model_validate(raw)
 
     async def decide(self, request: DecideRequest) -> DecideResponse:
-        raise NotImplementedError(
-            "GroqLLMProvider.decide() is scoped to Phase 3 (dialogue orchestrator) — not wired yet."
+        user_content = json.dumps(
+            {
+                "topic": request.topic,
+                "step_type": request.step_type,
+                "correct_step": request.correct_step,
+                "student_step": request.student_step,
+                "misconception": request.misconception.model_dump() if request.misconception else None,
+                "turn_number": request.turn_number,
+            }
         )
+        raw = await self._chat_json(DECIDE_SYSTEM_PROMPT, user_content)
+        return DecideResponse.model_validate(raw)
 
     async def generate(self, request: GenerateRequest) -> GenerateResponse:
-        raise NotImplementedError(
-            "GroqLLMProvider.generate() is scoped to Phase 3 (dialogue orchestrator) — "
-            "not wired yet."
+        user_content = json.dumps(
+            {
+                "decision": request.decision.model_dump(),
+                "conversation_so_far": request.conversation_so_far,
+                "correct_step": request.correct_step,
+                "student_step": request.student_step,
+            }
         )
+        raw = await self._chat_json(GENERATE_SYSTEM_PROMPT, user_content)
+        return GenerateResponse.model_validate(raw)
 
     async def _chat_json(self, system_prompt: str, user_content: str) -> dict[str, object]:
         response = await self._client.chat.completions.create(

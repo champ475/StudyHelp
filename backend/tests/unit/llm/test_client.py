@@ -30,8 +30,11 @@ async def test_logging_client_passes_through_classify_response() -> None:
 def test_build_llm_client_defaults_to_mock(monkeypatch: pytest.MonkeyPatch) -> None:
     from studyhelp import config
 
+    # Explicit `setenv("mock", ...)`, not `delenv` — see conftest.py's
+    # `_force_mock_llm_provider` docstring: a bare `delenv` would fall back
+    # to whatever `backend/.env` has, not the field's true default.
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
     config.get_settings.cache_clear()
-    monkeypatch.delenv("LLM_PROVIDER", raising=False)
     client = build_llm_client()
     assert isinstance(client, LoggingLLMClient)
     config.get_settings.cache_clear()
@@ -40,9 +43,13 @@ def test_build_llm_client_defaults_to_mock(monkeypatch: pytest.MonkeyPatch) -> N
 def test_build_llm_client_refuses_groq_without_key(monkeypatch: pytest.MonkeyPatch) -> None:
     from studyhelp import config
 
+    # `setenv("", ...)`, not `delenv` — see conftest.py's
+    # `_force_mock_llm_provider` docstring: pydantic-settings falls back to
+    # `backend/.env` for any var absent from the process environment, so a
+    # real local key there would defeat a bare `delenv`.
     monkeypatch.setenv("LLM_PROVIDER", "groq")
-    monkeypatch.delenv("GROQ_API_KEY", raising=False)
-    monkeypatch.delenv("GROQ_MODEL", raising=False)
+    monkeypatch.setenv("GROQ_API_KEY", "")
+    monkeypatch.setenv("GROQ_MODEL", "")
     config.get_settings.cache_clear()
     try:
         with pytest.raises(RuntimeError, match="GROQ_API_KEY and GROQ_MODEL"):
