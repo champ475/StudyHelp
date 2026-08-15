@@ -66,7 +66,12 @@ export interface WriteFinalAnswerFields {
 export type StepType = "compare_column" | "borrow" | "subtract_column" | "write_final_answer";
 
 export interface StudentStep {
-  step_type: StepType;
+  // Structured-widget topics send one of `StepType`; free-text topics
+  // (fractions_addition) send a fixed placeholder ("fraction_step") since
+  // the student never declares a type — the backend verifier infers it
+  // from the DAG frontier instead (verification/topics/fractions_addition/
+  // verifier.py). Mirrors the backend's `StudentStep.step_type: str`.
+  step_type: StepType | "fraction_step";
   fields: Record<string, unknown>;
 }
 

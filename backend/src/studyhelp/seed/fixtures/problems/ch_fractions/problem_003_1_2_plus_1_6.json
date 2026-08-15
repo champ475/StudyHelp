@@ -1,0 +1,38 @@
+{
+  "problem_id": "fractions-add-003",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 7,
+    "chapter_title": "How Many Squares?",
+    "topic": "fractions_addition"
+  },
+  "given": { "a_num": 1, "a_den": 2, "b_num": 1, "b_den": 6 },
+  "final_answer": { "num": 2, "den": 3 },
+  "step_graph": [
+    {
+      "step_id": "s1_common_denom",
+      "type": "rewrite_common_denominator",
+      "expected_state": { "left_num": 3, "left_den": 6, "op": "+", "right_num": 1, "right_den": 6 },
+      "next": ["s2_add_numerators"]
+    },
+    {
+      "step_id": "s2_add_numerators",
+      "type": "add_numerators",
+      "expected_state": { "num": 4, "den": 6 },
+      "next": ["s3_simplify"]
+    },
+    {
+      "step_id": "s3_simplify",
+      "type": "simplify_fraction",
+      "expected_state": { "num": 2, "den": 3 },
+      "next": ["s4_final"]
+    },
+    {
+      "step_id": "s4_final",
+      "type": "write_final_answer",
+      "expected_state": { "num": 2, "den": 3 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

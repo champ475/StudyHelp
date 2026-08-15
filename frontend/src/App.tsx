@@ -15,6 +15,10 @@ const DEMO_PROBLEMS = [
   { id: "subtraction-borrow-004", label: "1000 − 1 (borrow across multiple zeros)" },
   { id: "subtraction-borrow-005", label: "542 − 89 (fewer digits in the subtrahend)" },
   { id: "subtraction-borrow-014", label: "542 − 187 (double cascading borrow)" },
+  { id: "fractions-add-001", label: "1/4 + 1/6 (fractions, free text)" },
+  { id: "fractions-add-002", label: "2/3 + 1/6 (fractions, free text)" },
+  { id: "fractions-add-003", label: "1/2 + 1/6 (fractions, needs simplifying)" },
+  { id: "fractions-add-004", label: "3/8 + 1/4 (fractions, free text)" },
 ];
 
 export default function App() {

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "fractions_addition.no_common_denominator",
+    "topic": "fractions_addition",
+    "step_type": "rewrite_common_denominator",
+    "bug_signature": { "buggy_rule_id": "fractions_addition.no_common_denominator" },
+    "typical_mindset": "Fractions are treated like two separate whole numbers stacked up, not as a single value that needs the same-sized 'pieces' before you can combine them — the idea that you must rewrite both fractions in equal-sized parts first hasn't taken hold yet.",
+    "explanation_strategy": "Make the 'different-sized pieces' concrete: ask the child to picture cutting one whole into fourths and another into sixths, and whether those pieces are the same size — then guide them to find a piece size both fractions can be rewritten in, rather than being told the LCM rule outright.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "If I cut a cake into 4 pieces, and another cake into 6 pieces, are the pieces the same size?" },
+      { "role": "student", "text": "No, the 6-piece ones are smaller." },
+      { "role": "tutor", "text": "Right! So before we add, we need to cut both cakes into the same size pieces. What size could work for both?" }
+    ],
+    "source": "Ni & Zhou 2005, 'whole number bias' in fraction learning; NCERT Class 5 Ch.7 misconception notes",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "fractions_addition.add_across",
+    "topic": "fractions_addition",
+    "step_type": "add_numerators",
+    "bug_signature": { "buggy_rule_id": "fractions_addition.add_across" },
+    "typical_mindset": "\"Adding fractions\" is interpreted the same way as adding two whole-number pairs side by side — top-plus-top, bottom-plus-bottom — the classic 'freshman's dream' overgeneralization from whole-number addition.",
+    "explanation_strategy": "Anchor the denominator to 'what kind of piece' rather than 'a number to add': ask what would happen to the piece size if you added the bottoms too, and whether the pieces are still the same kind you started with.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "You kept both fractions as twelfths before adding — good! Now, are we changing what size piece we're counting, or just how many of them we have?" },
+      { "role": "student", "text": "Just how many." },
+      { "role": "tutor", "text": "Exactly — so the bottom number, the piece size, should stay the same. What should it be?" }
+    ],
+    "source": "Behr, Wachsmuth, Post & Lesh 1984 on rational-number misconceptions; Ni & Zhou 2005",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "fractions_addition.forgot_to_simplify",
+    "topic": "fractions_addition",
+    "step_type": "simplify_fraction",
+    "bug_signature": { "buggy_rule_id": "fractions_addition.forgot_to_simplify" },
+    "typical_mindset": "The arithmetic of finding the sum is understood, but 'simplify' isn't recognized as a required final step — the fraction that comes out of the addition is treated as already finished, even when a smaller equivalent fraction exists.",
+    "explanation_strategy": "Ask the child to check whether the top and bottom numbers share a common factor, using a small concrete example if needed, so they discover the fraction can be written with smaller numbers rather than being told to 'always check for GCD.'",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Your answer is right! Now, can both the top and bottom number be divided by the same number?" },
+      { "role": "student", "text": "Both by 2!" },
+      { "role": "tutor", "text": "Try that — what do you get?" }
+    ],
+    "source": "NCERT Class 5 Ch.7; general Class 5 fraction-simplification curricular emphasis",
+    "version": 1,
+    "review_status": "seed_curated"
+  }
+]

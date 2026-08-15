@@ -139,6 +139,12 @@ async def _pipeline_events(
     )
     yield "verdict", verify_result.model_dump(mode="json")
 
+    # Structured-widget topics already send structured `fields`; free-text
+    # topics (fractions) send `{"text": ...}` and the verifier separately
+    # derives the structured shape downstream classification/dialogue code
+    # needs (schemas/verify.py's `parsed_fields` docstring).
+    structured_student_fields = verify_result.parsed_fields or request.student_step.fields
+
     classification = None
     correct_fields: dict[str, Any] = {}
     target_node = None
@@ -167,7 +173,7 @@ async def _pipeline_events(
                 topic=problem.ncert_ref.topic,
                 step_type=target_node.type,
                 correct_fields=correct_fields,
-                student_fields=request.student_step.fields,
+                student_fields=structured_student_fields,
                 discrepant_fields=discrepant,
                 event_id=verdict_event.id,
             )
@@ -187,7 +193,7 @@ async def _pipeline_events(
         topic=problem.ncert_ref.topic,
         step_type=step_type,
         correct_fields=correct_fields,
-        student_fields=request.student_step.fields,
+        student_fields=structured_student_fields,
         verify_result=verify_result,
         classification=classification,
         timing_policy=request.timing_policy,

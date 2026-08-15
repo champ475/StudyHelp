@@ -87,6 +87,48 @@ fieldset {
   cursor: not-allowed;
 }
 
+.free-text-stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.free-text-step {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.free-text-step .step-number {
+  min-width: 4.5rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.free-text-input {
+  flex: 1;
+  min-height: 2.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1.05rem;
+}
+
+.free-text-input.locked {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.free-text-step.active .free-text-input {
+  border-color: #4f46e5;
+}
+
+.step-check {
+  color: #16a34a;
+  font-weight: 700;
+}
+
 .chat-panel {
   margin-top: 1rem;
   display: flex;

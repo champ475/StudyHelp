@@ -1,0 +1,80 @@
+[
+  {
+    "id": "fractions_addition.no_common_denominator",
+    "topic": "fractions_addition",
+    "step_type": "rewrite_common_denominator",
+    "bug_code": "F1-no-common-denominator",
+    "signature_matcher": {
+      "applies_to": "rewrite_common_denominator",
+      "precondition": {},
+      "student_formula": "left_den != right_den",
+      "distinguishing_from": []
+    },
+    "citation": "Ni & Zhou (2005), whole-number bias in fraction learning",
+    "misconception_id": "fractions_addition.no_common_denominator",
+    "example_pair": {
+      "problem_id": "fractions-add-001",
+      "correct_step": {
+        "step_type": "rewrite_common_denominator",
+        "fields": { "left_num": 3, "left_den": 12, "op": "+", "right_num": 2, "right_den": 12 }
+      },
+      "student_step": {
+        "step_type": "rewrite_common_denominator",
+        "fields": { "left_num": 1, "left_den": 4, "op": "+", "right_num": 1, "right_den": 6 }
+      },
+      "note": "Student re-types the original fractions unchanged instead of converting to a common denominator."
+    }
+  },
+  {
+    "id": "fractions_addition.add_across",
+    "topic": "fractions_addition",
+    "step_type": "add_numerators",
+    "bug_code": "F2-add-across",
+    "signature_matcher": {
+      "applies_to": "add_numerators",
+      "precondition": {},
+      "student_formula": "num == correct.num AND den == correct.den * 2",
+      "distinguishing_from": []
+    },
+    "citation": "Behr, Wachsmuth, Post & Lesh (1984); Ni & Zhou (2005), 'freshman's dream'",
+    "misconception_id": "fractions_addition.add_across",
+    "example_pair": {
+      "problem_id": "fractions-add-001",
+      "correct_step": {
+        "step_type": "add_numerators",
+        "fields": { "num": 5, "den": 12 }
+      },
+      "student_step": {
+        "step_type": "add_numerators",
+        "fields": { "num": 5, "den": 24 }
+      },
+      "note": "Student adds the (already-equal) denominators together (12+12=24) instead of keeping the common denominator."
+    }
+  },
+  {
+    "id": "fractions_addition.forgot_to_simplify",
+    "topic": "fractions_addition",
+    "step_type": "simplify_fraction",
+    "bug_code": "F3-forgot-to-simplify",
+    "signature_matcher": {
+      "applies_to": "simplify_fraction",
+      "precondition": {},
+      "student_formula": "value(num, den) == value(correct.num, correct.den) AND gcd(num, den) != 1",
+      "distinguishing_from": []
+    },
+    "citation": "NCERT Class 5 Ch.7 curricular emphasis on lowest-terms simplification",
+    "misconception_id": "fractions_addition.forgot_to_simplify",
+    "example_pair": {
+      "problem_id": "fractions-add-003",
+      "correct_step": {
+        "step_type": "simplify_fraction",
+        "fields": { "num": 2, "den": 3 }
+      },
+      "student_step": {
+        "step_type": "simplify_fraction",
+        "fields": { "num": 4, "den": 6 }
+      },
+      "note": "Sum is correct (4/6) but the student re-submits it unsimplified instead of reducing to 2/3."
+    }
+  }
+]

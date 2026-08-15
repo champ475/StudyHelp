@@ -3,7 +3,13 @@ import { fetchProblem, submitStep } from "../api/client";
 import { frontierStepTypes } from "../frontier";
 import type { PublicProblem, StudentStep, VerifyResult } from "../types";
 import { ChatPanel, type ChatMessage } from "./ChatPanel";
+import { FreeTextStepper } from "./FreeTextStepper";
 import { StepWidgetSwitcher } from "./StepWidgetSwitcher";
+
+// Topics whose steps are typed free text (one box per step) rather than a
+// math-aware structured widget — see FreeTextStepper's doc comment for why
+// this deviates from ARCHITECTURE.md's original D12.
+const FREE_TEXT_TOPICS = new Set(["fractions_addition"]);
 
 interface ProblemSolverProps {
   sessionId: string;
@@ -24,6 +30,9 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastVerdict, setLastVerdict] = useState<VerifyResult | null>(null);
   const [solved, setSolved] = useState(false);
+  const [lockedTexts, setLockedTexts] = useState<string[]>([]);
+  const [activeText, setActiveText] = useState("");
+  const isFreeTextTopic = problem !== null && FREE_TEXT_TOPICS.has(problem.ncert_ref.topic);
 
   useEffect(() => {
     let cancelled = false;
@@ -96,6 +105,23 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
     setSolved(terminalReached);
   }, [problem, acceptedStepIds]);
 
+  // A step just got accepted: freeze what the student typed into a locked
+  // box and clear the active one for the next step. Keyed on the accepted
+  // count (not the verdict object) so a resubmission that fails doesn't
+  // touch this at all — only an actual advance does.
+  useEffect(() => {
+    if (!isFreeTextTopic) return;
+    if (acceptedStepIds.length > lockedTexts.length) {
+      setLockedTexts((prev) => [...prev, activeText]);
+      setActiveText("");
+    }
+  }, [acceptedStepIds, lockedTexts.length, activeText, isFreeTextTopic]);
+
+  const handleFreeTextCommit = useCallback(() => {
+    if (!activeText.trim()) return;
+    void handleSubmit({ step_type: "fraction_step", fields: { text: activeText } });
+  }, [activeText, handleSubmit]);
+
   if (loadError) {
     return <p className="error-banner">Could not load problem: {loadError}</p>;
   }
@@ -114,14 +140,25 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
   const nextNodeId = lastAcceptedNode?.next[0];
   const preferredStepType = problem.step_graph.find((node) => node.step_id === nextNodeId)?.type;
 
+  const heading = isFreeTextTopic
+    ? `${problem.given.a_num as number}/${problem.given.a_den as number} + ${problem.given.b_num as number}/${problem.given.b_den as number}`
+    : `${problem.given.minuend as number} − ${problem.given.subtrahend as number}`;
+
   return (
     <div className="problem-solver">
-      <h2>
-        {problem.given.minuend as number} − {problem.given.subtrahend as number}
-      </h2>
+      <h2>{heading}</h2>
       <p className="progress-note">Steps completed: {acceptedStepIds.length}</p>
 
-      {solved ? (
+      {isFreeTextTopic ? (
+        <FreeTextStepper
+          lockedTexts={lockedTexts}
+          activeText={activeText}
+          onActiveTextChange={setActiveText}
+          onCommit={handleFreeTextCommit}
+          disabled={isSubmitting}
+          solved={solved}
+        />
+      ) : solved ? (
         <p className="solved-banner">Solved! Great work.</p>
       ) : (
         <StepWidgetSwitcher
@@ -131,6 +168,8 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
           disabled={isSubmitting}
         />
       )}
+
+      {isFreeTextTopic && solved && <p className="solved-banner">Solved! Great work.</p>}
 
       {lastVerdict && !lastVerdict.is_valid && (
         <p className="verdict-banner incorrect" role="alert">

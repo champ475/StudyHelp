@@ -16,7 +16,10 @@ step-field pair without needing broader graph context.
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from math import gcd
 from typing import Any
+
+import sympy
 
 _Fields = dict[str, Any]
 _Matcher = Callable[[_Fields, _Fields], bool]
@@ -90,6 +93,50 @@ def _b4_stale_borrow_digit(correct: _Fields, student: _Fields) -> bool:
     )
 
 
+def _f1_no_common_denominator(correct: _Fields, student: _Fields) -> bool:
+    """Classic Class 5 fraction-addition misconception: the student never
+    converts to a common denominator at all — the two denominators they
+    submit still differ from each other (Ni & Zhou 2005; "whole-number
+    bias" literature)."""
+    left_den = _as_int(student, "left_den")
+    right_den = _as_int(student, "right_den")
+    if left_den is None or right_den is None:
+        return False
+    return bool(left_den != right_den and student != correct)
+
+
+def _f2_add_across(correct: _Fields, student: _Fields) -> bool:
+    """"Freshman's dream": adds numerators AND denominators straight
+    across instead of keeping the (already-equal) common denominator —
+    the student's denominator is exactly double the correct one, having
+    added the common denominator to itself."""
+    correct_num = _as_int(correct, "num")
+    correct_den = _as_int(correct, "den")
+    student_num = _as_int(student, "num")
+    student_den = _as_int(student, "den")
+    if correct_num is None or correct_den is None or student_num is None or student_den is None:
+        return False
+    return bool(student_num == correct_num and student_den == correct_den * 2)
+
+
+def _f3_forgot_to_simplify(correct: _Fields, student: _Fields) -> bool:
+    """The value is right but the student re-submits the unsimplified
+    fraction as if it were already in lowest terms — the concept of
+    "simplify" (find and divide out the common factor) hasn't been
+    internalized, only the arithmetic that produced the sum."""
+    correct_num = _as_int(correct, "num")
+    correct_den = _as_int(correct, "den")
+    student_num = _as_int(student, "num")
+    student_den = _as_int(student, "den")
+    if correct_num is None or correct_den is None or student_num is None or student_den is None:
+        return False
+    if student_den == 0:
+        return False
+    equal_value = sympy.Eq(sympy.Rational(student_num, student_den), sympy.Rational(correct_num, correct_den))
+    not_reduced = gcd(student_num, student_den) != 1
+    return bool(equal_value) and not_reduced
+
+
 @dataclass(frozen=True)
 class _MatcherSpec:
     buggy_rule_id: str
@@ -122,6 +169,24 @@ _MATCHERS: list[_MatcherSpec] = [
         "B2-no-decrement-after-borrow",
         "borrow",
         _b2_no_decrement_after_borrow,
+    ),
+    _MatcherSpec(
+        "fractions_addition.no_common_denominator",
+        "F1-no-common-denominator",
+        "rewrite_common_denominator",
+        _f1_no_common_denominator,
+    ),
+    _MatcherSpec(
+        "fractions_addition.add_across",
+        "F2-add-across",
+        "add_numerators",
+        _f2_add_across,
+    ),
+    _MatcherSpec(
+        "fractions_addition.forgot_to_simplify",
+        "F3-forgot-to-simplify",
+        "simplify_fraction",
+        _f3_forgot_to_simplify,
     ),
 ]
 

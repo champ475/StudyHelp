@@ -59,3 +59,9 @@ class VerifyResult(BaseModel):
     matched_step_id: str | None
     confidence: float
     error_signal: ErrorSignal | None = None
+    parsed_fields: dict[str, Any] | None = None
+    """Populated only by topics whose `StudentStep.fields` isn't already the
+    structured shape downstream consumers need (e.g. fractions' free-text
+    `{"text": ...}` — ARCHITECTURE.md's free-text-input supersede entry).
+    Structured-widget topics leave this `None`; callers fall back to
+    `StudentStep.fields` in that case, which is already structured."""

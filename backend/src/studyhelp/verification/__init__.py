@@ -4,10 +4,12 @@ the pipeline that calls `interface.registry.get(topic).verify_step()` never
 changes (ARCHITECTURE.md D1, D21)."""
 
 from studyhelp.verification.interface import registry
+from studyhelp.verification.topics.fractions_addition.verifier import FractionsAdditionVerifier
 from studyhelp.verification.topics.subtraction_borrowing.verifier import (
     SubtractionBorrowingVerifier,
 )
 
 registry.register(SubtractionBorrowingVerifier())
+registry.register(FractionsAdditionVerifier())
 
 __all__ = ["registry"]

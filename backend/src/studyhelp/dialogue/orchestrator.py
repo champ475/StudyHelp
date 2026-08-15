@@ -55,7 +55,17 @@ def _protected_values(correct_fields: dict[str, Any]) -> list[int]:
     secret. Topic-agnostic by construction — no field name here is
     specific to a step *type* the way `verification/topics/...` is."""
     values: list[int] = []
-    for key in ("result_digit", "value", "to_digit_after"):
+    for key in (
+        "result_digit",
+        "value",
+        "to_digit_after",
+        "num",
+        "den",
+        "left_num",
+        "left_den",
+        "right_num",
+        "right_den",
+    ):
         value = correct_fields.get(key)
         if isinstance(value, int):
             values.append(value)

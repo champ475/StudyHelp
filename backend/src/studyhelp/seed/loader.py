@@ -2,12 +2,11 @@
 upserts them into Postgres by natural key (`topic`+`step_type_key`, or a
 stable slug `id`) — safe to re-run, never duplicates rows.
 
-Note on topic-awareness: `validate_problem_arithmetic` (imported from the
-subtraction-borrowing topic module) is specific to that topic's field
-names. With only one topic seeded so far this lives inline; if/when a
-second topic is added, this becomes a per-topic validation hook rather
-than a single hardcoded import (ARCHITECTURE.md D19 — sequence, don't
-front-load).
+Note on topic-awareness: each topic's `validate_problem_arithmetic` is
+specific to that topic's field names, so `_ARITHMETIC_VALIDATORS` below
+dispatches on `problem.ncert_ref.topic` rather than hardcoding one import
+(ARCHITECTURE.md D19 — sequence, don't front-load; this dict is what that
+sequencing turned into once a second topic existed).
 """
 
 import json
@@ -24,11 +23,23 @@ from studyhelp.db.models import StepType as StepTypeRow
 from studyhelp.schemas.buggy_rule import BuggyRuleEntry
 from studyhelp.schemas.misconception import MisconceptionEntry
 from studyhelp.schemas.step_schema import Problem, StepTypeEntry
+from studyhelp.verification.topics.fractions_addition.sympy_utils import (
+    validate_problem_arithmetic as validate_fractions_addition_arithmetic,
+)
 from studyhelp.verification.topics.subtraction_borrowing.sympy_utils import (
-    validate_problem_arithmetic,
+    validate_problem_arithmetic as validate_subtraction_borrowing_arithmetic,
 )
 
 FIXTURES_ROOT = Path(__file__).parent / "fixtures"
+
+_ARITHMETIC_VALIDATORS = {
+    "subtraction_with_borrowing": validate_subtraction_borrowing_arithmetic,
+    "fractions_addition": validate_fractions_addition_arithmetic,
+}
+"""Per-topic seed-time arithmetic cross-check hook (ARCHITECTURE.md D19 —
+sequence, don't front-load: this became a dict the moment a second topic
+existed, rather than staying the single hardcoded import it was for one
+topic)."""
 
 
 def _load_json(path: Path) -> Any:
@@ -46,8 +57,9 @@ def load_problems() -> list[Problem]:
     problems: list[Problem] = []
     for path in sorted((FIXTURES_ROOT / "problems").rglob("*.json")):
         problem = Problem.model_validate(_load_json(path))
-        if problem.ncert_ref.topic == "subtraction_with_borrowing":
-            validate_problem_arithmetic(problem)
+        validator = _ARITHMETIC_VALIDATORS.get(problem.ncert_ref.topic)
+        if validator is not None:
+            validator(problem)
         problems.append(problem)
     return problems
 

@@ -19,6 +19,10 @@ def test_step_types_load_and_cover_all_four_types() -> None:
         ("subtraction_with_borrowing", "borrow"),
         ("subtraction_with_borrowing", "subtract_column"),
         ("subtraction_with_borrowing", "write_final_answer"),
+        ("fractions_addition", "rewrite_common_denominator"),
+        ("fractions_addition", "add_numerators"),
+        ("fractions_addition", "simplify_fraction"),
+        ("fractions_addition", "write_final_answer"),
     }
 
 
@@ -32,27 +36,33 @@ def test_problems_load_and_pass_arithmetic_validation() -> None:
     assert "subtraction-borrow-014" in problem_ids
 
 
-def test_misconceptions_load_with_four_seed_entries() -> None:
+def test_misconceptions_load_with_seven_seed_entries() -> None:
     entries = load_misconceptions()
-    assert len(entries) == 4
+    assert len(entries) == 7
     ids = {e.id for e in entries}
     assert ids == {
         "subtraction_borrowing.smaller_from_larger",
         "subtraction_borrowing.no_decrement_after_borrow",
         "subtraction_borrowing.borrow_across_zero",
         "subtraction_borrowing.stale_borrow_digit",
+        "fractions_addition.no_common_denominator",
+        "fractions_addition.add_across",
+        "fractions_addition.forgot_to_simplify",
     }
 
 
-def test_buggy_rules_load_with_four_seed_entries() -> None:
+def test_buggy_rules_load_with_seven_seed_entries() -> None:
     entries = load_buggy_rules()
-    assert len(entries) == 4
+    assert len(entries) == 7
     bug_codes = {e.bug_code for e in entries}
     assert bug_codes == {
         "B1-smaller-from-larger",
         "B2-no-decrement-after-borrow",
         "B3-borrow-across-zero",
         "B4-stale-borrow-digit",
+        "F1-no-common-denominator",
+        "F2-add-across",
+        "F3-forgot-to-simplify",
     }
 
 
