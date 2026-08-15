@@ -4,6 +4,7 @@ the pipeline that calls `interface.registry.get(topic).verify_step()` never
 changes (ARCHITECTURE.md D1, D21)."""
 
 from studyhelp.verification.interface import registry
+from studyhelp.verification.topics.area_perimeter.verifier import AreaPerimeterVerifier
 from studyhelp.verification.topics.decimals.verifier import DecimalsVerifier
 from studyhelp.verification.topics.fractions_addition.verifier import FractionsAdditionVerifier
 from studyhelp.verification.topics.lcm_hcf.verifier import LcmHcfVerifier
@@ -15,5 +16,6 @@ registry.register(SubtractionBorrowingVerifier())
 registry.register(FractionsAdditionVerifier())
 registry.register(LcmHcfVerifier())
 registry.register(DecimalsVerifier())
+registry.register(AreaPerimeterVerifier())
 
 __all__ = ["registry"]

@@ -1,0 +1,27 @@
+{
+  "problem_id": "area-perimeter-005",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 11,
+    "chapter_title": "Area and its Boundary",
+    "topic": "area_perimeter"
+  },
+  "display_label": "Area of an 8 x 3 rectangle",
+  "given": { "shape": "rectangle", "length": 8, "width": 3, "measure": "area" },
+  "final_answer": { "value": 24 },
+  "step_graph": [
+    {
+      "step_id": "s1_compute",
+      "type": "compute_area",
+      "expected_state": { "length": 8, "width": 3, "result": 24 },
+      "next": ["s2_final"]
+    },
+    {
+      "step_id": "s2_final",
+      "type": "write_final_answer",
+      "expected_state": { "value": 24 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

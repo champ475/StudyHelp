@@ -1,0 +1,34 @@
+[
+  {
+    "id": "area_perimeter.formula_confusion",
+    "topic": "area_perimeter",
+    "step_type": "compute_area",
+    "bug_signature": { "buggy_rule_id": "area_perimeter.formula_confusion" },
+    "typical_mindset": "Area and perimeter are both 'the length-and-width formula' without a clear sense of what each one actually measures — the student reaches for whichever formula they remember (often perimeter's addition, since it's simpler than multiplying) regardless of which quantity the question asks for.",
+    "explanation_strategy": "Ground the two formulas in what they physically measure before returning to the numbers: ask whether we're measuring the space covered (area, needs multiplying — think of tiles filling the inside) or the distance walked around the edge (perimeter, needs adding all four sides).",
+    "example_dialogue": [
+      { "role": "tutor", "text": "If you covered this rectangle with tiny square tiles, would you be counting tiles, or walking around the edge?" },
+      { "role": "student", "text": "Counting tiles." },
+      { "role": "tutor", "text": "Right — that's area, and counting tiles inside a grid is the same as multiplying the two sides. What do you get?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for area/perimeter formula confusion specifically.",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "area_perimeter.forgot_times_two",
+    "topic": "area_perimeter",
+    "step_type": "compute_perimeter",
+    "bug_signature": { "buggy_rule_id": "area_perimeter.forgot_times_two" },
+    "typical_mindset": "The idea that a rectangle has four sides, not two, hasn't fully carried over into the perimeter calculation — the student adds length and width once (as if only two sides existed) and stops, without doubling to account for the opposite pair.",
+    "explanation_strategy": "Ask the student to name all four sides of the rectangle, one at a time, and add them one by one, rather than starting from the doubling rule as a fact to memorize — let them notice for themselves that length and width each appear twice.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "A rectangle has four sides. Can you name all four, one at a time?" },
+      { "role": "student", "text": "Top, bottom, left, right." },
+      { "role": "tutor", "text": "Good — and top and bottom are both the length, left and right are both the width. So how many times do we count the length?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for area/perimeter formula confusion specifically.",
+    "version": 1,
+    "review_status": "seed_curated"
+  }
+]

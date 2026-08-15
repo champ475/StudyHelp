@@ -254,3 +254,11 @@ Both fixes have dedicated regression tests. Recorded as D36. **This is the stron
 - **No arithmetic mistakes or bugs found while building** — unlike LCM/HCF, this topic's first full test run was clean. Recorded honestly either way, per this project's convention of logging both outcomes, not just corrections.
 - **Verified**: 268 unit+golden tests passing (up from 231), `ruff`/`mypy` clean, independently re-run and confirmed.
 - Recorded as ARCHITECTURE.md D48.
+
+## 2026-08-15 23:00 — Phase E, topic 3/5: area/perimeter (Ch.11)
+
+- New `area_perimeter` topic, built directly against the established pattern rather than delegated — the fork launched for this topic returned after ~36s with zero file changes, so it was built in-session instead of re-delegating. 2-step DAG (deliberately shorter than the 3-4 step topics, same precedent as fractions' comparison problems): `compute_area` (`"<L> x <W> = <result>"`) or `compute_perimeter` (`"2 x (<L> + <W>) = <result>"`), whichever `given.measure` calls for, then `write_final_answer`. Squares represented as `length == width` so one uniform grammar serves both shapes — the parser never sees `given`, only `(step_type, text)`.
+- 10 problems: 3 rectangle-area, 3 rectangle-perimeter, 2 square-area, 2 square-perimeter.
+- **2 new buggy-rule matchers**, both designed from the outset to respect the D47 interface lesson (checkable from a single step's own field pair): AP1 (formula confusion — student's result on an area step matches what the perimeter formula would give from their own submitted length/width, or vice versa) and AP2 (forgot the ×2 on perimeter — adds length+width once and stops).
+- **Verified**: 303 unit+golden tests passing (up from 268), `ruff`/`mypy` clean, all green on the first full run — no arithmetic mistakes found.
+- Recorded as ARCHITECTURE.md D49.

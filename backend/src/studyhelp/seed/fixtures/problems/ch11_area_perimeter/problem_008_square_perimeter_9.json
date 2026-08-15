@@ -1,0 +1,27 @@
+{
+  "problem_id": "area-perimeter-008",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 11,
+    "chapter_title": "Area and its Boundary",
+    "topic": "area_perimeter"
+  },
+  "display_label": "Perimeter of a square with side 9",
+  "given": { "shape": "square", "length": 9, "width": 9, "measure": "perimeter" },
+  "final_answer": { "value": 36 },
+  "step_graph": [
+    {
+      "step_id": "s1_compute",
+      "type": "compute_perimeter",
+      "expected_state": { "length": 9, "width": 9, "result": 36 },
+      "next": ["s2_final"]
+    },
+    {
+      "step_id": "s2_final",
+      "type": "write_final_answer",
+      "expected_state": { "value": 36 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

@@ -1,0 +1,27 @@
+{
+  "problem_id": "area-perimeter-002",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 11,
+    "chapter_title": "Area and its Boundary",
+    "topic": "area_perimeter"
+  },
+  "display_label": "Perimeter of a 6 x 4 rectangle",
+  "given": { "shape": "rectangle", "length": 6, "width": 4, "measure": "perimeter" },
+  "final_answer": { "value": 20 },
+  "step_graph": [
+    {
+      "step_id": "s1_compute",
+      "type": "compute_perimeter",
+      "expected_state": { "length": 6, "width": 4, "result": 20 },
+      "next": ["s2_final"]
+    },
+    {
+      "step_id": "s2_final",
+      "type": "write_final_answer",
+      "expected_state": { "value": 20 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

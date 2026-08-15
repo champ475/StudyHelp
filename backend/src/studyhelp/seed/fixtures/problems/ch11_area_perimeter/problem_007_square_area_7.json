@@ -1,0 +1,27 @@
+{
+  "problem_id": "area-perimeter-007",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 11,
+    "chapter_title": "Area and its Boundary",
+    "topic": "area_perimeter"
+  },
+  "display_label": "Area of a square with side 7",
+  "given": { "shape": "square", "length": 7, "width": 7, "measure": "area" },
+  "final_answer": { "value": 49 },
+  "step_graph": [
+    {
+      "step_id": "s1_compute",
+      "type": "compute_area",
+      "expected_state": { "length": 7, "width": 7, "result": 49 },
+      "next": ["s2_final"]
+    },
+    {
+      "step_id": "s2_final",
+      "type": "write_final_answer",
+      "expected_state": { "value": 49 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

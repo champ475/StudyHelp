@@ -1,0 +1,27 @@
+{
+  "problem_id": "area-perimeter-009",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 11,
+    "chapter_title": "Area and its Boundary",
+    "topic": "area_perimeter"
+  },
+  "display_label": "Area of a 12 x 3 rectangle",
+  "given": { "shape": "rectangle", "length": 12, "width": 3, "measure": "area" },
+  "final_answer": { "value": 36 },
+  "step_graph": [
+    {
+      "step_id": "s1_compute",
+      "type": "compute_area",
+      "expected_state": { "length": 12, "width": 3, "result": 36 },
+      "next": ["s2_final"]
+    },
+    {
+      "step_id": "s2_final",
+      "type": "write_final_answer",
+      "expected_state": { "value": 36 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

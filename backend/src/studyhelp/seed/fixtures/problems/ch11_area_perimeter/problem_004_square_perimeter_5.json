@@ -1,0 +1,27 @@
+{
+  "problem_id": "area-perimeter-004",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 11,
+    "chapter_title": "Area and its Boundary",
+    "topic": "area_perimeter"
+  },
+  "display_label": "Perimeter of a square with side 5",
+  "given": { "shape": "square", "length": 5, "width": 5, "measure": "perimeter" },
+  "final_answer": { "value": 20 },
+  "step_graph": [
+    {
+      "step_id": "s1_compute",
+      "type": "compute_perimeter",
+      "expected_state": { "length": 5, "width": 5, "result": 20 },
+      "next": ["s2_final"]
+    },
+    {
+      "step_id": "s2_final",
+      "type": "write_final_answer",
+      "expected_state": { "value": 20 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

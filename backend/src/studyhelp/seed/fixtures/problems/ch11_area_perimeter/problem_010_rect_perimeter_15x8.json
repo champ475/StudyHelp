@@ -1,0 +1,27 @@
+{
+  "problem_id": "area-perimeter-010",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 11,
+    "chapter_title": "Area and its Boundary",
+    "topic": "area_perimeter"
+  },
+  "display_label": "Perimeter of a 15 x 8 rectangle",
+  "given": { "shape": "rectangle", "length": 15, "width": 8, "measure": "perimeter" },
+  "final_answer": { "value": 46 },
+  "step_graph": [
+    {
+      "step_id": "s1_compute",
+      "type": "compute_perimeter",
+      "expected_state": { "length": 15, "width": 8, "result": 46 },
+      "next": ["s2_final"]
+    },
+    {
+      "step_id": "s2_final",
+      "type": "write_final_answer",
+      "expected_state": { "value": 46 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}

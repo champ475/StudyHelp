@@ -1,0 +1,54 @@
+[
+  {
+    "id": "area_perimeter.formula_confusion",
+    "topic": "area_perimeter",
+    "step_type": "compute_area",
+    "bug_code": "AP1-formula-confusion",
+    "signature_matcher": {
+      "applies_to": "compute_area",
+      "precondition": {},
+      "student_formula": "result == 2 * (length + width) AND result != length * width",
+      "distinguishing_from": []
+    },
+    "citation": "Topic-authored; no direct literature-survey citation for area/perimeter formula confusion specifically.",
+    "misconception_id": "area_perimeter.formula_confusion",
+    "example_pair": {
+      "problem_id": "area-perimeter-001",
+      "correct_step": {
+        "step_type": "compute_area",
+        "fields": { "length": 6, "width": 4, "result": 24 }
+      },
+      "student_step": {
+        "step_type": "compute_area",
+        "fields": { "length": 6, "width": 4, "result": 20 }
+      },
+      "note": "Student applies the perimeter formula (2 x (6+4) = 20) to an area question instead of multiplying (6 x 4 = 24)."
+    }
+  },
+  {
+    "id": "area_perimeter.forgot_times_two",
+    "topic": "area_perimeter",
+    "step_type": "compute_perimeter",
+    "bug_code": "AP2-forgot-times-two",
+    "signature_matcher": {
+      "applies_to": "compute_perimeter",
+      "precondition": {},
+      "student_formula": "result == length + width AND result != 2 * (length + width)",
+      "distinguishing_from": []
+    },
+    "citation": "Topic-authored; no direct literature-survey citation for area/perimeter formula confusion specifically.",
+    "misconception_id": "area_perimeter.forgot_times_two",
+    "example_pair": {
+      "problem_id": "area-perimeter-002",
+      "correct_step": {
+        "step_type": "compute_perimeter",
+        "fields": { "length": 6, "width": 4, "result": 20 }
+      },
+      "student_step": {
+        "step_type": "compute_perimeter",
+        "fields": { "length": 6, "width": 4, "result": 10 }
+      },
+      "note": "Student adds length and width once (6+4=10) and forgets to double it for the four sides."
+    }
+  }
+]

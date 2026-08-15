@@ -150,6 +150,32 @@ def _f5_compares_numerators_only(correct: _Fields, student: _Fields) -> bool:
     return bool(student_op == naive_op)
 
 
+def _ap1_formula_confusion(correct: _Fields, student: _Fields) -> bool:
+    """Area/perimeter formula confusion: on an area problem, the student's
+    result matches what the PERIMETER formula would give from their own
+    submitted length/width (2*(l+w)) rather than the area formula
+    (l*w). Checkable purely from the student's own field pair — no
+    cross-step context needed."""
+    length = _as_int(student, "length")
+    width = _as_int(student, "width")
+    result = _as_int(student, "result")
+    if length is None or width is None or result is None:
+        return False
+    naive_perimeter = 2 * (length + width)
+    return bool(result == naive_perimeter and result != length * width)
+
+
+def _ap2_forgot_times_two(correct: _Fields, student: _Fields) -> bool:
+    """On a perimeter problem, the student adds length and width once and
+    stops, forgetting to double for all four sides."""
+    length = _as_int(student, "length")
+    width = _as_int(student, "width")
+    result = _as_int(student, "result")
+    if length is None or width is None or result is None:
+        return False
+    return bool(result == length + width and result != 2 * (length + width))
+
+
 def _f3_forgot_to_simplify(correct: _Fields, student: _Fields) -> bool:
     """The value is right but the student re-submits the unsimplified
     fraction as if it were already in lowest terms — the concept of
@@ -318,6 +344,18 @@ _MATCHERS: list[_MatcherSpec] = [
         "DEC2-decimal-point-shifted",
         "compute_result",
         _dec2_decimal_point_shifted,
+    ),
+    _MatcherSpec(
+        "area_perimeter.formula_confusion",
+        "AP1-formula-confusion",
+        "compute_area",
+        _ap1_formula_confusion,
+    ),
+    _MatcherSpec(
+        "area_perimeter.forgot_times_two",
+        "AP2-forgot-times-two",
+        "compute_perimeter",
+        _ap2_forgot_times_two,
     ),
 ]
 

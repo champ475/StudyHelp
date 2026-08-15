@@ -1,0 +1,27 @@
+{
+  "problem_id": "area-perimeter-006",
+  "ncert_ref": {
+    "class": 5,
+    "chapter": 11,
+    "chapter_title": "Area and its Boundary",
+    "topic": "area_perimeter"
+  },
+  "display_label": "Perimeter of a 9 x 5 rectangle",
+  "given": { "shape": "rectangle", "length": 9, "width": 5, "measure": "perimeter" },
+  "final_answer": { "value": 28 },
+  "step_graph": [
+    {
+      "step_id": "s1_compute",
+      "type": "compute_perimeter",
+      "expected_state": { "length": 9, "width": 5, "result": 28 },
+      "next": ["s2_final"]
+    },
+    {
+      "step_id": "s2_final",
+      "type": "write_final_answer",
+      "expected_state": { "value": 28 },
+      "next": []
+    }
+  ],
+  "alt_paths": []
+}
