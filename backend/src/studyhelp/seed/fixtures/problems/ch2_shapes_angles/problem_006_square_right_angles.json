@@ -1,0 +1,11 @@
+{
+  "problem_id": "shapes-angles-006",
+  "ncert_ref": { "class": 5, "chapter": 2, "chapter_title": "Shapes and Angles", "topic": "shapes_angles" },
+  "display_label": "Right angles in a square",
+  "given": { "question": "How many right angles does a square have?" },
+  "final_answer": { "answer": "4" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "shapes_angles_answer", "expected_state": { "answer": "4" }, "next": [] }
+  ],
+  "alt_paths": []
+}

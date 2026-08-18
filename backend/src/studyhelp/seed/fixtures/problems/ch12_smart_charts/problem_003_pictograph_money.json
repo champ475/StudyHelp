@@ -1,0 +1,11 @@
+{
+  "problem_id": "smart-charts-003",
+  "ncert_ref": { "class": 5, "chapter": 12, "chapter_title": "Smart Charts", "topic": "smart_charts" },
+  "display_label": "Pictograph: money saved (key = 100)",
+  "given": { "question": "A pictograph's key says: 1 symbol = Rs. 100. Rahul's row has 6 symbols. How much money did Rahul save?" },
+  "final_answer": { "answer": "600" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "smart_charts_answer", "expected_state": { "answer": "600" }, "next": [] }
+  ],
+  "alt_paths": []
+}

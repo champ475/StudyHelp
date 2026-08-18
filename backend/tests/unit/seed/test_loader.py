@@ -41,6 +41,14 @@ def test_step_types_load_and_cover_every_registered_step_type() -> None:
         ("measurement", "identify_conversion_factor"),
         ("measurement", "convert_units"),
         ("measurement", "write_final_answer"),
+        ("shapes_angles", "shapes_angles_answer"),
+        ("how_many_squares", "how_many_squares_answer"),
+        ("symmetry", "symmetry_answer"),
+        ("patterns", "patterns_common_difference"),
+        ("patterns", "patterns_next_term"),
+        ("mapping", "mapping_answer"),
+        ("boxes_sketches", "boxes_sketches_answer"),
+        ("smart_charts", "smart_charts_answer"),
     }
 
 
@@ -49,14 +57,14 @@ def test_problems_load_and_pass_arithmetic_validation() -> None:
     fixture — if this doesn't raise, every seeded problem is internally
     consistent per the independent sympy cross-check."""
     problems = load_problems()
-    assert len(problems) >= 66
+    assert len(problems) == 140
     problem_ids = {p.problem_id for p in problems}
     assert "subtraction-borrow-014" in problem_ids
 
 
-def test_misconceptions_load_with_nineteen_seed_entries() -> None:
+def test_misconceptions_load_with_twenty_six_seed_entries() -> None:
     entries = load_misconceptions()
-    assert len(entries) == 19
+    assert len(entries) == 26
     ids = {e.id for e in entries}
     assert ids == {
         "subtraction_borrowing.smaller_from_larger",
@@ -78,12 +86,19 @@ def test_misconceptions_load_with_nineteen_seed_entries() -> None:
         "multiplication_division.misplaced_remainder",
         "measurement.wrong_direction",
         "measurement.wrong_factor",
+        "shapes_angles.acute_obtuse_swap",
+        "how_many_squares.only_counts_unit_squares",
+        "symmetry.assumes_nonzero_symmetry",
+        "patterns.repeats_last_term",
+        "mapping.ignores_return_trip_cancellation",
+        "boxes_sketches.confuses_faces_and_vertices",
+        "smart_charts.reads_symbol_count_not_value",
     }
 
 
-def test_buggy_rules_load_with_nineteen_seed_entries() -> None:
+def test_buggy_rules_load_with_twenty_one_seed_entries() -> None:
     entries = load_buggy_rules()
-    assert len(entries) == 19
+    assert len(entries) == 21
     bug_codes = {e.bug_code for e in entries}
     assert bug_codes == {
         "B1-smaller-from-larger",
@@ -105,6 +120,8 @@ def test_buggy_rules_load_with_nineteen_seed_entries() -> None:
         "MD2-misplaced-remainder",
         "ME1-wrong-direction",
         "ME2-wrong-factor",
+        "SA1-acute-obtuse-swap",
+        "SYM1-assumes-nonzero-symmetry",
     }
 
 

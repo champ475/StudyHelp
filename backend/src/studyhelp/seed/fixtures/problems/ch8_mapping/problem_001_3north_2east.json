@@ -1,0 +1,11 @@
+{
+  "problem_id": "mapping-001",
+  "ncert_ref": { "class": 5, "chapter": 8, "chapter_title": "Mapping Your Way", "topic": "mapping" },
+  "display_label": "Total blocks walked: 3 north, 2 east",
+  "given": { "question": "Starting at the school, walk 3 blocks north then 2 blocks east. How many blocks total did you walk?" },
+  "final_answer": { "answer": "5" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "mapping_answer", "expected_state": { "answer": "5" }, "next": [] }
+  ],
+  "alt_paths": []
+}

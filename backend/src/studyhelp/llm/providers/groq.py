@@ -72,18 +72,28 @@ class GroqLLMProvider:
         return DecideResponse.model_validate(raw)
 
     async def generate(self, request: GenerateRequest) -> GenerateResponse:
-        user_content = json.dumps(
-            {
-                "decision": request.decision.model_dump(),
-                "conversation_so_far": request.conversation_so_far,
-                "correct_step": request.correct_step,
-                "student_step": request.student_step,
-            }
-        )
-        raw = await self._chat_json(GENERATE_SYSTEM_PROMPT, user_content)
+        payload: dict[str, object] = {
+            "decision": request.decision.model_dump(),
+            "conversation_so_far": request.conversation_so_far,
+            "correct_step": request.correct_step,
+            "student_step": request.student_step,
+        }
+        if request.regeneration_feedback is not None:
+            payload["regeneration_feedback"] = request.regeneration_feedback
+        user_content = json.dumps(payload)
+        # A gate-rejected retry needs actual variation, not a repeat of the
+        # same rejected text — at temperature=0 (used everywhere else for
+        # determinism) an unchanged prompt reliably reproduces the exact
+        # same output, so a retry only helps once regeneration_feedback has
+        # changed the prompt too; bumping temperature here is a second,
+        # independent nudge toward a genuinely different draft.
+        temperature = 0.0 if request.regeneration_feedback is None else 0.6
+        raw = await self._chat_json(GENERATE_SYSTEM_PROMPT, user_content, temperature=temperature)
         return GenerateResponse.model_validate(raw)
 
-    async def _chat_json(self, system_prompt: str, user_content: str) -> dict[str, object]:
+    async def _chat_json(
+        self, system_prompt: str, user_content: str, *, temperature: float = 0
+    ) -> dict[str, object]:
         response = await self._client.chat.completions.create(
             model=self._model,
             messages=[
@@ -91,7 +101,7 @@ class GroqLLMProvider:
                 {"role": "user", "content": user_content},
             ],
             response_format={"type": "json_object"},
-            temperature=0,
+            temperature=temperature,
         )
         content = response.choices[0].message.content
         if content is None:

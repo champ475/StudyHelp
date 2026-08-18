@@ -1,0 +1,11 @@
+{
+  "problem_id": "smart-charts-001",
+  "ncert_ref": { "class": 5, "chapter": 12, "chapter_title": "Smart Charts", "topic": "smart_charts" },
+  "display_label": "Pictograph: books read (key = 10)",
+  "given": { "question": "A pictograph's key says: 1 symbol = 10 books. Priya's row has 3 symbols. How many books did Priya read?" },
+  "final_answer": { "answer": "30" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "smart_charts_answer", "expected_state": { "answer": "30" }, "next": [] }
+  ],
+  "alt_paths": []
+}

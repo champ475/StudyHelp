@@ -1,0 +1,11 @@
+{
+  "problem_id": "how-many-squares-005",
+  "ncert_ref": { "class": 5, "chapter": 3, "chapter_title": "How Many Squares?", "topic": "how_many_squares" },
+  "display_label": "Unit squares in a 6x6 grid",
+  "given": { "question": "A grid is 6x6. How many unit squares are there?" },
+  "final_answer": { "answer": "36" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "how_many_squares_answer", "expected_state": { "answer": "36" }, "next": [] }
+  ],
+  "alt_paths": []
+}

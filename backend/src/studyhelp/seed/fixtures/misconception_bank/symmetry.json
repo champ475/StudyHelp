@@ -1,0 +1,18 @@
+[
+  {
+    "id": "symmetry.assumes_nonzero_symmetry",
+    "topic": "symmetry",
+    "step_type": "symmetry_answer",
+    "bug_signature": { "buggy_rule_id": "symmetry.assumes_nonzero_symmetry" },
+    "typical_mindset": "Every shape or letter is assumed to have at least one line of symmetry somewhere, even ones that are genuinely asymmetric — the idea that 'zero' is a valid, common answer hasn't taken hold, so the child looks harder for a fold line that doesn't exist rather than concluding there isn't one.",
+    "explanation_strategy": "Have the child actually try folding (or imagining folding) the shape along a few different lines and checking whether the two halves truly match, rather than assuming a line must exist — let a real failed match be the evidence for zero.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "If you folded this shape right down the middle, would both halves land exactly on top of each other?" },
+      { "role": "student", "text": "No, one side is bigger." },
+      { "role": "tutor", "text": "Right — so that fold doesn't work. Try another line... does any line work here?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for this specific symmetry-assumption bug.",
+    "version": 1,
+    "review_status": "seed_curated"
+  }
+]

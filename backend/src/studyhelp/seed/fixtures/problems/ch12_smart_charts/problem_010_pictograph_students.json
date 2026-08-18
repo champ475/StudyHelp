@@ -1,0 +1,11 @@
+{
+  "problem_id": "smart-charts-010",
+  "ncert_ref": { "class": 5, "chapter": 12, "chapter_title": "Smart Charts", "topic": "smart_charts" },
+  "display_label": "Pictograph: students (key = 25)",
+  "given": { "question": "A pictograph's key says: 1 symbol = 25 students. The school's row has 4 symbols. How many students are in the school?" },
+  "final_answer": { "answer": "100" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "smart_charts_answer", "expected_state": { "answer": "100" }, "next": [] }
+  ],
+  "alt_paths": []
+}

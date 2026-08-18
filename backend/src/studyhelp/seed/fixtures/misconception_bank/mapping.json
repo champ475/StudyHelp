@@ -1,0 +1,17 @@
+[
+  {
+    "id": "mapping.ignores_return_trip_cancellation",
+    "topic": "mapping",
+    "step_type": "mapping_answer",
+    "typical_mindset": "Every leg of a journey is added to a running total distance walked, even when a later leg doubles back and cancels out an earlier one — the idea that walking north then the same distance south returns you to your net starting position (net displacement of zero) is conflated with total distance travelled, which is nonzero.",
+    "explanation_strategy": "Act the journey out step by step, asking after each leg where the child now stands relative to the start, rather than asking for a running total distance.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "You walked 5 blocks east. Where are you now, compared to where you started?" },
+      { "role": "student", "text": "5 blocks east." },
+      { "role": "tutor", "text": "Right. Now you walk 5 blocks west, back the way you came. Where are you now?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for this specific mapping bug — not matched to a deterministic buggy-rule signature (net-position problems need the full described route, not just the single final answer field, to check generically; see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "problem_id": "how-many-squares-004",
+  "ncert_ref": { "class": 5, "chapter": 3, "chapter_title": "How Many Squares?", "topic": "how_many_squares" },
+  "display_label": "All-size squares in a 2x2 grid",
+  "given": { "question": "A grid is 2x2. How many squares of ALL sizes can you find?" },
+  "final_answer": { "answer": "5" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "how_many_squares_answer", "expected_state": { "answer": "5" }, "next": [] }
+  ],
+  "alt_paths": []
+}

@@ -1,0 +1,11 @@
+{
+  "problem_id": "boxes-sketches-004",
+  "ncert_ref": { "class": 5, "chapter": 9, "chapter_title": "Boxes and Sketches", "topic": "boxes_sketches" },
+  "display_label": "Faces on a cuboid",
+  "given": { "question": "A cuboid-shaped box (like a matchbox) has how many flat faces?" },
+  "final_answer": { "answer": "6" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "boxes_sketches_answer", "expected_state": { "answer": "6" }, "next": [] }
+  ],
+  "alt_paths": []
+}

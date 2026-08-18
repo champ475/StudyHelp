@@ -1,0 +1,10 @@
+[
+  {
+    "topic": "smart_charts",
+    "step_type_key": "smart_charts_answer",
+    "description": "Read the chart carefully and answer the question.",
+    "structured_input_schema": {
+      "text": "free_text: a word or number"
+    }
+  }
+]

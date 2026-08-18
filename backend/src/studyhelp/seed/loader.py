@@ -23,6 +23,7 @@ from studyhelp.db.models import StepType as StepTypeRow
 from studyhelp.schemas.buggy_rule import BuggyRuleEntry
 from studyhelp.schemas.misconception import MisconceptionEntry
 from studyhelp.schemas.step_schema import Problem, StepTypeEntry
+from studyhelp.verification.topics._light_check.base import validate_light_check_problem
 from studyhelp.verification.topics.area_perimeter.sympy_utils import (
     validate_problem_arithmetic as validate_area_perimeter_arithmetic,
 )
@@ -55,15 +56,24 @@ _ARITHMETIC_VALIDATORS = {
     "area_perimeter": validate_area_perimeter_arithmetic,
     "multiplication_division": validate_multiplication_division_arithmetic,
     "measurement": validate_measurement_arithmetic,
+    "shapes_angles": validate_light_check_problem,
+    "how_many_squares": validate_light_check_problem,
+    "symmetry": validate_light_check_problem,
+    "patterns": validate_light_check_problem,
+    "mapping": validate_light_check_problem,
+    "boxes_sketches": validate_light_check_problem,
+    "smart_charts": validate_light_check_problem,
 }
-"""Per-topic seed-time arithmetic cross-check hook (ARCHITECTURE.md D19 —
-sequence, don't front-load: this became a dict the moment a second topic
-existed, rather than staying the single hardcoded import it was for one
-topic)."""
+"""Per-topic seed-time structural/arithmetic cross-check hook (ARCHITECTURE.md
+D19 — sequence, don't front-load: this became a dict the moment a second
+topic existed, rather than staying the single hardcoded import it was for
+one topic). The 7 light-check topics (D47) share one validator since they
+share one verifier — there's no per-topic arithmetic identity to check,
+only the shared 1-2-step/non-empty-answer structural shape."""
 
 
 def _load_json(path: Path) -> Any:
-    return json.loads(path.read_text())
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def load_step_types() -> list[StepTypeEntry]:

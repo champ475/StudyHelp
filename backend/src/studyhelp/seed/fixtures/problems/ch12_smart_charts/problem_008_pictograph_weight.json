@@ -1,0 +1,11 @@
+{
+  "problem_id": "smart-charts-008",
+  "ncert_ref": { "class": 5, "chapter": 12, "chapter_title": "Smart Charts", "topic": "smart_charts" },
+  "display_label": "Pictograph: rice sold (key = 50 kg)",
+  "given": { "question": "A pictograph's key says: 1 symbol = 50 kg of rice. The shop's row has 4 symbols. How many kg of rice did the shop sell?" },
+  "final_answer": { "answer": "200" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "smart_charts_answer", "expected_state": { "answer": "200" }, "next": [] }
+  ],
+  "alt_paths": []
+}

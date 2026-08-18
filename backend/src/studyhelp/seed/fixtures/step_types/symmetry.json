@@ -1,0 +1,10 @@
+[
+  {
+    "topic": "symmetry",
+    "step_type_key": "symmetry_answer",
+    "description": "Answer the question about lines of symmetry.",
+    "structured_input_schema": {
+      "text": "free_text: a word or number"
+    }
+  }
+]

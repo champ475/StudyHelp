@@ -1,0 +1,17 @@
+[
+  {
+    "id": "patterns.repeats_last_term",
+    "topic": "patterns",
+    "step_type": "patterns_next_term",
+    "typical_mindset": "The pattern's growth rule is understood well enough to name the common difference, but applying it forward to predict a genuinely new term is a separate skill — the child sometimes restates the last given term instead of adding the difference one more time, as if 'continuing' the list just meant naming a number already seen.",
+    "explanation_strategy": "Ask the child to physically point to the last given term, then ask what gets added to move one step further, treating it as an action performed on that last term rather than a fact to recall.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "What was the last number in the list?" },
+      { "role": "student", "text": "8." },
+      { "role": "tutor", "text": "Right. And each time, how much bigger does the next number get?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for this specific pattern-extension bug — not matched to a deterministic buggy-rule signature (the common-difference and next-term steps are separate submissions with no shared field context at the single-answer-field level, see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
+  }
+]

@@ -84,6 +84,14 @@ class GenerateRequest(BaseModel):
     conversation_so_far: list[dict[str, str]]
     correct_step: dict[str, Any]
     student_step: dict[str, Any]
+    regeneration_feedback: str | None = None
+    """Set only on a gate-rejected retry (dialogue/orchestrator.py):
+    concretely what was wrong with the previous draft (leaked the answer /
+    too complex), so the model has something to actually change. Without
+    this, a deterministic provider (temperature=0) regenerates the exact
+    same rejected text on every attempt, burning the whole retry budget on
+    one guaranteed-identical draft before falling back to the generic
+    canned message."""
 
 
 class GenerateResponse(BaseModel):

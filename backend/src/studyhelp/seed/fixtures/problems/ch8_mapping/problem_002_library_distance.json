@@ -1,0 +1,11 @@
+{
+  "problem_id": "mapping-002",
+  "ncert_ref": { "class": 5, "chapter": 8, "chapter_title": "Mapping Your Way", "topic": "mapping" },
+  "display_label": "Library distance from house",
+  "given": { "question": "A map shows the park is 4 km north of your house, and the library is 3 km further north of the park. How far is the library from your house, in km?" },
+  "final_answer": { "answer": "7" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "mapping_answer", "expected_state": { "answer": "7" }, "next": [] }
+  ],
+  "alt_paths": []
+}

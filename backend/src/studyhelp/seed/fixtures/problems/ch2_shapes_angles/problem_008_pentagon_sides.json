@@ -1,0 +1,11 @@
+{
+  "problem_id": "shapes-angles-008",
+  "ncert_ref": { "class": 5, "chapter": 2, "chapter_title": "Shapes and Angles", "topic": "shapes_angles" },
+  "display_label": "Sides of a pentagon",
+  "given": { "question": "How many sides does a pentagon have?" },
+  "final_answer": { "answer": "5" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "shapes_angles_answer", "expected_state": { "answer": "5" }, "next": [] }
+  ],
+  "alt_paths": []
+}

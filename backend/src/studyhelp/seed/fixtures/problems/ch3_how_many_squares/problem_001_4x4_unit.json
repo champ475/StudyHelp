@@ -1,0 +1,11 @@
+{
+  "problem_id": "how-many-squares-001",
+  "ncert_ref": { "class": 5, "chapter": 3, "chapter_title": "How Many Squares?", "topic": "how_many_squares" },
+  "display_label": "Unit squares in a 4x4 grid",
+  "given": { "question": "A grid has 4 rows and 4 columns of unit squares. How many unit squares are there in total?" },
+  "final_answer": { "answer": "16" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "how_many_squares_answer", "expected_state": { "answer": "16" }, "next": [] }
+  ],
+  "alt_paths": []
+}

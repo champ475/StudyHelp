@@ -4,6 +4,7 @@ the pipeline that calls `interface.registry.get(topic).verify_step()` never
 changes (ARCHITECTURE.md D1, D21)."""
 
 from studyhelp.verification.interface import registry
+from studyhelp.verification.topics._light_check.base import LightCheckVerifier
 from studyhelp.verification.topics.area_perimeter.verifier import AreaPerimeterVerifier
 from studyhelp.verification.topics.decimals.verifier import DecimalsVerifier
 from studyhelp.verification.topics.fractions_addition.verifier import FractionsAdditionVerifier
@@ -23,5 +24,20 @@ registry.register(DecimalsVerifier())
 registry.register(AreaPerimeterVerifier())
 registry.register(MultiplicationDivisionVerifier())
 registry.register(MeasurementVerifier())
+
+# The 7 "light-check" chapters (Phase F, ARCHITECTURE.md D20/D47's Phase-0
+# audit) share one verifier class (_light_check/base.py) — recognition/
+# visual/interpretive tasks with a single free-text `answer` field, not a
+# multi-field DAG procedure.
+for _light_check_topic in (
+    "shapes_angles",
+    "how_many_squares",
+    "symmetry",
+    "patterns",
+    "mapping",
+    "boxes_sketches",
+    "smart_charts",
+):
+    registry.register(LightCheckVerifier(topic=_light_check_topic))
 
 __all__ = ["registry"]

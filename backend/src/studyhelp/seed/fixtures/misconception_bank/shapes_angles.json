@@ -1,0 +1,18 @@
+[
+  {
+    "id": "shapes_angles.acute_obtuse_swap",
+    "topic": "shapes_angles",
+    "step_type": "shapes_angles_answer",
+    "bug_signature": { "buggy_rule_id": "shapes_angles.acute_obtuse_swap" },
+    "typical_mindset": "Acute and obtuse are remembered as a pair of opposite labels without a firm anchor to which one means 'smaller than a right angle' and which means 'bigger' — the labels get swapped even when the underlying comparison-to-90-degrees idea is understood.",
+    "explanation_strategy": "Anchor both labels to the right angle (90 degrees) as the dividing line, using a concrete comparison, rather than asking the child to recall the definitions directly.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Is this angle bigger or smaller than a right angle (like the corner of a book)?" },
+      { "role": "student", "text": "Smaller." },
+      { "role": "tutor", "text": "Right — angles smaller than a right angle are called acute. So what would you call this one?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for acute/obtuse label confusion specifically.",
+    "version": 1,
+    "review_status": "seed_curated"
+  }
+]

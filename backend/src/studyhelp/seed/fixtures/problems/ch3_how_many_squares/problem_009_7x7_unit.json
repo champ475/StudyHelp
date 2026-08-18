@@ -1,0 +1,11 @@
+{
+  "problem_id": "how-many-squares-009",
+  "ncert_ref": { "class": 5, "chapter": 3, "chapter_title": "How Many Squares?", "topic": "how_many_squares" },
+  "display_label": "Unit squares in a 7x7 grid",
+  "given": { "question": "A grid is 7x7. How many unit squares are there?" },
+  "final_answer": { "answer": "49" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "how_many_squares_answer", "expected_state": { "answer": "49" }, "next": [] }
+  ],
+  "alt_paths": []
+}

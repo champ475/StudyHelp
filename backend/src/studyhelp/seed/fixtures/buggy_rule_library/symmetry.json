@@ -1,0 +1,28 @@
+[
+  {
+    "id": "symmetry.assumes_nonzero_symmetry",
+    "topic": "symmetry",
+    "step_type": "symmetry_answer",
+    "bug_code": "SYM1-assumes-nonzero-symmetry",
+    "signature_matcher": {
+      "applies_to": "symmetry_answer",
+      "precondition": { "correct_answer": "0" },
+      "student_formula": "answer == '1'",
+      "distinguishing_from": []
+    },
+    "citation": "Topic-authored; no direct literature-survey citation for this specific symmetry-assumption bug.",
+    "misconception_id": "symmetry.assumes_nonzero_symmetry",
+    "example_pair": {
+      "problem_id": "symmetry-006",
+      "correct_step": {
+        "step_type": "symmetry_answer",
+        "fields": { "answer": "0" }
+      },
+      "student_step": {
+        "step_type": "symmetry_answer",
+        "fields": { "answer": "1" }
+      },
+      "note": "Student assumes a scalene triangle (which has no line of symmetry) must have at least one."
+    }
+  }
+]

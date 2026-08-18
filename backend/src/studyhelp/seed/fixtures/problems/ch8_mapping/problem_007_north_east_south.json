@@ -1,0 +1,11 @@
+{
+  "problem_id": "mapping-007",
+  "ncert_ref": { "class": 5, "chapter": 8, "chapter_title": "Mapping Your Way", "topic": "mapping" },
+  "display_label": "2 north, 3 east, 2 south",
+  "given": { "question": "You walk 2 blocks north, then 3 blocks east, then 2 blocks south. How many blocks north of your start are you now?" },
+  "final_answer": { "answer": "0" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "mapping_answer", "expected_state": { "answer": "0" }, "next": [] }
+  ],
+  "alt_paths": []
+}

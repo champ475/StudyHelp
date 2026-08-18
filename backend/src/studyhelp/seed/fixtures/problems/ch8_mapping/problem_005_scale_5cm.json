@@ -1,0 +1,11 @@
+{
+  "problem_id": "mapping-005",
+  "ncert_ref": { "class": 5, "chapter": 8, "chapter_title": "Mapping Your Way", "topic": "mapping" },
+  "display_label": "Map scale: 1 cm = 1 km, distance 5 cm",
+  "given": { "question": "On a map, 1 cm represents 1 km. The distance between two towns on the map is 5 cm. What is the real distance, in km?" },
+  "final_answer": { "answer": "5" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "mapping_answer", "expected_state": { "answer": "5" }, "next": [] }
+  ],
+  "alt_paths": []
+}

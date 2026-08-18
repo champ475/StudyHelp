@@ -49,6 +49,10 @@ from studyhelp.verification.interface import registry
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 logger = get_logger(__name__)
 
+_LLM_UNAVAILABLE_MESSAGE = (
+    "I'm having a little trouble thinking right now. Please try this step again in a moment."
+)
+
 
 class CreateSessionRequest(BaseModel):
     display_name: str
@@ -148,57 +152,112 @@ async def _pipeline_events(
     classification = None
     correct_fields: dict[str, Any] = {}
     target_node = None
+    error_signal = verify_result.error_signal
 
-    if verify_result.is_valid:
-        if verify_result.matched_step_id is not None:
-            target_node = problem.node(verify_result.matched_step_id)
-            correct_fields = target_node.expected_state if target_node else {}
-    else:
-        nearest = (
-            verify_result.error_signal.nearest_matched_step_id
-            if verify_result.error_signal
-            else None
+    # A low-confidence field mismatch still gets `is_valid=True` (the
+    # REJECT_THRESHOLD false-negative bias, D2/D22) so the child is never
+    # wrongly told a correct step is wrong. But that raw field-agreement
+    # score is a different kind of confidence than a buggy-rule match: the
+    # rule library is a set of exact, deterministic signatures, not a fuzzy
+    # heuristic, so a case the threshold waved through still deserves a
+    # shot at the rule matcher before being treated as silently accepted.
+    is_passthrough_mismatch = (
+        verify_result.is_valid
+        and verify_result.matched_step_id is None
+        and error_signal is not None
+        and error_signal.kind == "field_mismatch"
+    )
+
+    try:
+        if verify_result.is_valid and not is_passthrough_mismatch:
+            if verify_result.matched_step_id is not None:
+                target_node = problem.node(verify_result.matched_step_id)
+                correct_fields = target_node.expected_state if target_node else {}
+        else:
+            nearest = error_signal.nearest_matched_step_id if error_signal else None
+            target_node = problem.node(nearest) if nearest else None
+            if target_node is not None:
+                correct_fields = target_node.expected_state
+                discrepant = (
+                    [d.field for d in error_signal.discrepant_fields] if error_signal else []
+                )
+                classification = await classify_error(
+                    db,
+                    build_llm_client(),
+                    topic=problem.ncert_ref.topic,
+                    step_type=target_node.type,
+                    correct_fields=correct_fields,
+                    student_fields=structured_student_fields,
+                    discrepant_fields=discrepant,
+                    event_id=verdict_event.id,
+                )
+                yield "classification", dataclasses.asdict(classification)
+
+        # A confirmed buggy-rule match is high-confidence evidence of a
+        # real, known error even when the verifier's fuzzy field-agreement
+        # score alone stayed below REJECT_THRESHOLD — the false-negative
+        # bias is meant for genuinely ambiguous deviations, not ones a
+        # known bug signature just confirmed. Only the dialogue-facing
+        # copy of the verdict is overridden; the raw "verdict" event
+        # already streamed to the client above stays the verifier's
+        # honest, unmodified signal.
+        effective_verify_result = verify_result
+        if (
+            is_passthrough_mismatch
+            and classification is not None
+            and classification.source == "rule"
+        ):
+            effective_verify_result = verify_result.model_copy(update={"is_valid": False})
+
+        problem_is_complete = bool(
+            target_node is not None
+            and not target_node.next
+            and effective_verify_result.is_valid
         )
-        target_node = problem.node(nearest) if nearest else None
-        if target_node is not None:
-            correct_fields = target_node.expected_state
-            discrepant = (
-                [d.field for d in verify_result.error_signal.discrepant_fields]
-                if verify_result.error_signal
-                else []
-            )
-            classification = await classify_error(
-                db,
-                build_llm_client(),
-                topic=problem.ncert_ref.topic,
-                step_type=target_node.type,
-                correct_fields=correct_fields,
-                student_fields=structured_student_fields,
-                discrepant_fields=discrepant,
-                event_id=verdict_event.id,
-            )
-            yield "classification", dataclasses.asdict(classification)
+        step_type = (
+            target_node.type if target_node is not None else request.student_step.step_type
+        )
 
-    problem_is_complete = bool(
-        target_node is not None and not target_node.next and verify_result.is_valid
-    )
-    step_type = target_node.type if target_node is not None else request.student_step.step_type
-
-    state_store = DialogueStateStore(get_redis())
-    dialogue_result = await handle_step_submission(
-        state_store=state_store,
-        llm_client=build_llm_client(),
-        session_id=session_id,
-        problem_id=problem.problem_id,
-        topic=problem.ncert_ref.topic,
-        step_type=step_type,
-        correct_fields=correct_fields,
-        student_fields=structured_student_fields,
-        verify_result=verify_result,
-        classification=classification,
-        timing_policy=request.timing_policy,
-        problem_is_complete=problem_is_complete,
-    )
+        state_store = DialogueStateStore(get_redis())
+        dialogue_result = await handle_step_submission(
+            state_store=state_store,
+            llm_client=build_llm_client(),
+            session_id=session_id,
+            problem_id=problem.problem_id,
+            topic=problem.ncert_ref.topic,
+            step_type=step_type,
+            correct_fields=correct_fields,
+            student_fields=structured_student_fields,
+            verify_result=effective_verify_result,
+            classification=classification,
+            timing_policy=request.timing_policy,
+            problem_is_complete=problem_is_complete,
+        )
+    except Exception:
+        # The verifier's verdict already streamed and is durable regardless
+        # of what happens next (D1: the LLM is never the arbiter of
+        # correctness). But everything past this point touches the LLM
+        # (classification fallback, decide/generate) and a provider outage
+        # or model error must not crash the SSE connection out from under
+        # the child mid-step (D14's graceful-fallback principle applies to
+        # infra failures too, not just turn-budget exhaustion) — degrade to
+        # a safe, generic message instead of leaking a stack trace or
+        # silently dropping the connection.
+        logger.exception(
+            "step_pipeline_llm_stage_failed", session_id=session_id, problem_id=problem.problem_id
+        )
+        yield "message_chunk", {"text": _LLM_UNAVAILABLE_MESSAGE}
+        yield (
+            "turn_complete",
+            {
+                "dialogue_event": "no_action",
+                "turn_count": 0,
+                "expects_retry": False,
+                "message": _LLM_UNAVAILABLE_MESSAGE,
+            },
+        )
+        await db.commit()
+        return
 
     if dialogue_result.message is not None:
         for chunk in _chunk_message(dialogue_result.message):

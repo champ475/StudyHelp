@@ -1,0 +1,11 @@
+{
+  "problem_id": "smart-charts-009",
+  "ncert_ref": { "class": 5, "chapter": 12, "chapter_title": "Smart Charts", "topic": "smart_charts" },
+  "display_label": "Bar graph: how many more bananas?",
+  "given": { "question": "A bar graph shows fruit sales: Apples 12, Bananas 18, Mangoes 9. How many more bananas were sold than mangoes?" },
+  "final_answer": { "answer": "9" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "smart_charts_answer", "expected_state": { "answer": "9" }, "next": [] }
+  ],
+  "alt_paths": []
+}

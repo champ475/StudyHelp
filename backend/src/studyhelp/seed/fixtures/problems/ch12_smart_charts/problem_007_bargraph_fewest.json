@@ -1,0 +1,11 @@
+{
+  "problem_id": "smart-charts-007",
+  "ncert_ref": { "class": 5, "chapter": 12, "chapter_title": "Smart Charts", "topic": "smart_charts" },
+  "display_label": "Bar graph: which class has fewest students?",
+  "given": { "question": "A bar graph shows students per class: Class A 20, Class B 25, Class C 18. Which class has the fewest students?" },
+  "final_answer": { "answer": "Class C" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "smart_charts_answer", "expected_state": { "answer": "Class C" }, "next": [] }
+  ],
+  "alt_paths": []
+}

@@ -1,0 +1,18 @@
+[
+  {
+    "topic": "patterns",
+    "step_type_key": "patterns_common_difference",
+    "description": "Look at the numbers. What is the common difference between them?",
+    "structured_input_schema": {
+      "text": "free_text: a number"
+    }
+  },
+  {
+    "topic": "patterns",
+    "step_type_key": "patterns_next_term",
+    "description": "Now use the pattern to find the next number.",
+    "structured_input_schema": {
+      "text": "free_text: a number"
+    }
+  }
+]

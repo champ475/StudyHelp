@@ -238,6 +238,28 @@ def _me2_wrong_factor(correct: _Fields, student: _Fields) -> bool:
     )
 
 
+def _sa1_acute_obtuse_swap(correct: _Fields, student: _Fields) -> bool:
+    """Shapes and Angles `answer` step: the student swaps acute and obtuse
+    — names the opposite of the two most commonly confused angle types."""
+    correct_answer = correct.get("answer")
+    student_answer = student.get("answer")
+    if not isinstance(correct_answer, str) or not isinstance(student_answer, str):
+        return False
+    swap = {"acute": "obtuse", "obtuse": "acute"}
+    return bool(swap.get(correct_answer.strip().lower()) == student_answer.strip().lower())
+
+
+def _sym1_assumes_nonzero_symmetry(correct: _Fields, student: _Fields) -> bool:
+    """Symmetry `answer` step: the correct line-of-symmetry count is 0
+    (an asymmetric shape/letter), but the student assumes every shape has
+    at least one line of symmetry and answers 1."""
+    correct_answer = correct.get("answer")
+    student_answer = student.get("answer")
+    if not isinstance(correct_answer, str) or not isinstance(student_answer, str):
+        return False
+    return bool(correct_answer.strip().lower() == "0" and student_answer.strip().lower() == "1")
+
+
 def _f3_forgot_to_simplify(correct: _Fields, student: _Fields) -> bool:
     """The value is right but the student re-submits the unsimplified
     fraction as if it were already in lowest terms — the concept of
@@ -442,6 +464,18 @@ _MATCHERS: list[_MatcherSpec] = [
         "ME2-wrong-factor",
         "identify_conversion_factor",
         _me2_wrong_factor,
+    ),
+    _MatcherSpec(
+        "shapes_angles.acute_obtuse_swap",
+        "SA1-acute-obtuse-swap",
+        "shapes_angles_answer",
+        _sa1_acute_obtuse_swap,
+    ),
+    _MatcherSpec(
+        "symmetry.assumes_nonzero_symmetry",
+        "SYM1-assumes-nonzero-symmetry",
+        "symmetry_answer",
+        _sym1_assumes_nonzero_symmetry,
     ),
 ]
 

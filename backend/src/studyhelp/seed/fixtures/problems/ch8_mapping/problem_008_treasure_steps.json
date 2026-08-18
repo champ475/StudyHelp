@@ -1,0 +1,11 @@
+{
+  "problem_id": "mapping-008",
+  "ncert_ref": { "class": 5, "chapter": 8, "chapter_title": "Mapping Your Way", "topic": "mapping" },
+  "display_label": "Steps remaining to the treasure",
+  "given": { "question": "A treasure is 10 steps east of the tree. You are standing 4 steps east of the tree. How many more steps east do you need to reach the treasure?" },
+  "final_answer": { "answer": "6" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "mapping_answer", "expected_state": { "answer": "6" }, "next": [] }
+  ],
+  "alt_paths": []
+}

@@ -1,0 +1,11 @@
+{
+  "problem_id": "shapes-angles-001",
+  "ncert_ref": { "class": 5, "chapter": 2, "chapter_title": "Shapes and Angles", "topic": "shapes_angles" },
+  "display_label": "Classify a 30° angle",
+  "given": { "question": "An angle measures 30 degrees. Classify it: acute, right, obtuse, straight, or reflex?" },
+  "final_answer": { "answer": "acute" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "shapes_angles_answer", "expected_state": { "answer": "acute" }, "next": [] }
+  ],
+  "alt_paths": []
+}

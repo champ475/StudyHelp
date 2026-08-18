@@ -1,0 +1,11 @@
+{
+  "problem_id": "shapes-angles-009",
+  "ncert_ref": { "class": 5, "chapter": 2, "chapter_title": "Shapes and Angles", "topic": "shapes_angles" },
+  "display_label": "Equal-side pairs in a rectangle",
+  "given": { "question": "A rectangle has how many pairs of equal sides?" },
+  "final_answer": { "answer": "2" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "shapes_angles_answer", "expected_state": { "answer": "2" }, "next": [] }
+  ],
+  "alt_paths": []
+}

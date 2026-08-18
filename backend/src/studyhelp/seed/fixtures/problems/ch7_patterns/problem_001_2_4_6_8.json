@@ -1,0 +1,12 @@
+{
+  "problem_id": "patterns-001",
+  "ncert_ref": { "class": 5, "chapter": 7, "chapter_title": "Can You See the Pattern?", "topic": "patterns" },
+  "display_label": "Pattern: 2, 4, 6, 8, ...",
+  "given": { "question": "Look at the pattern: 2, 4, 6, 8, ... What is the common difference? Then, what is the next number?" },
+  "final_answer": { "answer": "10" },
+  "step_graph": [
+    { "step_id": "s1_diff", "type": "patterns_common_difference", "expected_state": { "answer": "2" }, "next": ["s2_next"] },
+    { "step_id": "s2_next", "type": "patterns_next_term", "expected_state": { "answer": "10" }, "next": [] }
+  ],
+  "alt_paths": []
+}

@@ -1,0 +1,11 @@
+{
+  "problem_id": "mapping-004",
+  "ncert_ref": { "class": 5, "chapter": 8, "chapter_title": "Mapping Your Way", "topic": "mapping" },
+  "display_label": "Distance remaining to the market",
+  "given": { "question": "The market is 6 km from home. You've already walked 4 km toward it. How much further to the market, in km?" },
+  "final_answer": { "answer": "2" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "mapping_answer", "expected_state": { "answer": "2" }, "next": [] }
+  ],
+  "alt_paths": []
+}

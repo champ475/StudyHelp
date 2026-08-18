@@ -1,0 +1,11 @@
+{
+  "problem_id": "smart-charts-006",
+  "ncert_ref": { "class": 5, "chapter": 12, "chapter_title": "Smart Charts", "topic": "smart_charts" },
+  "display_label": "Pictograph: toys donated (key = 2)",
+  "given": { "question": "A pictograph's key says: 1 symbol = 2 toys. Class 5A's row has 5 symbols. How many toys did Class 5A donate?" },
+  "final_answer": { "answer": "10" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "smart_charts_answer", "expected_state": { "answer": "10" }, "next": [] }
+  ],
+  "alt_paths": []
+}

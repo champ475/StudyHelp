@@ -1,0 +1,11 @@
+{
+  "problem_id": "shapes-angles-004",
+  "ncert_ref": { "class": 5, "chapter": 2, "chapter_title": "Shapes and Angles", "topic": "shapes_angles" },
+  "display_label": "Classify a 180° angle",
+  "given": { "question": "An angle measures 180 degrees. Classify it: acute, right, obtuse, straight, or reflex?" },
+  "final_answer": { "answer": "straight" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "shapes_angles_answer", "expected_state": { "answer": "straight" }, "next": [] }
+  ],
+  "alt_paths": []
+}

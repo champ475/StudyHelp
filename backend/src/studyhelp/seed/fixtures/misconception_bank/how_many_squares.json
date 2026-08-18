@@ -1,0 +1,17 @@
+[
+  {
+    "id": "how_many_squares.only_counts_unit_squares",
+    "topic": "how_many_squares",
+    "step_type": "how_many_squares_answer",
+    "typical_mindset": "When asked for squares of every size within a grid, only the smallest (1x1) squares get counted — the idea that a 2x2 or 3x3 block of the grid is itself a square hasn't been considered as something to count separately.",
+    "explanation_strategy": "Ask the child to trace a bigger square (like a 2x2 block) with a finger first, confirming it's a real square too, before recounting everything by size, one size at a time.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Can you trace a square that's made of 4 little boxes, 2 across and 2 down?" },
+      { "role": "student", "text": "Yes, I found one." },
+      { "role": "tutor", "text": "That's a square too, even though it's bigger! Let's count all the squares of that size first, then move to the next size." }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for this specific counting bug — not matched to a deterministic buggy-rule signature (no cross-step problem-size context available at the single-answer-field level, see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
+  }
+]

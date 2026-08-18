@@ -15,6 +15,8 @@ LEAKY_CASES = [
     ("That equals 12, right?", [12]),
     ("It is equal to 8.", [8]),
     ("So we know 1/4 < 1/6.", ["<"]),
+    ("This shape is acute, isn't it?", ["acute"]),
+    ("This shape is Acute, isn't it?", ["acute"]),
 ]
 
 # --- known-safe: must NOT be flagged ----------------------------------------
@@ -25,6 +27,7 @@ SAFE_CASES = [
     ("You wrote 3 here. If we have 2 apples, can we take away 7 of them?", [9]),
     ("Where could we borrow some from?", [355, 5]),
     ("Which fraction do you think has bigger pieces?", ["<", ">"]),
+    ("Is this angle bigger or smaller than a right angle?", ["acute"]),
 ]
 
 

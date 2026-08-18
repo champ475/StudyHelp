@@ -1,0 +1,10 @@
+[
+  {
+    "topic": "mapping",
+    "step_type_key": "mapping_answer",
+    "description": "Work out the answer using the directions or distances given.",
+    "structured_input_schema": {
+      "text": "free_text: a number"
+    }
+  }
+]

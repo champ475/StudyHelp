@@ -1,0 +1,11 @@
+{
+  "problem_id": "boxes-sketches-003",
+  "ncert_ref": { "class": 5, "chapter": 9, "chapter_title": "Boxes and Sketches", "topic": "boxes_sketches" },
+  "display_label": "Corners on a cube",
+  "given": { "question": "A cube-shaped box has how many pointy corners (vertices)?" },
+  "final_answer": { "answer": "8" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "boxes_sketches_answer", "expected_state": { "answer": "8" }, "next": [] }
+  ],
+  "alt_paths": []
+}

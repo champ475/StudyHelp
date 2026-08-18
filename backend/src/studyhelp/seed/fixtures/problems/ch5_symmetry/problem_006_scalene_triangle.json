@@ -1,0 +1,11 @@
+{
+  "problem_id": "symmetry-006",
+  "ncert_ref": { "class": 5, "chapter": 5, "chapter_title": "Does it Look the Same?", "topic": "symmetry" },
+  "display_label": "Lines of symmetry in a scalene triangle",
+  "given": { "question": "How many lines of symmetry does a scalene triangle (a triangle where all three sides are different lengths) have?" },
+  "final_answer": { "answer": "0" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "symmetry_answer", "expected_state": { "answer": "0" }, "next": [] }
+  ],
+  "alt_paths": []
+}

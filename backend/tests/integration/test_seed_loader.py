@@ -29,7 +29,7 @@ async def test_seed_all_is_idempotent(db_session: AsyncSession) -> None:
         return step_types, problems, misconceptions, buggy_rules
 
     first_pass = await counts()
-    assert first_pass == (4, 6, 4, 4)
+    assert first_pass == (34, 140, 26, 21)
 
     # Re-running must upsert by natural key, not duplicate rows.
     await seed_all(db_session)

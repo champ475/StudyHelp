@@ -1,0 +1,28 @@
+[
+  {
+    "id": "shapes_angles.acute_obtuse_swap",
+    "topic": "shapes_angles",
+    "step_type": "shapes_angles_answer",
+    "bug_code": "SA1-acute-obtuse-swap",
+    "signature_matcher": {
+      "applies_to": "shapes_angles_answer",
+      "precondition": { "correct_answer": "acute or obtuse" },
+      "student_formula": "answer == swap(correct.answer)",
+      "distinguishing_from": []
+    },
+    "citation": "Topic-authored; no direct literature-survey citation for acute/obtuse label confusion specifically.",
+    "misconception_id": "shapes_angles.acute_obtuse_swap",
+    "example_pair": {
+      "problem_id": "shapes-angles-001",
+      "correct_step": {
+        "step_type": "shapes_angles_answer",
+        "fields": { "answer": "acute" }
+      },
+      "student_step": {
+        "step_type": "shapes_angles_answer",
+        "fields": { "answer": "obtuse" }
+      },
+      "note": "Student swaps acute and obtuse for a 30-degree angle."
+    }
+  }
+]

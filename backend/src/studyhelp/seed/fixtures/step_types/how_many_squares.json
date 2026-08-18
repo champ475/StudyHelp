@@ -1,0 +1,10 @@
+[
+  {
+    "topic": "how_many_squares",
+    "step_type_key": "how_many_squares_answer",
+    "description": "Count carefully and write the total number of squares.",
+    "structured_input_schema": {
+      "text": "free_text: a number"
+    }
+  }
+]

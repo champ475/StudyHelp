@@ -1,0 +1,11 @@
+{
+  "problem_id": "shapes-angles-002",
+  "ncert_ref": { "class": 5, "chapter": 2, "chapter_title": "Shapes and Angles", "topic": "shapes_angles" },
+  "display_label": "Classify a 90° angle",
+  "given": { "question": "An angle measures 90 degrees. Classify it: acute, right, obtuse, straight, or reflex?" },
+  "final_answer": { "answer": "right" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "shapes_angles_answer", "expected_state": { "answer": "right" }, "next": [] }
+  ],
+  "alt_paths": []
+}

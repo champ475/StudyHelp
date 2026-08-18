@@ -32,10 +32,11 @@ def contains_leakage(message: str, protected_values: list[int | str]) -> bool:
     if _ANSWER_PHRASES.search(message):
         return True
     mentioned_numbers = {int(match) for match in _NUMBER_RE.findall(message)}
+    lowered_message = message.lower()
     for value in protected_values:
         if isinstance(value, int):
             if value in mentioned_numbers:
                 return True
-        elif value in message:
+        elif value.lower() in lowered_message:
             return True
     return False

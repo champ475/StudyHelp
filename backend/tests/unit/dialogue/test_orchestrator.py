@@ -11,7 +11,11 @@ import fakeredis
 import pytest
 
 from studyhelp.classification.classifier import ClassificationResult
-from studyhelp.dialogue.orchestrator import _FALLBACK_MESSAGE, handle_step_submission
+from studyhelp.dialogue.orchestrator import (
+    _FALLBACK_MESSAGE,
+    _protected_values,
+    handle_step_submission,
+)
 from studyhelp.dialogue.state import DialogueStateStore
 from studyhelp.dialogue.timing_policy import InterventionPolicy
 from studyhelp.llm.client import GenerateResponse
@@ -302,3 +306,15 @@ async def test_misconception_from_classification_reaches_the_decide_call(
     assert saved is not None
     assert saved.misconception_id == "subtraction_borrowing.smaller_from_larger"
     assert saved.bug_code == "B1-smaller-from-larger"
+
+
+def test_protected_values_covers_light_check_word_answers() -> None:
+    """The 7 light-check topics' (and `patterns`' two step types')
+    `expected_state` is `{"answer": <word or number>}` — none of the
+    numeric-keyed fields `_protected_values` otherwise looks for. Without
+    explicit "answer" handling, this returns `[]` and the leakage filter
+    has nothing to check a generated message against for ~a third of the
+    syllabus."""
+    assert _protected_values({"answer": "acute"}) == ["acute"]
+    assert _protected_values({"answer": "0"}) == ["0"]
+    assert _protected_values({}) == []

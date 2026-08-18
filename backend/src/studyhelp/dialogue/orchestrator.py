@@ -74,6 +74,16 @@ def _protected_values(correct_fields: dict[str, Any]) -> list[int | str]:
     op = correct_fields.get("op")
     if isinstance(op, str) and op in ("<", ">", "="):
         values.append(op)
+    # The 7 light-check topics' (and `patterns`' two step types') answer
+    # field: a bare word or number rather than one of the numeric keys
+    # above (e.g. "acute", "Tuesday", "0" lines of symmetry). Without this,
+    # the leakage filter has no protected value at all for any of these
+    # step types — `_protected_values()` would silently return empty and
+    # every generated message for ~a third of the syllabus would pass the
+    # gate unchecked, answer stated outright or not.
+    answer = correct_fields.get("answer")
+    if isinstance(answer, str) and answer:
+        values.append(answer)
     digits = correct_fields.get("digits")
     if isinstance(digits, dict):
         values.extend(v for v in digits.values() if isinstance(v, int))
@@ -215,6 +225,7 @@ async def handle_step_submission(
 
     protected_values = _protected_values(correct_fields)
     message: str | None = None
+    regeneration_feedback: str | None = None
     for attempt in range(MAX_GATE_REGENERATION_ATTEMPTS + 1):
         generated = await llm_client.generate(
             GenerateRequest(
@@ -222,6 +233,7 @@ async def handle_step_submission(
                 conversation_so_far=[turn.model_dump() for turn in conversation],
                 correct_step=correct_fields,
                 student_step=student_fields,
+                regeneration_feedback=regeneration_feedback,
             )
         )
         if contains_leakage(generated.message, protected_values):
@@ -231,6 +243,11 @@ async def handle_step_submission(
                 problem_id=problem_id,
                 attempt=attempt,
             )
+            regeneration_feedback = (
+                "Your previous draft accidentally stated the correct answer or a value that "
+                "gives it away. Ask a guiding question instead — do not include any number or "
+                "word that reveals the correct result."
+            )
             continue
         if not passes_readability(generated.message, resolved_max_grade):
             logger.warning(
@@ -238,6 +255,10 @@ async def handle_step_submission(
                 session_id=session_id,
                 problem_id=problem_id,
                 attempt=attempt,
+            )
+            regeneration_feedback = (
+                "Your previous draft was too complex for a 10-year-old to read comfortably. "
+                "Rewrite it using shorter sentences and simpler, more common words."
             )
             continue
         message = generated.message

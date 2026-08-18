@@ -1,0 +1,11 @@
+{
+  "problem_id": "shapes-angles-003",
+  "ncert_ref": { "class": 5, "chapter": 2, "chapter_title": "Shapes and Angles", "topic": "shapes_angles" },
+  "display_label": "Classify a 120° angle",
+  "given": { "question": "An angle measures 120 degrees. Classify it: acute, right, obtuse, straight, or reflex?" },
+  "final_answer": { "answer": "obtuse" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "shapes_angles_answer", "expected_state": { "answer": "obtuse" }, "next": [] }
+  ],
+  "alt_paths": []
+}

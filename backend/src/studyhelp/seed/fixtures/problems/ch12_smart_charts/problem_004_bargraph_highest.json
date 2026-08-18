@@ -1,0 +1,11 @@
+{
+  "problem_id": "smart-charts-004",
+  "ncert_ref": { "class": 5, "chapter": 12, "chapter_title": "Smart Charts", "topic": "smart_charts" },
+  "display_label": "Bar graph: which day sold the most?",
+  "given": { "question": "A bar graph shows ice creams sold: Monday 5, Tuesday 8, Wednesday 3, Thursday 6, Friday 4. Which day had the tallest bar?" },
+  "final_answer": { "answer": "Tuesday" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "smart_charts_answer", "expected_state": { "answer": "Tuesday" }, "next": [] }
+  ],
+  "alt_paths": []
+}

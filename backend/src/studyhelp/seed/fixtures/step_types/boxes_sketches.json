@@ -1,0 +1,10 @@
+[
+  {
+    "topic": "boxes_sketches",
+    "step_type_key": "boxes_sketches_answer",
+    "description": "Count the faces, edges, or corners of the solid shape.",
+    "structured_input_schema": {
+      "text": "free_text: a number"
+    }
+  }
+]

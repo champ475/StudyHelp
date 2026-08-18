@@ -1,0 +1,17 @@
+[
+  {
+    "id": "boxes_sketches.confuses_faces_and_vertices",
+    "topic": "boxes_sketches",
+    "step_type": "boxes_sketches_answer",
+    "typical_mindset": "Faces, edges, and vertices are three genuinely different things to count on a solid shape, but the vocabulary hasn't fully separated yet — a question about faces sometimes gets answered with the vertex count (or vice versa) because both are 'counting something about the corners and sides.'",
+    "explanation_strategy": "Have the child point to and name one example of each — a flat face, a straight edge, a pointy corner — before counting, so the three words are each anchored to something concrete on the shape rather than interchangeable.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Can you point to one flat face on this box?" },
+      { "role": "student", "text": "This one, the front." },
+      { "role": "tutor", "text": "Good — that's a face, a flat surface. Now let's count how many flat surfaces the whole box has." }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for this specific faces/vertices confusion — not matched to a deterministic buggy-rule signature (would require knowing both the asked-for count type and the shape's other counts, not available from a single answer field; see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
+  }
+]

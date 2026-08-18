@@ -1,0 +1,11 @@
+{
+  "problem_id": "smart-charts-005",
+  "ncert_ref": { "class": 5, "chapter": 12, "chapter_title": "Smart Charts", "topic": "smart_charts" },
+  "display_label": "Bar graph: total for two days",
+  "given": { "question": "A bar graph shows ice creams sold: Monday 5, Tuesday 8, Wednesday 3, Thursday 6, Friday 4. How many were sold in total on Monday and Wednesday together?" },
+  "final_answer": { "answer": "8" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "smart_charts_answer", "expected_state": { "answer": "8" }, "next": [] }
+  ],
+  "alt_paths": []
+}

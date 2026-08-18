@@ -1,0 +1,10 @@
+[
+  {
+    "topic": "shapes_angles",
+    "step_type_key": "shapes_angles_answer",
+    "description": "Answer the question about the shape or angle.",
+    "structured_input_schema": {
+      "text": "free_text: a word or number"
+    }
+  }
+]

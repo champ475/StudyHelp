@@ -1,0 +1,17 @@
+[
+  {
+    "id": "smart_charts.reads_symbol_count_not_value",
+    "topic": "smart_charts",
+    "step_type": "smart_charts_answer",
+    "typical_mindset": "In a pictograph where one symbol stands for several units (e.g. 1 symbol = 10 books), the number of symbols itself is reported as the answer instead of multiplying by what each symbol represents — the scale/key of the pictograph is overlooked, and the count of pictures is treated as the count of the real quantity.",
+    "explanation_strategy": "Point back at the key first and ask what one symbol is worth, before asking the child to work out the total for a row — make the multiplication step explicit rather than assumed.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "The key says one symbol stands for 10 books. If a row has 3 symbols, how many books is that?" },
+      { "role": "student", "text": "3." },
+      { "role": "tutor", "text": "Each symbol is worth 10 books, not 1 — so how many books do 3 symbols really stand for?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for this specific pictograph-scale bug — not matched to a deterministic buggy-rule signature (would need the problem's own scale factor, not present in a single answer field; see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
+  }
+]

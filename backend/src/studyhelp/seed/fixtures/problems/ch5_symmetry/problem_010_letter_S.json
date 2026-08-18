@@ -1,0 +1,11 @@
+{
+  "problem_id": "symmetry-010",
+  "ncert_ref": { "class": 5, "chapter": 5, "chapter_title": "Does it Look the Same?", "topic": "symmetry" },
+  "display_label": "Symmetry of the letter S",
+  "given": { "question": "Does the capital letter S have a line of symmetry? Answer yes or no." },
+  "final_answer": { "answer": "no" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "symmetry_answer", "expected_state": { "answer": "no" }, "next": [] }
+  ],
+  "alt_paths": []
+}

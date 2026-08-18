@@ -1,0 +1,11 @@
+{
+  "problem_id": "smart-charts-002",
+  "ncert_ref": { "class": 5, "chapter": 12, "chapter_title": "Smart Charts", "topic": "smart_charts" },
+  "display_label": "Pictograph: apples sold (key = 5)",
+  "given": { "question": "A pictograph's key says: 1 symbol = 5 apples. The Tuesday row has 4 symbols. How many apples were sold on Tuesday?" },
+  "final_answer": { "answer": "20" },
+  "step_graph": [
+    { "step_id": "s1_answer", "type": "smart_charts_answer", "expected_state": { "answer": "20" }, "next": [] }
+  ],
+  "alt_paths": []
+}
