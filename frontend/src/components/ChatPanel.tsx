@@ -1,6 +1,13 @@
 export interface ChatMessage {
   id: string;
   text: string;
+  // Which step attempt this tutor message belongs to — the count of
+  // already-accepted steps at the moment the student's (wrong) submission
+  // that triggered it was sent. Lets ProblemSolver/FreeTextStepper render
+  // each explanation directly under the step attempt it responds to,
+  // instead of grouping every message into one block at the bottom
+  // (CLAUDE.md Bug4: UI order should match the real event order).
+  stepIndex: number;
 }
 
 interface ChatPanelProps {

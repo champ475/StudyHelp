@@ -64,8 +64,12 @@ class GroqLLMProvider:
                 "step_type": request.step_type,
                 "correct_step": request.correct_step,
                 "student_step": request.student_step,
-                "misconception": request.misconception.model_dump() if request.misconception else None,
+                "misconception": request.misconception.model_dump()
+                if request.misconception
+                else None,
                 "turn_number": request.turn_number,
+                "repeat_count": request.repeat_count,
+                "analogy_hint": request.analogy_hint,
             }
         )
         raw = await self._chat_json(DECIDE_SYSTEM_PROMPT, user_content)
@@ -77,6 +81,8 @@ class GroqLLMProvider:
             "conversation_so_far": request.conversation_so_far,
             "correct_step": request.correct_step,
             "student_step": request.student_step,
+            "repeat_count": request.repeat_count,
+            "analogy_hint": request.analogy_hint,
         }
         if request.regeneration_feedback is not None:
             payload["regeneration_feedback"] = request.regeneration_feedback

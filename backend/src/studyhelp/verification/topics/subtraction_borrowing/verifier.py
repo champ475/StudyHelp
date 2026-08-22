@@ -110,7 +110,18 @@ class SubtractionBorrowingVerifier:
         frontier: set[str],
     ) -> VerifyResult:
         frontier_matches = [c for c in exact if c[0].step_id in frontier]
-        node, _discrepancies, _agreement, fields = frontier_matches[0] if frontier_matches else exact[0]
+        # See fractions_addition/decimals/etc.'s identical tie-break
+        # (ARCHITECTURE.md D59): prefer an actually-terminal (`next == []`)
+        # match over a merely-further-along one when a submission's value
+        # coincides with more than one candidate node.
+        terminal_matches = [c for c in exact if not c[0].next]
+        node, _discrepancies, _agreement, fields = (
+            frontier_matches[0]
+            if frontier_matches
+            else terminal_matches[0]
+            if terminal_matches
+            else exact[0]
+        )
 
         if node.type == "write_final_answer":
             self._cross_check_final_identity(problem, node)

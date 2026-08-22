@@ -308,6 +308,49 @@ async def test_misconception_from_classification_reaches_the_decide_call(
     assert saved.bug_code == "B1-smaller-from-larger"
 
 
+async def test_repeated_error_on_same_step_switches_to_concrete_analogy(
+    store: DialogueStateStore,
+) -> None:
+    """Bug2 regression: getting the *same* step wrong a second time in a
+    row must switch the tutor's register to the topic's fixed concrete
+    analogy (`llm/analogies.py`, `REGISTER_SWITCH_REPEAT_THRESHOLD`), not
+    just repeat another abstract/numeric nudge."""
+    first = await handle_step_submission(
+        state_store=store,
+        llm_client=MockLLMProvider(),
+        session_id="s1",
+        problem_id="p1",
+        topic="subtraction_with_borrowing",
+        step_type="subtract_column",
+        correct_fields=_CORRECT_FIELDS,
+        student_fields=_WRONG_FIELDS,
+        verify_result=_INVALID_RESULT,
+        classification=None,
+        timing_policy=InterventionPolicy.IMMEDIATE,
+        problem_is_complete=False,
+    )
+    assert first.message is not None
+    assert "trading" not in first.message.lower()
+
+    second = await handle_step_submission(
+        state_store=store,
+        llm_client=MockLLMProvider(),
+        session_id="s1",
+        problem_id="p1",
+        topic="subtraction_with_borrowing",
+        step_type="subtract_column",
+        correct_fields=_CORRECT_FIELDS,
+        student_fields=_WRONG_FIELDS,
+        verify_result=_INVALID_RESULT,
+        classification=None,
+        timing_policy=InterventionPolicy.IMMEDIATE,
+        problem_is_complete=False,
+    )
+    assert second.event == "explaining"
+    assert second.message is not None
+    assert "trading" in second.message.lower()  # subtraction's analogy: trading coins
+
+
 def test_protected_values_covers_light_check_word_answers() -> None:
     """The 7 light-check topics' (and `patterns`' two step types')
     `expected_state` is `{"answer": <word or number>}` — none of the

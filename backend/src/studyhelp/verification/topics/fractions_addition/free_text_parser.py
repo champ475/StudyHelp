@@ -54,25 +54,39 @@ def parse_single_fraction(text: str) -> dict[str, Any]:
     return {"num": int(num), "den": _nonzero_denominator(int(den), text)}
 
 
-def parse_final_answer(text: str) -> dict[str, Any]:
-    """Accepts a fraction, a mixed number, or a whole number, and always
-    normalizes to a reduced improper-fraction `num`/`den` pair — the final
-    answer's `expected_state` is authored in the same reduced form, so a
-    student writing "1 1/2" and one writing "3/2" must compare equal."""
+def parse_final_answer(text: str, *, reduce: bool = True) -> dict[str, Any]:
+    """Accepts a fraction, a mixed number, or a whole number. With
+    `reduce=True` (the default — used whenever `write_final_answer` is the
+    prescribed next step), always normalizes to a reduced improper-fraction
+    `num`/`den` pair, since the final answer's `expected_state` is authored
+    in the same reduced form and a student writing "1 1/2" and one writing
+    "3/2" must compare equal there.
+
+    `reduce=False` returns the literal, unreduced `num`/`den` the student
+    typed. The verifier uses this when checking `write_final_answer` as a
+    *non-adjacent* (skip-ahead) candidate (ARCHITECTURE.md D59): without it,
+    an unsimplified-but-numerically-equivalent submission at an earlier step
+    (e.g. "4/6" typed at `simplify_fraction`) would silently reduce to match
+    the final node's expected value and get accepted as "the student jumped
+    to the end," masking exactly the "forgot to simplify" error this
+    topic's buggy-rule library exists to catch."""
     mixed = _MIXED_NUMBER.match(text)
     if mixed:
         whole, num, den = (int(g) for g in mixed.groups())
         den = _nonzero_denominator(den, text)
-        return _reduce(whole * den + num, den)
+        total_num = whole * den + num
+        return _reduce(total_num, den) if reduce else {"num": total_num, "den": den}
 
     fraction = _SINGLE_FRACTION.match(text)
     if fraction:
         num, den = (int(g) for g in fraction.groups())
-        return _reduce(num, _nonzero_denominator(den, text))
+        den = _nonzero_denominator(den, text)
+        return _reduce(num, den) if reduce else {"num": num, "den": den}
 
     whole_match = _WHOLE_NUMBER.match(text)
     if whole_match:
-        return _reduce(int(whole_match.group(1)), 1)
+        num = int(whole_match.group(1))
+        return _reduce(num, 1) if reduce else {"num": num, "den": 1}
 
     raise ValueError(f"'{text}' is not a whole number, fraction, or mixed number")
 

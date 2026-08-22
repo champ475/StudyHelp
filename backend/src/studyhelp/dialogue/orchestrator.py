@@ -26,6 +26,7 @@ from studyhelp.dialogue.state import (
     DialogueStateStore,
 )
 from studyhelp.dialogue.timing_policy import InterventionPolicy, should_intervene
+from studyhelp.llm.analogies import get_analogy
 from studyhelp.llm.client import ClassifyCandidate, DecideRequest, GenerateRequest, LLMClient
 from studyhelp.logging import get_logger
 from studyhelp.schemas.verify import VerifyResult
@@ -33,6 +34,11 @@ from studyhelp.schemas.verify import VerifyResult
 logger = get_logger(__name__)
 
 MAX_GATE_REGENERATION_ATTEMPTS = 2
+
+REGISTER_SWITCH_REPEAT_THRESHOLD = 2
+"""At this many consecutive wrong submissions on the same step, the decide/
+generate register switches from abstract/numeric re-explanation to a fixed,
+topic-appropriate concrete analogy (CLAUDE.md Bug2; `llm/analogies.py`)."""
 
 _FALLBACK_MESSAGE = "Let's slow down and look at this step together. Take your time, and try it again when you're ready."
 
@@ -212,6 +218,8 @@ async def handle_step_submission(
 
     conversation = existing.conversation if existing is not None else []
 
+    analogy_hint = get_analogy(topic) if consecutive >= REGISTER_SWITCH_REPEAT_THRESHOLD else None
+
     decision = await llm_client.decide(
         DecideRequest(
             topic=topic,
@@ -220,6 +228,8 @@ async def handle_step_submission(
             student_step=student_fields,
             misconception=misconception_candidate,
             turn_number=turn_count,
+            repeat_count=consecutive,
+            analogy_hint=analogy_hint,
         )
     )
 
@@ -233,6 +243,8 @@ async def handle_step_submission(
                 conversation_so_far=[turn.model_dump() for turn in conversation],
                 correct_step=correct_fields,
                 student_step=student_fields,
+                repeat_count=consecutive,
+                analogy_hint=analogy_hint,
                 regeneration_feedback=regeneration_feedback,
             )
         )

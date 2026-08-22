@@ -49,12 +49,26 @@ class MockLLMProvider:
     async def decide(self, request: DecideRequest) -> DecideResponse:
         if self._decide_override is not None:
             return self._decide_override
+        if request.repeat_count >= 2 and request.analogy_hint:
+            return DecideResponse(
+                error_type="conceptual",
+                remediation_strategy=(
+                    "The student has missed this exact step more than once with the abstract/"
+                    "numeric explanation — switch register entirely and re-teach the idea through "
+                    "the given concrete analogy instead."
+                ),
+                instructional_intent=(
+                    "Help the student map the concrete analogy onto their own step and notice "
+                    "what it implies, without stating the correct value."
+                ),
+            )
         if request.misconception is not None:
             return DecideResponse(
                 error_type="procedural",
                 remediation_strategy=(
-                    "Re-anchor to the concrete procedure step-by-step using the retrieved "
-                    "misconception's explanation strategy, rather than restating the rule."
+                    "Re-teach the concrete procedure behind this step using the retrieved "
+                    "misconception's explanation strategy and a small demonstration example with "
+                    "different numbers, rather than a bare restatement of the rule."
                 ),
                 instructional_intent=(
                     "Guide the student to notice the specific mismatch themselves through a "
@@ -71,17 +85,37 @@ class MockLLMProvider:
         if self._generate_override is not None:
             return self._generate_override
         hint_level = min(len(request.conversation_so_far) // 2 + 1, 3)
-        # Deliberately short, plain, Class-5-appropriate — this is what a
-        # real generate() call should also produce; the raw
-        # instructional_intent string is planning content for the *next*
-        # LLM call, not something to paste verbatim into child-facing text.
-        messages_by_hint_level = {
-            1: "Let's look at this step again. What do you notice?",
-            2: "Take another look at this column. Do you see anything to fix?",
-            3: "Let's slow down. Can you check this step one more time?",
-        }
+        # Deterministic stand-in for what a real generate() call should also
+        # produce (CLAUDE.md Bug2, llm/prompts.py's GENERATE_SYSTEM_PROMPT
+        # rules 3/8): a careless slip gets a short nudge; a procedural or
+        # conceptual error gets a real, concrete re-teaching explanation, not
+        # a one-line "look again"; and once the same step has been missed
+        # `repeat_count` times, the register switches to the fixed
+        # topic analogy (`llm/analogies.py`) instead of more numbers/rules.
+        if request.repeat_count >= 2 and request.analogy_hint:
+            message = (
+                f"Let's try this a different way. {request.analogy_hint} Now think about your "
+                "own step. What do you notice that might need to change?"
+            )
+        elif request.decision.error_type == "careless":
+            messages_by_hint_level = {
+                1: "Let's look at this step again. What do you notice?",
+                2: "Take another look at this column. Do you see anything to fix?",
+                3: "Let's slow down. Can you check this step one more time?",
+            }
+            message = messages_by_hint_level[hint_level]
+        else:
+            # Short, simple sentences on purpose (Class-5 readability
+            # gate) — a longer, concrete re-teach still has to stay easy
+            # to read, not just short.
+            message = (
+                "Let's slow down and look at the idea behind this step, not just the numbers. "
+                "Picture a much simpler version of this same kind of step, with easier numbers. "
+                "Notice what actually has to happen there. Now look back at your own step with "
+                "that same idea in mind. What do you notice that might need to change?"
+            )
         return GenerateResponse(
-            message=messages_by_hint_level[hint_level],
+            message=message,
             expects_retry=True,
             hint_level=hint_level,
             concept_flag=None,

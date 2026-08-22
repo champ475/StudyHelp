@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchProblem, submitStep } from "../api/client";
 import { computeFrontier } from "../frontier";
 import type { PublicProblem, StudentStep, VerifyResult } from "../types";
-import { ChatPanel, type ChatMessage } from "./ChatPanel";
+import type { ChatMessage } from "./ChatPanel";
 import { FreeTextStepper } from "./FreeTextStepper";
 
 interface ProblemSolverProps {
@@ -47,6 +47,11 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
       setLastVerdict(null);
       let streamingMessageId: string | null = null;
       let accumulatedText = "";
+      // A submission that turns out wrong never advances `acceptedStepIds`,
+      // so this is stable for every message this attempt produces — it's
+      // what lets a tutor message render directly under the step attempt
+      // it responds to (CLAUDE.md Bug4) instead of in one block at the end.
+      const stepIndexForThisAttempt = acceptedStepIds.length;
 
       try {
         for await (const event of submitStep(sessionId, {
@@ -65,7 +70,10 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
             if (streamingMessageId === null) {
               streamingMessageId = nextMessageId();
               const id = streamingMessageId;
-              setMessages((prev) => [...prev, { id, text: accumulatedText }]);
+              setMessages((prev) => [
+                ...prev,
+                { id, text: accumulatedText, stepIndex: stepIndexForThisAttempt },
+              ]);
             } else {
               const id = streamingMessageId;
               const text = accumulatedText;
@@ -114,6 +122,17 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
     void handleSubmit({ step_type: "free_text_step", fields: { text: activeText } });
   }, [activeText, handleSubmit]);
 
+  // Every hook must run on every render regardless of the early returns
+  // below (Rules of Hooks) — this one stays above them even though its
+  // result is only used once `problem` has loaded.
+  const messagesByStepIndex = useMemo(() => {
+    const grouped: ChatMessage[][] = [];
+    for (const message of messages) {
+      (grouped[message.stepIndex] ??= []).push(message);
+    }
+    return grouped;
+  }, [messages]);
+
   if (loadError) {
     return <p className="error-banner">Could not load problem: {loadError}</p>;
   }
@@ -134,6 +153,12 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
       <h2>{problem.display_label}</h2>
       <p className="progress-note">Steps completed: {acceptedStepIds.length}</p>
 
+      {lastVerdict && !lastVerdict.is_valid && (
+        <p className="verdict-banner incorrect" role="alert">
+          Not quite — let&apos;s look at it together.
+        </p>
+      )}
+
       <FreeTextStepper
         lockedTexts={lockedTexts}
         activeText={activeText}
@@ -142,17 +167,11 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
         disabled={isSubmitting}
         solved={solved}
         hint={frontierHint}
+        messagesByStepIndex={messagesByStepIndex}
+        isThinking={isSubmitting}
       />
 
       {solved && <p className="solved-banner">Solved! Great work.</p>}
-
-      {lastVerdict && !lastVerdict.is_valid && (
-        <p className="verdict-banner incorrect" role="alert">
-          Not quite — let&apos;s look at it together.
-        </p>
-      )}
-
-      <ChatPanel messages={messages} isThinking={isSubmitting} />
     </div>
   );
 }

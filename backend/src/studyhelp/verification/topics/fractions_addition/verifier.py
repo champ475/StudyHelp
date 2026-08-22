@@ -5,13 +5,25 @@ free-text-input request (ARCHITECTURE.md supersede entry over D12).
 Unlike the subtraction topic, the student never declares a `step_type` —
 there are no tabs, just one text box per step (CLAUDE.md: "text boxes for
 each step ... mistake checking happen when I move to next step"). So this
-verifier tries every step type reachable from the current frontier against
-the raw text, rather than trusting a client-declared type. Restricting the
-search to the *frontier* (not every node in the whole graph) is deliberate:
-without it, text that happens to parse as some later step's shape would get
-silently accepted as a "non-adjacent valid match" the moment it parses,
-which is the wrong failure mode for a student who is simply behind and
-typed the wrong shape of answer for where they actually are.
+verifier tries every step type against the raw text, rather than trusting a
+client-declared type.
+
+Candidate search covers every node still reachable from the current
+frontier (BFS forward closure over `.next`, `Problem.reachable_step_ids()`),
+not just the immediate frontier (ARCHITECTURE.md D59, superseding this
+module's original frontier-only search — see D59 for why the concern this
+module used to guard against, a stray grammar match on a later step's
+*shape*, isn't actually the failure mode here: `_resolve_near_match`/the
+exact-match branch below both still require the submission's *values* to
+equal that node's `expected_state` exactly, not merely its shape, so a
+"non-adjacent valid match" can only ever be a submission that is genuinely
+correct for some further-along step, e.g. a student who jumps straight to
+the final answer). An exact match against the immediate frontier is a clean
+accept (confidence 1.0); an exact match further along is accepted too but
+surfaced at `NON_ADJACENT_MATCH_CONFIDENCE` (`non_adjacent_valid_match`),
+same tiering as `SubtractionBorrowingVerifier`. A non-exact match anywhere
+in the reachable set is still an unambiguous reject, not a low-confidence
+passthrough — unchanged from this module's original rationale below.
 """
 
 from pydantic import ValidationError
@@ -24,7 +36,11 @@ from studyhelp.schemas.verify import (
     StudentStep,
     VerifyResult,
 )
-from studyhelp.verification.topics.fractions_addition.free_text_parser import parse_student_text
+from studyhelp.verification.confidence import NON_ADJACENT_MATCH_CONFIDENCE
+from studyhelp.verification.topics.fractions_addition.free_text_parser import (
+    parse_final_answer,
+    parse_student_text,
+)
 from studyhelp.verification.topics.fractions_addition.step_checkers import (
     STEP_TYPE_FIELD_MODELS,
     compare_to_expected,
@@ -49,11 +65,12 @@ class FractionsAdditionVerifier:
             )
 
         frontier_ids = self._frontier(problem, problem_state.accepted_step_ids)
-        frontier_nodes: list[StepNode] = [
-            node for step_id in frontier_ids if (node := problem.node(step_id)) is not None
+        reachable_ids = problem.reachable_step_ids(frontier_ids) if frontier_ids else set()
+        reachable_nodes: list[StepNode] = [
+            node for step_id in reachable_ids if (node := problem.node(step_id)) is not None
         ]
 
-        if not frontier_nodes:
+        if not reachable_nodes:
             return VerifyResult(
                 is_valid=False,
                 matched_step_id=None,
@@ -62,11 +79,19 @@ class FractionsAdditionVerifier:
             )
 
         evaluated: list[_EvaluatedCandidate] = []
-        for node in frontier_nodes:
+        for node in reachable_nodes:
             if node.type not in STEP_TYPE_FIELD_MODELS:
                 continue
             try:
-                fields = parse_student_text(node.type, raw_text)
+                if node.type == "write_final_answer" and node.step_id not in frontier_ids:
+                    # Non-adjacent candidate: use the literal, unreduced
+                    # parse (free_text_parser.py's `reduce=False`) so an
+                    # unsimplified submission at an earlier step can't
+                    # silently reduce into a false "skipped to the end"
+                    # match — see that function's docstring.
+                    fields = parse_final_answer(raw_text, reduce=False)
+                else:
+                    fields = parse_student_text(node.type, raw_text)
                 STEP_TYPE_FIELD_MODELS[node.type].model_validate(fields)
             except (ValueError, ValidationError):
                 continue
@@ -82,23 +107,56 @@ class FractionsAdditionVerifier:
                     kind="malformed",
                     note=(
                         f"'{raw_text}' doesn't match the expected shape for this step "
-                        f"({', '.join(n.type for n in frontier_nodes)})"
+                        f"({', '.join(n.type for n in reachable_nodes)})"
                     ),
                 ),
             )
 
         exact = [c for c in evaluated if not c[1]]
         if exact:
-            node, _discrepancies, _agreement, fields = exact[0]
+            frontier_matches = [c for c in exact if c[0].step_id in frontier_ids]
+            # A submission's value can coincide with more than one
+            # non-frontier reachable node (e.g. a `simplify_fraction` step
+            # whose correct output happens to equal the final answer) --
+            # prefer an actually-terminal (`next == []`) match over a
+            # merely-further-along intermediate one, so a value that both
+            # legitimately completes the problem AND happens to satisfy an
+            # earlier node is read as "the student finished" (Bug3), not
+            # as an arbitrary pick between coincidentally-equal candidates.
+            terminal_matches = [c for c in exact if not c[0].next]
+            node, _discrepancies, _agreement, fields = (
+                frontier_matches[0]
+                if frontier_matches
+                else terminal_matches[0]
+                if terminal_matches
+                else exact[0]
+            )
             if node.type == "write_final_answer":
                 self._cross_check_final_identity(problem, node)
+            if node.step_id in frontier_ids:
+                return VerifyResult(
+                    is_valid=True,
+                    matched_step_id=node.step_id,
+                    confidence=1.0,
+                    parsed_fields=fields,
+                )
             return VerifyResult(
-                is_valid=True, matched_step_id=node.step_id, confidence=1.0, parsed_fields=fields
+                is_valid=True,
+                matched_step_id=node.step_id,
+                confidence=NON_ADJACENT_MATCH_CONFIDENCE,
+                error_signal=ErrorSignal(
+                    kind="none",
+                    note="non_adjacent_valid_match",
+                    nearest_matched_step_id=node.step_id,
+                ),
+                parsed_fields=fields,
             )
 
-        return self._resolve_near_match(evaluated)
+        return self._resolve_near_match(evaluated, frontier_ids)
 
-    def _resolve_near_match(self, evaluated: list[_EvaluatedCandidate]) -> VerifyResult:
+    def _resolve_near_match(
+        self, evaluated: list[_EvaluatedCandidate], frontier_ids: set[str]
+    ) -> VerifyResult:
         # `REJECT_THRESHOLD`-style field-agreement ratios (ARCHITECTURE.md
         # D2's false-negative bias, tuned against subtraction's many-digit
         # fields) don't transfer cleanly here: every fraction step has only
@@ -111,7 +169,16 @@ class FractionsAdditionVerifier:
         # shape (`evaluated` only contains candidates whose grammar
         # matched), so a value mismatch is unambiguous, not low-confidence
         # noise. Any non-exact parse is therefore a definite error.
-        node, discrepancies, agreement, fields = max(evaluated, key=lambda c: c[2])
+        # Candidate search now spans every reachable node (D59), not just
+        # the frontier, so two reachable nodes can tie on agreement (e.g. a
+        # re-used field name whose expected value happens to coincide further
+        # down the DAG) -- prefer the frontier candidate on a tie so the
+        # diagnosis points at the step the student is actually on, same
+        # (agreement, in_frontier) tie-break as
+        # SubtractionBorrowingVerifier._resolve_near_match.
+        node, discrepancies, agreement, fields = max(
+            evaluated, key=lambda c: (c[2], c[0].step_id in frontier_ids)
+        )
         return VerifyResult(
             is_valid=False,
             matched_step_id=None,

@@ -65,6 +65,18 @@ class DecideRequest(BaseModel):
     student_step: dict[str, Any]
     misconception: ClassifyCandidate | None
     turn_number: int
+    repeat_count: int = 1
+    """How many consecutive times the student has now gotten *this exact
+    step* wrong (`DialogueState.consecutive_errors_on_this_step` —
+    orchestrator.py), distinct from `turn_number` (how many dialogue turns
+    have actually been shown, which can lag `repeat_count` under a delayed
+    intervention policy). Drives the register switch to a concrete analogy
+    at `repeat_count >= 2` (CLAUDE.md Bug2)."""
+    analogy_hint: str | None = None
+    """The fixed, topic-appropriate analogy (`llm/analogies.py`) to use once
+    `repeat_count >= 2` — deterministically retrieved by application code,
+    never left to the model to invent (see that module's docstring).
+    `None` when `repeat_count < 2` or the topic has no library entry."""
 
 
 class DecideResponse(BaseModel):
@@ -84,6 +96,14 @@ class GenerateRequest(BaseModel):
     conversation_so_far: list[dict[str, str]]
     correct_step: dict[str, Any]
     student_step: dict[str, Any]
+    repeat_count: int = 1
+    """Same value passed to `decide()` for this turn — see `DecideRequest`.
+    Threaded independently to `generate()` (not just embedded in
+    `decision`) so the register-switch instruction is enforced directly at
+    generation time regardless of what `decision.remediation_strategy`'s
+    free text happens to say."""
+    analogy_hint: str | None = None
+    """Same value passed to `decide()` for this turn — see `DecideRequest`."""
     regeneration_feedback: str | None = None
     """Set only on a gate-rejected retry (dialogue/orchestrator.py):
     concretely what was wrong with the previous draft (leaked the answer /

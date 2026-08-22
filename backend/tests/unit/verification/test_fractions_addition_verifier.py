@@ -8,7 +8,13 @@ from studyhelp.schemas.verify import ProblemState, StudentStep
 from studyhelp.verification.topics.fractions_addition.verifier import FractionsAdditionVerifier
 
 _FIXTURES_DIR = (
-    Path(__file__).parents[3] / "src" / "studyhelp" / "seed" / "fixtures" / "problems" / "ch_fractions"
+    Path(__file__).parents[3]
+    / "src"
+    / "studyhelp"
+    / "seed"
+    / "fixtures"
+    / "problems"
+    / "ch_fractions"
 )
 
 
@@ -54,7 +60,13 @@ def test_first_step_correct_matches_frontier(
     assert result.is_valid is True
     assert result.matched_step_id == "s1_common_denom"
     assert result.confidence == 1.0
-    assert result.parsed_fields == {"left_num": 3, "left_den": 6, "op": "+", "right_num": 1, "right_den": 6}
+    assert result.parsed_fields == {
+        "left_num": 3,
+        "left_den": 6,
+        "op": "+",
+        "right_num": 1,
+        "right_den": 6,
+    }
 
 
 def test_full_correct_walkthrough_reaches_final_answer(
@@ -80,10 +92,32 @@ def test_no_common_denominator_bug_is_rejected(
     assert result.error_signal.nearest_matched_step_id == "s1_common_denom"
 
 
+def test_direct_final_answer_from_the_start_is_accepted_non_adjacent(
+    verifier: FractionsAdditionVerifier, problem_1_2_plus_1_6: Problem
+) -> None:
+    """Bug1/Bug3 regression: a student who skips straight to the correct,
+    already-simplified final answer (no intermediate steps submitted) must
+    not be flagged wrong (ARCHITECTURE.md D59), and the matched node must
+    itself be terminal. Distinct from `test_forgot_to_simplify_is_rejected`
+    below, which confirms an *unreduced* value at an earlier step is still
+    correctly rejected, not swept up by this same reachable-search widening."""
+    state = ProblemState(problem=problem_1_2_plus_1_6)
+    result = verifier.verify_step(state, _text_step("2/3"))
+    assert result.is_valid is True
+    assert result.matched_step_id == "s4_final"
+    assert result.error_signal is not None
+    assert result.error_signal.note == "non_adjacent_valid_match"
+    matched_node = problem_1_2_plus_1_6.node(result.matched_step_id)
+    assert matched_node is not None
+    assert matched_node.next == []
+
+
 def test_forgot_to_simplify_is_rejected(
     verifier: FractionsAdditionVerifier, problem_1_2_plus_1_6: Problem
 ) -> None:
-    state = ProblemState(problem=problem_1_2_plus_1_6, accepted_step_ids=["s1_common_denom", "s2_add_numerators"])
+    state = ProblemState(
+        problem=problem_1_2_plus_1_6, accepted_step_ids=["s1_common_denom", "s2_add_numerators"]
+    )
     result = verifier.verify_step(state, _text_step("4/6"))
     assert result.is_valid is False
     assert result.error_signal is not None

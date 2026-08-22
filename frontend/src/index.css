@@ -59,6 +59,12 @@ fieldset {
 .free-text-stepper {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
+}
+
+.free-text-step-block {
+  display: flex;
+  flex-direction: column;
   gap: 0.5rem;
 }
 

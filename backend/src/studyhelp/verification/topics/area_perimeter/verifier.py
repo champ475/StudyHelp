@@ -2,11 +2,20 @@
 -- area and perimeter of rectangles/squares). Mirrors `DecimalsVerifier`'s
 / `LcmHcfVerifier`'s pattern exactly (ARCHITECTURE.md D41): no
 client-declared `step_type`, tries every step type's grammar against the
-submitted text, restricts candidate search to the DAG frontier (this
-topic's DAG is linear with no step-type recurrence -- a given problem's
-graph only ever contains ONE of `compute_area`/`compute_perimeter`, never
-both), and rejects any non-exact frontier-parseable match rather than a
-low-confidence passthrough (D40's rationale).
+submitted text.
+
+Candidate search covers every node still reachable from the current
+frontier (BFS forward closure over `.next`, `Problem.reachable_step_ids()`),
+not just the immediate frontier (ARCHITECTURE.md D59, superseding this
+module's original frontier-only search) -- otherwise a student who jumps
+straight to the final answer, skipping intermediate steps the DAG still
+accepts, is wrongly flagged wrong. An exact match against the immediate
+frontier is a clean accept (confidence 1.0); an exact match further along
+is accepted too but surfaced at `NON_ADJACENT_MATCH_CONFIDENCE`
+(`non_adjacent_valid_match`), same tiering as `SubtractionBorrowingVerifier`.
+A non-exact match anywhere in the reachable set is still an unambiguous
+reject rather than a low-confidence passthrough (D40's rationale: once text
+parses cleanly into a step's exact grammar, a value mismatch is unambiguous).
 """
 
 from pydantic import ValidationError
@@ -19,6 +28,7 @@ from studyhelp.schemas.verify import (
     StudentStep,
     VerifyResult,
 )
+from studyhelp.verification.confidence import NON_ADJACENT_MATCH_CONFIDENCE
 from studyhelp.verification.topics.area_perimeter.free_text_parser import parse_student_text
 from studyhelp.verification.topics.area_perimeter.step_checkers import (
     STEP_TYPE_FIELD_MODELS,
@@ -44,11 +54,12 @@ class AreaPerimeterVerifier:
             )
 
         frontier_ids = self._frontier(problem, problem_state.accepted_step_ids)
-        frontier_nodes: list[StepNode] = [
-            node for step_id in frontier_ids if (node := problem.node(step_id)) is not None
+        reachable_ids = problem.reachable_step_ids(frontier_ids) if frontier_ids else set()
+        reachable_nodes: list[StepNode] = [
+            node for step_id in reachable_ids if (node := problem.node(step_id)) is not None
         ]
 
-        if not frontier_nodes:
+        if not reachable_nodes:
             return VerifyResult(
                 is_valid=False,
                 matched_step_id=None,
@@ -57,7 +68,7 @@ class AreaPerimeterVerifier:
             )
 
         evaluated: list[_EvaluatedCandidate] = []
-        for node in frontier_nodes:
+        for node in reachable_nodes:
             if node.type not in STEP_TYPE_FIELD_MODELS:
                 continue
             try:
@@ -77,28 +88,70 @@ class AreaPerimeterVerifier:
                     kind="malformed",
                     note=(
                         f"'{raw_text}' doesn't match the expected shape for this step "
-                        f"({', '.join(n.type for n in frontier_nodes)})"
+                        f"({', '.join(n.type for n in reachable_nodes)})"
                     ),
                 ),
             )
 
         exact = [c for c in evaluated if not c[1]]
         if exact:
-            node, _discrepancies, _agreement, fields = exact[0]
+            frontier_matches = [c for c in exact if c[0].step_id in frontier_ids]
+            # A submission's value can coincide with more than one
+            # non-frontier reachable node (e.g. a `simplify_fraction` step
+            # whose correct output happens to equal the final answer) --
+            # prefer an actually-terminal (`next == []`) match over a
+            # merely-further-along intermediate one, so a value that both
+            # legitimately completes the problem AND happens to satisfy an
+            # earlier node is read as "the student finished" (Bug3), not
+            # as an arbitrary pick between coincidentally-equal candidates.
+            terminal_matches = [c for c in exact if not c[0].next]
+            node, _discrepancies, _agreement, fields = (
+                frontier_matches[0]
+                if frontier_matches
+                else terminal_matches[0]
+                if terminal_matches
+                else exact[0]
+            )
             if node.type == "write_final_answer":
                 self._cross_check_final_value(problem, node)
+            if node.step_id in frontier_ids:
+                return VerifyResult(
+                    is_valid=True,
+                    matched_step_id=node.step_id,
+                    confidence=1.0,
+                    parsed_fields=fields,
+                )
             return VerifyResult(
-                is_valid=True, matched_step_id=node.step_id, confidence=1.0, parsed_fields=fields
+                is_valid=True,
+                matched_step_id=node.step_id,
+                confidence=NON_ADJACENT_MATCH_CONFIDENCE,
+                error_signal=ErrorSignal(
+                    kind="none",
+                    note="non_adjacent_valid_match",
+                    nearest_matched_step_id=node.step_id,
+                ),
+                parsed_fields=fields,
             )
 
-        return self._resolve_near_match(evaluated)
+        return self._resolve_near_match(evaluated, frontier_ids)
 
-    def _resolve_near_match(self, evaluated: list[_EvaluatedCandidate]) -> VerifyResult:
+    def _resolve_near_match(
+        self, evaluated: list[_EvaluatedCandidate], frontier_ids: set[str]
+    ) -> VerifyResult:
         # Same rationale as fractions_addition's D40 / lcm_hcf's / decimals'
         # precedent: `evaluated` only ever contains candidates whose text
         # already parsed cleanly into that step type's exact grammar, so a
         # non-exact value match is unambiguous, not low-confidence noise.
-        node, discrepancies, agreement, fields = max(evaluated, key=lambda c: c[2])
+        # Candidate search now spans every reachable node (D59), not just
+        # the frontier, so two reachable nodes can tie on agreement (e.g. a
+        # re-used field name whose expected value happens to coincide further
+        # down the DAG) -- prefer the frontier candidate on a tie so the
+        # diagnosis points at the step the student is actually on, same
+        # (agreement, in_frontier) tie-break as
+        # SubtractionBorrowingVerifier._resolve_near_match.
+        node, discrepancies, agreement, fields = max(
+            evaluated, key=lambda c: (c[2], c[0].step_id in frontier_ids)
+        )
         return VerifyResult(
             is_valid=False,
             matched_step_id=None,

@@ -69,6 +69,25 @@ def test_full_correct_division_walkthrough(
     assert accepted == ["s1_tens", "s2_units", "s3_final"]
 
 
+def test_direct_final_answer_from_the_start_is_accepted_non_adjacent(
+    verifier: MultiplicationDivisionVerifier, problem_mult: Problem
+) -> None:
+    """Bug1/Bug3 regression: a student who skips straight to the correct
+    final answer (no intermediate column steps submitted) must not be
+    flagged wrong (ARCHITECTURE.md D59), and the matched node must itself
+    be terminal so the orchestrator can end the problem right there rather
+    than forcing the remaining predefined steps."""
+    state = ProblemState(problem=problem_mult, accepted_step_ids=[])
+    result = verifier.verify_step(state, _text_step("204"))
+    assert result.is_valid is True
+    assert result.matched_step_id == "s3_final"
+    assert result.error_signal is not None
+    assert result.error_signal.note == "non_adjacent_valid_match"
+    matched_node = problem_mult.node(result.matched_step_id)
+    assert matched_node is not None
+    assert matched_node.next == []
+
+
 def test_forgot_carry_bug_is_rejected(
     verifier: MultiplicationDivisionVerifier, problem_mult: Problem
 ) -> None:
