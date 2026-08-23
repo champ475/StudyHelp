@@ -13,9 +13,22 @@ a single free-text field, compared case/whitespace-insensitively
 (`_normalize()`) since the "answer" here is a word or number, not a
 structured multi-field submission. Because there is exactly one field to
 compare, a mismatch is always an unambiguous reject (confidence 1.0) — the
-multi-field confidence-band machinery the DAG topics need (D2's
+multi-field agreement-ratio machinery the heavy DAG topics need (D2's
 false-negative bias, D22's thresholds) doesn't apply to a single yes/no
 field comparison, so this module deliberately doesn't import or reuse it.
+
+Candidate search covers every node still reachable from the current
+frontier (`Problem.reachable_step_ids()`), not just the immediate frontier
+(ARCHITECTURE.md D59/D65) — most light-check problems are exactly 1 step
+so this is a no-op, but `patterns` (Ch.7) problems are a genuine 2-step DAG
+(`patterns_common_difference` -> `patterns_next_term`), and the second
+step's answer is often numerically simple enough that a student answers it
+directly at step 1 (confirmed live: "2, 4, 6, 8, ..." — student typed "10",
+the correct *next term*, while step 1 still expects the common difference
+"2"). An exact match against the immediate frontier is a clean accept
+(confidence 1.0); an exact match further along is accepted too but
+surfaced at `NON_ADJACENT_MATCH_CONFIDENCE`, same tiering as every DAG
+topic's verifier.
 
 Deliberately does NOT filter candidate nodes by a hardcoded `node.type`
 string (unlike every DAG topic's verifier) — each light-check topic gives
@@ -38,6 +51,7 @@ from studyhelp.schemas.verify import (
     StudentStep,
     VerifyResult,
 )
+from studyhelp.verification.confidence import NON_ADJACENT_MATCH_CONFIDENCE
 
 
 def _normalize(text: str) -> str:
@@ -60,9 +74,10 @@ class LightCheckVerifier:
             )
 
         frontier_ids = self._frontier(problem, problem_state.accepted_step_ids)
+        reachable_ids = problem.reachable_step_ids(frontier_ids) if frontier_ids else set()
         candidates: list[StepNode] = [
             node
-            for step_id in frontier_ids
+            for step_id in reachable_ids
             if (node := problem.node(step_id)) is not None and "answer" in node.expected_state
         ]
 
@@ -76,14 +91,44 @@ class LightCheckVerifier:
 
         fields = {"answer": raw_text.strip()}
         normalized_student = _normalize(raw_text)
-        exact = [n for n in candidates if _normalize(n.expected_state["answer"]) == normalized_student]
+        exact = [
+            n for n in candidates if _normalize(n.expected_state["answer"]) == normalized_student
+        ]
         if exact:
-            node = exact[0]
+            frontier_matches = [n for n in exact if n.step_id in frontier_ids]
+            terminal_matches = [n for n in exact if not n.next]
+            node = (
+                frontier_matches[0]
+                if frontier_matches
+                else terminal_matches[0]
+                if terminal_matches
+                else exact[0]
+            )
+            if node.step_id in frontier_ids:
+                return VerifyResult(
+                    is_valid=True,
+                    matched_step_id=node.step_id,
+                    confidence=1.0,
+                    parsed_fields=fields,
+                )
             return VerifyResult(
-                is_valid=True, matched_step_id=node.step_id, confidence=1.0, parsed_fields=fields
+                is_valid=True,
+                matched_step_id=node.step_id,
+                confidence=NON_ADJACENT_MATCH_CONFIDENCE,
+                error_signal=ErrorSignal(
+                    kind="none",
+                    note="non_adjacent_valid_match",
+                    nearest_matched_step_id=node.step_id,
+                ),
+                parsed_fields=fields,
             )
 
-        nearest = candidates[0]
+        # Prefer a frontier candidate as the "nearest" reject target when
+        # the reachable set now spans more than one node (D59/D65) — a
+        # wrong answer should be diagnosed against the step the student is
+        # actually on, not an arbitrary later reachable one.
+        frontier_candidates = [n for n in candidates if n.step_id in frontier_ids]
+        nearest = frontier_candidates[0] if frontier_candidates else candidates[0]
         return VerifyResult(
             is_valid=False,
             matched_step_id=None,
@@ -126,14 +171,22 @@ def validate_light_check_problem(problem: "Problem") -> None:
     for node in problem.step_graph:
         answer = node.expected_state.get("answer")
         if not isinstance(answer, str) or not answer.strip():
-            raise ValueError(f"{problem.problem_id}/{node.step_id}: expected_state.answer must be a non-empty string")
+            raise ValueError(
+                f"{problem.problem_id}/{node.step_id}: expected_state.answer must be a non-empty string"
+            )
 
     terminal_nodes = [n for n in problem.step_graph if not n.next]
     if len(terminal_nodes) != 1:
-        raise ValueError(f"{problem.problem_id}: light-check problems must have exactly one terminal node")
+        raise ValueError(
+            f"{problem.problem_id}: light-check problems must have exactly one terminal node"
+        )
     terminal = terminal_nodes[0]
-    final_answer = problem.final_answer.get("answer") if isinstance(problem.final_answer, dict) else None
-    if not isinstance(final_answer, str) or _normalize(final_answer) != _normalize(terminal.expected_state["answer"]):
+    final_answer = (
+        problem.final_answer.get("answer") if isinstance(problem.final_answer, dict) else None
+    )
+    if not isinstance(final_answer, str) or _normalize(final_answer) != _normalize(
+        terminal.expected_state["answer"]
+    ):
         raise ValueError(
             f"{problem.problem_id}: final_answer {problem.final_answer!r} doesn't match terminal "
             f"step {terminal.step_id}'s answer {terminal.expected_state['answer']!r}"

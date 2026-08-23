@@ -97,9 +97,14 @@ class MockLLMProvider:
         # (dialogue/orchestrator.py) — so its mere presence here is the
         # trigger, not a repeat_count re-check.
         if request.is_concept_check:
+            # Reflective, not interrogative (CLAUDE.md open-ended-review
+            # Issue C): no input box exists for a reply to this message, so
+            # it must never read like a question the student has to answer
+            # before continuing — a direct "why does that work?" left the
+            # student staring at it with nothing to do.
             message = (
-                "Nice work fixing that! In your own words, why do you think that works? Try "
-                "telling yourself the idea in one sentence before you move on."
+                "Nice work fixing that! Take a moment to think about why that works, then "
+                "let's move on to the next step."
             )
         elif request.analogy_hint:
             message = (

@@ -19,7 +19,14 @@ from studyhelp.dialogue.orchestrator import (
 )
 from studyhelp.dialogue.state import DialogueStateStore
 from studyhelp.dialogue.timing_policy import InterventionPolicy
-from studyhelp.llm.client import GenerateResponse
+from studyhelp.llm.client import (
+    ClassifyRequest,
+    ClassifyResponse,
+    DecideRequest,
+    DecideResponse,
+    GenerateRequest,
+    GenerateResponse,
+)
 from studyhelp.llm.providers.mock import MockLLMProvider
 from studyhelp.schemas.verify import ErrorSignal, VerifyResult
 
@@ -201,7 +208,11 @@ async def test_resolved_dialogue_includes_a_post_correct_concept_check_message(
     assert resolved.event == "resolved"
     assert resolved.expects_retry is False
     assert resolved.message is not None
-    assert "why do you think that works" in resolved.message.lower()
+    assert "why that works" in resolved.message.lower()
+    # Reflective, not interrogative (open-ended-review Issue C: no input
+    # box exists for a reply, so this must never read as a question the
+    # student is expected to answer before continuing).
+    assert "?" not in resolved.message
 
 
 async def test_clean_first_try_correct_answer_has_no_concept_check_message(
@@ -513,3 +524,110 @@ def test_protected_values_covers_light_check_word_answers() -> None:
     assert _protected_values({"answer": "acute"}) == ["acute"]
     assert _protected_values({"answer": "0"}) == ["0"]
     assert _protected_values({}) == []
+
+
+class _CapturingLLMClient:
+    """A fake `LLMClient` (not `MockLLMProvider`, which the leakage bug
+    below doesn't reproduce against — its templates never contain digits)
+    that records every `GenerateRequest` it receives. Used to prove the
+    orchestrator actually threads `protected_values` into the request on
+    every attempt, not just the gate check — CLAUDE.md open-ended-review
+    Issue A: live testing against the real Groq model found demo-example
+    numbers coincidentally colliding with a problem's own small protected
+    values (fractions "1/4 + 1/6", protected [3, 12, 2, 12], a "1/2 + 1/3"
+    demo leaking via the bare "3"), because the model had to infer which
+    numbers in `correct_step` were secret rather than being told outright."""
+
+    def __init__(self, first_message: str, retry_message: str) -> None:
+        self.first_message = first_message
+        self.retry_message = retry_message
+        self.generate_requests: list[GenerateRequest] = []
+
+    async def classify(self, request: ClassifyRequest) -> ClassifyResponse:
+        return ClassifyResponse(misconception_id=None, rationale="n/a")
+
+    async def decide(self, request: DecideRequest) -> DecideResponse:
+        return DecideResponse(
+            error_type="procedural", remediation_strategy="x", instructional_intent="y"
+        )
+
+    async def generate(self, request: GenerateRequest) -> GenerateResponse:
+        self.generate_requests.append(request)
+        message = (
+            self.first_message if request.regeneration_feedback is None else self.retry_message
+        )
+        return GenerateResponse(
+            message=message, expects_retry=True, hint_level=1, concept_flag=None
+        )
+
+
+async def test_generate_request_carries_the_exact_gate_protected_values(
+    store: DialogueStateStore,
+) -> None:
+    """The `GenerateRequest` sent on the very first attempt (not just after
+    a rejection) must already carry the same `protected_values` list the
+    leakage gate itself checks against — the model needs this to avoid a
+    collision in the first place, not just after being told about one."""
+    fields = {"left_num": 3, "left_den": 12, "op": "+", "right_num": 2, "right_den": 12}
+    client = _CapturingLLMClient(
+        first_message="This step just needs a careful look, nothing more to say here.",
+        retry_message="unused",
+    )
+    result = await handle_step_submission(
+        state_store=store,
+        llm_client=client,  # type: ignore[arg-type]
+        session_id="s1",
+        problem_id="p1",
+        topic="fractions_addition",
+        step_type="rewrite_common_denominator",
+        correct_fields=fields,
+        student_fields={"left_num": 1, "left_den": 4, "op": "+", "right_num": 1, "right_den": 6},
+        verify_result=_INVALID_RESULT,
+        classification=None,
+        timing_policy=InterventionPolicy.IMMEDIATE,
+        problem_is_complete=False,
+    )
+    assert result.event == "explaining"
+    assert len(client.generate_requests) == 1
+    assert sorted(client.generate_requests[0].protected_values, key=str) == sorted(
+        _protected_values(fields), key=str
+    )
+
+
+async def test_leaked_demo_number_is_rejected_and_retry_recovers(
+    store: DialogueStateStore,
+) -> None:
+    """A draft that reuses a protected value inside an unrelated demo
+    example (the exact live-confirmed failure mode) is still rejected by
+    the gate — and a genuinely different retry can still succeed, rather
+    than guaranteeing three rejections in a row the way a model that
+    ignores `regeneration_feedback` entirely would (this is why
+    `MockLLMProvider` alone can't reproduce or verify a fix for this: its
+    templates never vary per attempt)."""
+    fields = {"left_num": 3, "left_den": 12, "op": "+", "right_num": 2, "right_den": 12}
+    client = _CapturingLLMClient(
+        first_message="Think about a demo like 1/2 + 1/3 to see the idea, then try your own.",
+        retry_message="Let's look at this a new way. What do you notice about your two numbers?",
+    )
+    result = await handle_step_submission(
+        state_store=store,
+        llm_client=client,  # type: ignore[arg-type]
+        session_id="s1",
+        problem_id="p1",
+        topic="fractions_addition",
+        step_type="rewrite_common_denominator",
+        correct_fields=fields,
+        student_fields={"left_num": 1, "left_den": 4, "op": "+", "right_num": 1, "right_den": 6},
+        verify_result=_INVALID_RESULT,
+        classification=None,
+        timing_policy=InterventionPolicy.IMMEDIATE,
+        problem_is_complete=False,
+    )
+    assert result.event == "explaining"
+    assert result.message == client.retry_message
+    assert result.message != _FALLBACK_MESSAGE
+    assert len(client.generate_requests) == 2
+    # The regeneration feedback on the retry names the exact protected
+    # values, not just a generic "don't leak" instruction.
+    assert client.generate_requests[1].regeneration_feedback is not None
+    assert "3" in client.generate_requests[1].regeneration_feedback

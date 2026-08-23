@@ -15,7 +15,7 @@ split these correspond to.
 import time
 from typing import Any, Literal, Protocol
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from studyhelp.config import get_settings
 from studyhelp.logging import get_logger
@@ -96,6 +96,20 @@ class GenerateRequest(BaseModel):
     conversation_so_far: list[dict[str, str]]
     correct_step: dict[str, Any]
     student_step: dict[str, Any]
+    protected_values: list[int | str] = Field(default_factory=list)
+    """The exact values `dialogue/leakage_filter.py::contains_leakage()`
+    will reject the draft for containing (`dialogue/orchestrator.py`'s
+    `_protected_values(correct_step)` — the same list the gate itself
+    checks against, not re-derived by the model from `correct_step`, which
+    mixes protected output fields with non-secret visible-input fields the
+    model can't reliably tell apart on its own). Confirmed live (CLAUDE.md
+    open-ended-review Issue A) that without this, a model told to "use a
+    demo example with different numbers" (rule 1) will still sometimes
+    pick small illustrative numbers that coincidentally equal one of this
+    problem's own protected values (e.g. a "1/2 + 1/3" demo colliding with
+    a correct numerator of 3) and get rejected for an unrelated reason —
+    telling it exactly what to avoid, including inside its own demo, fixes
+    that at the source instead of relying on trial-and-error retries."""
     repeat_count: int = 1
     """Same value passed to `decide()` for this turn — see `DecideRequest`.
     Threaded independently to `generate()` (not just embedded in

@@ -142,6 +142,22 @@ fieldset {
   gap: 0.25rem;
 }
 
+/* Post-correct reflective aside (open-ended-review Issue C): visually
+   distinct from a normal explanation bubble — lighter, dashed border, no
+   shadow — so it reads as a passing thought, not a question waiting for
+   an answer the student has no way to type. */
+.chat-message.reflection {
+  background: #fafaf5;
+  border: 1px dashed #d4d4a8;
+  box-shadow: none;
+  font-style: italic;
+  color: #57534e;
+}
+
+.reflection-marker {
+  font-style: normal;
+}
+
 .thinking-dot {
   width: 6px;
   height: 6px;

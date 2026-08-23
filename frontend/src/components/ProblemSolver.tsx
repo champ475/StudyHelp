@@ -86,6 +86,15 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
                 setAcceptedStepIds((prev) => (prev.includes(nearest) ? prev : [...prev, nearest]));
               }
             }
+            // A "resolved" message is the one-off post-correct reflection
+            // (backend's `_generate_concept_check_message`) — mark it so
+            // ChatPanel renders it visibly differently from a normal
+            // explanation bubble, never as a question awaiting a reply
+            // there's no input path for (open-ended-review Issue C).
+            if (event.data.dialogue_event === "resolved" && streamingMessageId !== null) {
+              const id = streamingMessageId;
+              setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, isReflection: true } : m)));
+            }
           } else if (event.event === "error") {
             setLoadError(event.data.detail);
           }

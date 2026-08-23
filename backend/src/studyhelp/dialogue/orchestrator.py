@@ -19,7 +19,7 @@ from typing import Any, Literal
 from studyhelp.classification.classifier import ClassificationResult
 from studyhelp.config import get_settings
 from studyhelp.dialogue.leakage_filter import contains_leakage
-from studyhelp.dialogue.readability_gate import passes_readability
+from studyhelp.dialogue.readability_gate import flesch_kincaid_grade, passes_readability
 from studyhelp.dialogue.state import (
     ConversationTurn,
     DialogueState,
@@ -60,8 +60,8 @@ otherwise trip it as fast as two genuinely-repeated attempts at one step)."""
 _FALLBACK_MESSAGE = "Let's slow down and look at this step together. Take your time, and try it again when you're ready."
 
 _CONCEPT_CHECK_FALLBACK_MESSAGE = (
-    "Nice work fixing that! Before you move on, try telling yourself in your own words why "
-    "that works."
+    "Nice work fixing that! Take a moment to think about why that works, then let's move on "
+    "to the next step."
 )
 
 DialogueEvent = Literal["no_action", "resolved", "explaining", "escalated"]
@@ -182,16 +182,33 @@ async def _run_gated_generate(
     for attempt in range(MAX_GATE_REGENERATION_ATTEMPTS + 1):
         generated = await llm_client.generate(build_request(regeneration_feedback))
         if contains_leakage(generated.message, protected_values):
+            # Logging the rejected draft itself (truncated) and the exact
+            # protected values it was checked against is what actually
+            # makes a gate rejection debuggable after the fact — a bare
+            # "rejected" line with no content proved useless when this was
+            # first investigated live (CLAUDE.md open-ended-review Issue A).
             logger.warning(
                 "dialogue_leakage_filter_rejected",
                 session_id=session_id,
                 problem_id=problem_id,
                 attempt=attempt,
+                protected_values=protected_values,
+                rejected_message=generated.message[:300],
             )
+            # Restating the exact protected values here too (on top of
+            # them already being in "protected_values" on every attempt)
+            # is deliberate reinforcement, not redundancy: the rejected
+            # draft already had them in context and still collided —
+            # usually via an unrelated demo example reusing a small
+            # protected number by coincidence (confirmed live,
+            # fractions_addition, CLAUDE.md open-ended-review Issue A) —
+            # so the retry needs a concrete, hard-to-miss "these exact
+            # ones" list, not just a repeat of the general rule.
             regeneration_feedback = (
-                "Your previous draft accidentally stated the correct answer or a value that "
-                "gives it away. Ask a guiding question instead — do not include any number or "
-                "word that reveals the correct result."
+                "Your previous draft accidentally included one of these exact protected values "
+                f"somewhere in the text, possibly inside a demo example: {protected_values}. Ask "
+                "a guiding question instead, and if you use a demonstration example, pick "
+                "different numbers than every one of those."
             )
             continue
         if not passes_readability(generated.message, resolved_max_grade):
@@ -200,6 +217,9 @@ async def _run_gated_generate(
                 session_id=session_id,
                 problem_id=problem_id,
                 attempt=attempt,
+                max_grade=resolved_max_grade,
+                actual_grade=flesch_kincaid_grade(generated.message),
+                rejected_message=generated.message[:300],
             )
             regeneration_feedback = (
                 "Your previous draft was too complex for a 10-year-old to read comfortably. "
@@ -221,12 +241,16 @@ async def _generate_concept_check_message(
     problem_id: str,
 ) -> str:
     """One follow-up message after a student's retry resolves an error
-    dialogue (open-ended review finding #3): a short, warm "why does that
-    work?" consolidation question, not another remediation turn — there's
-    no error left to diagnose, so this deliberately skips a real `decide()`
-    call (decide-then-generate, D7, exists to ground remediation in a real
-    error + misconception; there isn't one here) and instead builds the
-    `DecideResponse` directly in application code, the same way
+    dialogue (open-ended review finding #3): a short, warm, REFLECTIVE
+    aside about why the fix works — not a question requiring a typed reply
+    (there is no input box for one; the student just proceeds to the next
+    real step regardless — CLAUDE.md open-ended-review Issue C, a direct
+    "why does that work?" left the student stuck looking at an
+    unanswerable question) — and not another remediation turn either:
+    there's no error left to diagnose, so this deliberately skips a real
+    `decide()` call (decide-then-generate, D7, exists to ground remediation
+    in a real error + misconception; there isn't one here) and instead
+    builds the `DecideResponse` directly in application code, the same way
     `_worked_example_message()` is a deterministic non-LLM fallback for a
     different case. Still goes through `generate()` and the same
     leakage/readability gates as any other child-facing message — falls
@@ -237,14 +261,16 @@ async def _generate_concept_check_message(
         remediation_strategy=(
             "The student just answered this exact step correctly after getting it wrong "
             "earlier — this is not a new mistake. Warmly acknowledge the fix in one short "
-            "clause, then ask one genuine question inviting the student to explain, in their "
-            "own words, why the corrected approach works."
+            "clause, then invite the student to think for a moment about why the corrected "
+            "approach works, phrased as a reflective aside, not a question — there is no way "
+            "for the student to type a reply to this, they will simply move on to the next step."
         ),
         instructional_intent=(
             "Help the student articulate why their now-correct step works, to consolidate the "
             "concept rather than just the arithmetic."
         ),
     )
+    protected_values = _protected_values(correct_fields)
     message = await _run_gated_generate(
         llm_client=llm_client,
         build_request=lambda feedback: GenerateRequest(
@@ -252,10 +278,11 @@ async def _generate_concept_check_message(
             conversation_so_far=[turn.model_dump() for turn in conversation],
             correct_step=correct_fields,
             student_step=student_fields,
+            protected_values=protected_values,
             is_concept_check=True,
             regeneration_feedback=feedback,
         ),
-        protected_values=_protected_values(correct_fields),
+        protected_values=protected_values,
         resolved_max_grade=resolved_max_grade,
         session_id=session_id,
         problem_id=problem_id,
@@ -439,6 +466,7 @@ async def handle_step_submission(
             conversation_so_far=[turn.model_dump() for turn in conversation],
             correct_step=correct_fields,
             student_step=student_fields,
+            protected_values=protected_values,
             repeat_count=consecutive,
             analogy_hint=analogy_hint,
             regeneration_feedback=feedback,

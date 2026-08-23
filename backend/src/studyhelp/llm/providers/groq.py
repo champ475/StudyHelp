@@ -81,6 +81,7 @@ class GroqLLMProvider:
             "conversation_so_far": request.conversation_so_far,
             "correct_step": request.correct_step,
             "student_step": request.student_step,
+            "protected_values": request.protected_values,
             "repeat_count": request.repeat_count,
             "analogy_hint": request.analogy_hint,
             "is_concept_check": request.is_concept_check,
