@@ -96,6 +96,13 @@ class GenerateRequest(BaseModel):
     conversation_so_far: list[dict[str, str]]
     correct_step: dict[str, Any]
     student_step: dict[str, Any]
+    topic: str = ""
+    """Same topic string passed to `decide()` — see `DecideRequest.topic`.
+    Not needed by the real prompt (the model already has `correct_step` for
+    grounding) but lets `llm/providers/mock.py` vary its deterministic
+    procedural/conceptual phrasing per topic, not just per `hint_level`, so
+    mock-only manual testing isn't misleadingly identical across every
+    topic's first-ever mistake."""
     protected_values: list[int | str] = Field(default_factory=list)
     """The exact values `dialogue/leakage_filter.py::contains_leakage()`
     will reject the draft for containing (`dialogue/orchestrator.py`'s

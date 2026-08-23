@@ -233,6 +233,7 @@ async def _run_gated_generate(
 async def _generate_concept_check_message(
     *,
     llm_client: LLMClient,
+    topic: str,
     correct_fields: dict[str, Any],
     student_fields: dict[str, Any],
     conversation: list[ConversationTurn],
@@ -278,6 +279,7 @@ async def _generate_concept_check_message(
             conversation_so_far=[turn.model_dump() for turn in conversation],
             correct_step=correct_fields,
             student_step=student_fields,
+            topic=topic,
             protected_values=protected_values,
             is_concept_check=True,
             regeneration_feedback=feedback,
@@ -344,6 +346,7 @@ async def handle_step_submission(
             # and take the plain "no_action" path below untouched.
             concept_check_message = await _generate_concept_check_message(
                 llm_client=llm_client,
+                topic=topic,
                 correct_fields=correct_fields,
                 student_fields=student_fields,
                 conversation=existing.conversation,
@@ -466,6 +469,7 @@ async def handle_step_submission(
             conversation_so_far=[turn.model_dump() for turn in conversation],
             correct_step=correct_fields,
             student_step=student_fields,
+            topic=topic,
             protected_values=protected_values,
             repeat_count=consecutive,
             analogy_hint=analogy_hint,

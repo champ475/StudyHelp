@@ -47,5 +47,5 @@ def compare_to_expected(
                 FieldDiscrepancy(field=field, expected=expected_value, actual=actual_value)
             )
     total = len(expected_state)
-    agreement = matched / total if total else 1.0
+    agreement = round(matched / total, 4) if total else 1.0
     return discrepancies, agreement

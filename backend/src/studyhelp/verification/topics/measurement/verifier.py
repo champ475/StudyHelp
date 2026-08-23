@@ -154,7 +154,7 @@ class MeasurementVerifier:
         return VerifyResult(
             is_valid=False,
             matched_step_id=None,
-            confidence=1.0 - agreement,
+            confidence=round(1.0 - agreement, 4),
             error_signal=ErrorSignal(
                 kind="field_mismatch",
                 discrepant_fields=discrepancies,

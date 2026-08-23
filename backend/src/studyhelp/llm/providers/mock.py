@@ -15,6 +15,31 @@ from studyhelp.llm.client import (
     GenerateResponse,
 )
 
+# Short, topic-grounded focus phrase for the non-analogy procedural/
+# conceptual branch below — open-ended-review finding #3: that branch used
+# to be one static string regardless of topic, so two different topics'
+# first-ever mistake produced byte-identical mock text (confirmed in the
+# e2e sweep table), making mock-only manual testing hard to tell topics
+# apart by feel. `_DEFAULT_FOCUS` covers any topic not listed here so a
+# future topic never breaks this path.
+_TOPIC_FOCUS = {
+    "subtraction_with_borrowing": "how each column works",
+    "fractions_addition": "how the parts fit together",
+    "lcm_hcf": "how the numbers relate to each other",
+    "decimals": "how the place values line up",
+    "area_perimeter": "how the shape is measured",
+    "multiplication_division": "how the groups are built",
+    "measurement": "how the units connect",
+    "patterns": "how the pattern repeats",
+    "shapes_angles": "how the angle is shaped",
+    "how_many_squares": "how the squares are hiding in the grid",
+    "symmetry": "how the two sides match",
+    "mapping": "how the directions add up",
+    "boxes_sketches": "how the shape is built",
+    "smart_charts": "how the chart is read",
+}
+_DEFAULT_FOCUS = "the idea behind this step"
+
 
 class MockLLMProvider:
     def __init__(
@@ -121,13 +146,29 @@ class MockLLMProvider:
         else:
             # Short, simple sentences on purpose (Class-5 readability
             # gate) — a longer, concrete re-teach still has to stay easy
-            # to read, not just short.
-            message = (
-                "Let's slow down and look at the idea behind this step, not just the numbers. "
-                "Picture a much simpler version of this same kind of step, with easier numbers. "
-                "Notice what actually has to happen there. Now look back at your own step with "
-                "that same idea in mind. What do you notice that might need to change?"
-            )
+            # to read, not just short. Varies by topic (`_TOPIC_FOCUS`) and
+            # by `hint_level`, same mechanism the "careless" branch above
+            # already uses, so this branch isn't one fixed string either.
+            focus = _TOPIC_FOCUS.get(request.topic, _DEFAULT_FOCUS)
+            messages_by_hint_level = {
+                1: (
+                    f"Let's slow down and look at {focus}, not just the numbers. Picture a much "
+                    "simpler version of this same kind of step. Notice what actually has to "
+                    "happen there. Now look back at your own step. What do you notice that might "
+                    "need to change?"
+                ),
+                2: (
+                    f"Let's take this one part at a time and think about {focus}. Try a smaller, "
+                    "easier example of the same idea first. See what happens in that small "
+                    "example. Now try your own step again with that in mind."
+                ),
+                3: (
+                    f"Let's really slow down and focus on {focus}. Think of the simplest possible "
+                    "example of this idea. Walk through it slowly in your head. Then look at your "
+                    "own step once more. What is different?"
+                ),
+            }
+            message = messages_by_hint_level[hint_level]
         return GenerateResponse(
             message=message,
             expects_retry=True,

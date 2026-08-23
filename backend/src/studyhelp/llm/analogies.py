@@ -70,11 +70,61 @@ TOPIC_ANALOGIES: dict[str, str] = {
         "centimetres, is like reading the same weight on a different scale. The real amount does "
         "not change. Only how many small units it takes to say the same thing changes."
     ),
+    "patterns": (
+        "Think about a staircase. Each step is the same height as the one before it. That steady "
+        "jump from step to step is the pattern's rule. Once you know that jump, you can guess the "
+        "next step without climbing all the way there."
+    ),
+    # Deliberately never names a category word (the ones a real problem
+    # here could ask the student to classify an angle as) — this topic's
+    # possible answers are a small closed set of English words, not just
+    # numbers, so naming one directly in the analogy risks leaking the
+    # actual answer whenever that word happens to be it (confirmed live:
+    # an earlier draft that said "...is acute" got rejected by the
+    # leakage filter on exactly a problem whose real answer was "acute").
+    "shapes_angles": (
+        "Think about a clock's two hands. The corner they make between them can be small and "
+        "narrow, or wide and open. A very wide corner can even open all the way around, almost "
+        "back to where it started. Compare the corner in your own angle to a clock's hands to see "
+        "how far it opens."
+    ),
+    "how_many_squares": (
+        "Think about a chessboard. You can count the small squares one at a time. You can also "
+        "join four small squares together to make one bigger square. Keep looking for bigger "
+        "squares hiding inside the grid, not just the smallest ones."
+    ),
+    # Avoids the word "no" as a substring on purpose — some symmetry
+    # problems here ask a yes/no question, and contains_leakage() does
+    # plain substring matching, so an innocent word like "nothing" would
+    # otherwise falsely collide with a protected answer of "no".
+    "symmetry": (
+        "Think about folding a piece of paper in half. If both sides match exactly and line up "
+        "all the way, that fold line is a line of symmetry. Some shapes only fold perfectly one "
+        "way. Other shapes fold perfectly along more than one line."
+    ),
+    "mapping": (
+        "Think about giving directions to a friend. You say how many steps to take one way. Then "
+        "you say how many steps to take another way. Following each direction in order gets your "
+        "friend to the right spot."
+    ),
+    "boxes_sketches": (
+        "Think about a flat piece of cardboard before it is folded into a box. Flat, it is just a "
+        "few joined shapes. Once folded, those flat shapes become the box's faces. The lines where "
+        "they meet become its edges."
+    ),
+    "smart_charts": (
+        "Think about jars of marbles, one color for each group. A chart is just a picture of those "
+        "jars side by side. You can see which jar has the most, or the fewest, without counting "
+        "every single marble."
+    ),
 }
 
 
 def get_analogy(topic: str) -> str | None:
-    """`None` for a topic with no library entry (e.g. the light-check
-    chapters, which aren't multi-step numeric procedures) — the caller
-    treats that as "no analogy available," not an error."""
+    """`None` for a topic string with no library entry — the caller treats
+    that as "no analogy available," not an error. Every registered topic
+    (`verification/__init__.py`) has an entry, including the 7 light-check
+    chapters (added after the e2e sweep found a student stuck on the same
+    light-check mistake twice got the identical generic re-explanation
+    verbatim, with no register to switch to)."""
     return TOPIC_ANALOGIES.get(topic)

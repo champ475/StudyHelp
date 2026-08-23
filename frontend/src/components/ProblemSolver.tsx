@@ -108,9 +108,18 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
 
   useEffect(() => {
     if (!problem) return;
+    // Terminal means "no further DAG steps" (`next.length === 0`) — not a
+    // hardcoded type name. `write_final_answer` is only what the 7 heavy
+    // DAG topics call their terminal step; light-check topics use their
+    // own topic-specific type name (e.g. `patterns_next_term`), so keying
+    // off that string left every light-check problem's step box open
+    // forever after the student actually finished (found via this
+    // project's e2e sweep). Mirrors the backend's own `problem_is_complete`
+    // check (api/routes/sessions.py), which already uses `not
+    // target_node.next`, never a type-name check.
     const terminalReached = acceptedStepIds.some((id) => {
       const node = problem.step_graph.find((n) => n.step_id === id);
-      return node && node.type === "write_final_answer" && node.next.length === 0;
+      return node && node.next.length === 0;
     });
     setSolved(terminalReached);
   }, [problem, acceptedStepIds]);
