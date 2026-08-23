@@ -87,12 +87,21 @@ class MockLLMProvider:
         hint_level = min(len(request.conversation_so_far) // 2 + 1, 3)
         # Deterministic stand-in for what a real generate() call should also
         # produce (CLAUDE.md Bug2, llm/prompts.py's GENERATE_SYSTEM_PROMPT
-        # rules 3/8): a careless slip gets a short nudge; a procedural or
+        # rules 3/8/9): a careless slip gets a short nudge; a procedural or
         # conceptual error gets a real, concrete re-teaching explanation, not
-        # a one-line "look again"; and once the same step has been missed
-        # `repeat_count` times, the register switches to the fixed
-        # topic analogy (`llm/analogies.py`) instead of more numbers/rules.
-        if request.repeat_count >= 2 and request.analogy_hint:
+        # a one-line "look again". `analogy_hint` is only ever non-None when
+        # the orchestrator has already decided the register should switch —
+        # either the same step missed `REGISTER_SWITCH_REPEAT_THRESHOLD`
+        # times in a row, or the same misconception recurring across
+        # different steps/problems hit `TOPIC_REGISTER_SWITCH_THRESHOLD`
+        # (dialogue/orchestrator.py) — so its mere presence here is the
+        # trigger, not a repeat_count re-check.
+        if request.is_concept_check:
+            message = (
+                "Nice work fixing that! In your own words, why do you think that works? Try "
+                "telling yourself the idea in one sentence before you move on."
+            )
+        elif request.analogy_hint:
             message = (
                 f"Let's try this a different way. {request.analogy_hint} Now think about your "
                 "own step. What do you notice that might need to change?"

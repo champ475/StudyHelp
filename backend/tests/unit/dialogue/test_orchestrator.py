@@ -13,6 +13,7 @@ import pytest
 from studyhelp.classification.classifier import ClassificationResult
 from studyhelp.dialogue.orchestrator import (
     _FALLBACK_MESSAGE,
+    DialogueTurnResult,
     _protected_values,
     handle_step_submission,
 )
@@ -162,6 +163,156 @@ async def test_correct_retry_after_dialogue_resolves_and_clears_state(
     assert await store.get("s1", "p1") is None
 
 
+async def test_resolved_dialogue_includes_a_post_correct_concept_check_message(
+    store: DialogueStateStore,
+) -> None:
+    """Open-ended review finding #3: fixing an error shouldn't just silently
+    advance — one follow-up "why does that work?" message should accompany
+    the resolution, gated through the same generate() leakage/readability
+    pipeline as any other message (`is_concept_check=True`)."""
+    await handle_step_submission(
+        state_store=store,
+        llm_client=MockLLMProvider(),
+        session_id="s1",
+        problem_id="p1",
+        topic="subtraction_with_borrowing",
+        step_type="subtract_column",
+        correct_fields=_CORRECT_FIELDS,
+        student_fields=_WRONG_FIELDS,
+        verify_result=_INVALID_RESULT,
+        classification=None,
+        timing_policy=InterventionPolicy.IMMEDIATE,
+        problem_is_complete=False,
+    )
+    resolved = await handle_step_submission(
+        state_store=store,
+        llm_client=MockLLMProvider(),
+        session_id="s1",
+        problem_id="p1",
+        topic="subtraction_with_borrowing",
+        step_type="subtract_column",
+        correct_fields=_CORRECT_FIELDS,
+        student_fields=_CORRECT_FIELDS,
+        verify_result=_VALID_RESULT,
+        classification=None,
+        timing_policy=InterventionPolicy.IMMEDIATE,
+        problem_is_complete=False,
+    )
+    assert resolved.event == "resolved"
+    assert resolved.expects_retry is False
+    assert resolved.message is not None
+    assert "why do you think that works" in resolved.message.lower()
+
+
+async def test_clean_first_try_correct_answer_has_no_concept_check_message(
+    store: DialogueStateStore,
+) -> None:
+    """Bug3 scoping: a submission that was correct on the first try (no
+    prior error dialogue for this problem — including a clean skip-ahead
+    to the final answer) must take the plain no-op path, with no
+    concept-check message and no extra LLM call."""
+    result = await handle_step_submission(
+        state_store=store,
+        llm_client=MockLLMProvider(),
+        session_id="s1",
+        problem_id="p1",
+        topic="subtraction_with_borrowing",
+        step_type="subtract_column",
+        correct_fields=_CORRECT_FIELDS,
+        student_fields=_CORRECT_FIELDS,
+        verify_result=_VALID_RESULT,
+        classification=None,
+        timing_policy=InterventionPolicy.IMMEDIATE,
+        problem_is_complete=True,
+    )
+    assert result.event == "no_action"
+    assert result.message is None
+
+
+async def test_topic_weakness_across_different_steps_and_problems_triggers_analogy_switch(
+    store: DialogueStateStore,
+) -> None:
+    """Open-ended review finding #2 regression: the SAME misconception
+    recurring across DIFFERENT steps and DIFFERENT problems — never twice
+    in a row on any single step, so `REGISTER_SWITCH_REPEAT_THRESHOLD`
+    never fires — must still eventually switch the register once
+    `TOPIC_REGISTER_SWITCH_THRESHOLD` is reached."""
+    classification = ClassificationResult(
+        source="rule",
+        misconception_id="subtraction_borrowing.smaller_from_larger",
+        bug_code="B1-smaller-from-larger",
+        confidence="high",
+    )
+    last_result: DialogueTurnResult | None = None
+    for index, step_id in enumerate(["s3_sub_units", "s4_sub_tens", "s5_sub_hundreds"]):
+        wrong_result = VerifyResult(
+            is_valid=False,
+            matched_step_id=None,
+            confidence=0.75,
+            error_signal=ErrorSignal(kind="field_mismatch", nearest_matched_step_id=step_id),
+        )
+        last_result = await handle_step_submission(
+            state_store=store,
+            llm_client=MockLLMProvider(),
+            session_id="s-topic-weak",
+            problem_id=f"p{index}",
+            topic="subtraction_with_borrowing",
+            step_type="subtract_column",
+            correct_fields=_CORRECT_FIELDS,
+            student_fields=_WRONG_FIELDS,
+            verify_result=wrong_result,
+            classification=classification,
+            timing_policy=InterventionPolicy.IMMEDIATE,
+            problem_is_complete=False,
+        )
+        assert last_result.event == "explaining"
+        if index < 2:
+            # Different step every time -> the same-step counter never
+            # reaches its own threshold on its own.
+            assert "trading" not in last_result.message.lower()
+
+    assert last_result is not None
+    assert last_result.message is not None
+    assert "trading" in last_result.message.lower()  # subtraction's analogy, switched in
+
+
+async def test_topic_weakness_not_tracked_for_unclassified_novel_errors(
+    store: DialogueStateStore,
+) -> None:
+    """An error with no rule/misconception identifier at all (`source`
+    "novel", both ids `None`) has nothing concrete to accumulate against —
+    repeating it many times on different steps must not trip the
+    topic-broadened switch."""
+    novel = ClassificationResult(
+        source="novel", misconception_id=None, bug_code=None, confidence="low"
+    )
+    last_result: DialogueTurnResult | None = None
+    for index, step_id in enumerate(["s3", "s4", "s5", "s6"]):
+        wrong_result = VerifyResult(
+            is_valid=False,
+            matched_step_id=None,
+            confidence=0.75,
+            error_signal=ErrorSignal(kind="field_mismatch", nearest_matched_step_id=step_id),
+        )
+        last_result = await handle_step_submission(
+            state_store=store,
+            llm_client=MockLLMProvider(),
+            session_id="s-novel-weak",
+            problem_id=f"p{index}",
+            topic="subtraction_with_borrowing",
+            step_type="subtract_column",
+            correct_fields=_CORRECT_FIELDS,
+            student_fields=_WRONG_FIELDS,
+            verify_result=wrong_result,
+            classification=novel,
+            timing_policy=InterventionPolicy.IMMEDIATE,
+            problem_is_complete=False,
+        )
+    assert last_result is not None
+    assert last_result.message is not None
+    assert "trading" not in last_result.message.lower()
+
+
 async def test_turn_budget_exhausted_escalates_with_worked_example(
     store: DialogueStateStore,
 ) -> None:
@@ -202,8 +353,9 @@ async def test_turn_budget_exhausted_escalates_with_worked_example(
     assert escalated.expects_retry is False
     assert escalated.message is not None
     assert (
-        "result digit is 7" in escalated.message
+        "result here is 7" in escalated.message
     )  # the worked example reveals the answer, by design
+    assert "You've worked hard" in escalated.message  # warm framing, not a raw field dump
     assert await store.get("s1", "p1") is None  # cleared, not left dangling
 
 

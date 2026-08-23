@@ -83,6 +83,7 @@ class GroqLLMProvider:
             "student_step": request.student_step,
             "repeat_count": request.repeat_count,
             "analogy_hint": request.analogy_hint,
+            "is_concept_check": request.is_concept_check,
         }
         if request.regeneration_feedback is not None:
             payload["regeneration_feedback"] = request.regeneration_feedback

@@ -66,3 +66,28 @@ class DialogueStateStore:
 
     async def delete(self, session_id: str, problem_id: str) -> None:
         await self._redis.delete(self._key(session_id, problem_id))
+
+    def _topic_weakness_key(self, session_id: str, topic: str, misconception_key: str) -> str:
+        return f"weak_concept:{session_id}:{topic}:{misconception_key}"
+
+    async def increment_topic_weakness(
+        self, session_id: str, topic: str, misconception_key: str
+    ) -> int:
+        """Session-scoped count of how many times this session has now
+        been classified with this exact (topic, misconception) pairing —
+        broader than `consecutive_errors_on_this_step` (same *step* only):
+        this accumulates across different problems and different steps
+        within the same weak concept, so a student who is generally shaky
+        on a concept (not just stuck on one specific step) still reaches
+        the register-switch-to-analogy threshold (`dialogue/orchestrator.py`
+        `TOPIC_REGISTER_SWITCH_THRESHOLD`, open-ended review finding #2).
+
+        An ephemeral orchestration signal, not a durable record: never
+        explicitly reset (only expires via the same TTL as every other key
+        here), and recomputable from the Postgres event log's
+        classification events if ever lost — Redis stays active-cache-only
+        (ARCHITECTURE.md); Postgres remains the source of truth."""
+        key = self._topic_weakness_key(session_id, topic, misconception_key)
+        count = await self._redis.incr(key)
+        await self._redis.expire(key, self._ttl_seconds)
+        return int(count)

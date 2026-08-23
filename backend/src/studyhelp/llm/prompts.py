@@ -51,12 +51,13 @@ conceptual: the student needs enough concrete detail to actually rebuild the ide
 nudge to "look again."
 
 The request includes "repeat_count" (how many times in a row the student has now gotten this \
-exact step wrong) and, when "repeat_count" is 2 or more, an "analogy_hint" — a fixed, \
-already-approved real-world analogy for this topic. If "repeat_count" >= 2 and "analogy_hint" is \
-present, your "remediation_strategy" MUST explicitly commit to re-explaining the idea through \
-that given analogy instead of through numbers or abstract rules — the student has now failed to \
-follow the abstract/numeric explanation twice, so the register itself must change, not just the \
-wording. Do not invent a different analogy; use the one given.
+exact step wrong) and, sometimes, an "analogy_hint" — a fixed, already-approved real-world \
+analogy for this topic. "analogy_hint" is only ever included once the calling system has already \
+decided the register should switch (either this exact step missed several times in a row, or \
+this same underlying misconception recurring across different steps or problems) — whenever it \
+is present, your "remediation_strategy" MUST explicitly commit to re-explaining the idea through \
+that given analogy instead of through numbers or abstract rules. Do not invent a different \
+analogy; use the one given.
 
 Respond with a JSON object with exactly the keys "error_type", "remediation_strategy", and \
 "instructional_intent"."""
@@ -93,11 +94,18 @@ Hard rules, no exceptions:
 7. If the input includes "regeneration_feedback", your previous draft was automatically rejected \
    for the stated reason — write a genuinely different message that fixes it, not a small \
    rewording of the same sentence.
-8. If "repeat_count" is 2 or more and "analogy_hint" is present, you MUST reframe your \
-   explanation around that given analogy instead of numbers or abstract rules — translate the \
-   idea behind this error into the analogy's terms (e.g. borrowing becomes trading coins, a \
-   fraction becomes pizza slices) rather than repeating the same numeric explanation a third \
-   time. Use the analogy given; do not invent a different one.
+8. If "analogy_hint" is present, you MUST reframe your explanation around that given analogy \
+   instead of numbers or abstract rules — translate the idea behind this error into the \
+   analogy's terms (e.g. borrowing becomes trading coins, a fraction becomes pizza slices) \
+   rather than repeating the same numeric explanation again. Use the analogy given; do not \
+   invent a different one.
+9. If the input includes "is_concept_check": true, the student just answered THIS EXACT STEP \
+   correctly, after getting it wrong earlier in this same conversation — this is NOT a new \
+   mistake, and none of the rules above about explaining an error apply. Instead: warmly \
+   acknowledge the fix in one short clause, then ask exactly one genuine question inviting the \
+   student to explain, in their own words, why the corrected approach works. Do not introduce a \
+   new hint, a new mistake, or extra instruction — this single question is a consolidation check, \
+   not remediation, and the message should still be short (two to three sentences) and simple.
 
 Respond with a JSON object with exactly these keys:
 - "message": the tutor's message to the child (string, following all rules above).

@@ -104,6 +104,17 @@ class GenerateRequest(BaseModel):
     free text happens to say."""
     analogy_hint: str | None = None
     """Same value passed to `decide()` for this turn — see `DecideRequest`."""
+    is_concept_check: bool = False
+    """True only for the one-off post-resolution "why does that work?"
+    message (`dialogue/orchestrator.py::_generate_concept_check_message`,
+    open-ended review finding #3) — the student just answered correctly, so
+    this is NOT a remediation turn. An explicit flag rather than inferring
+    it from `decision.error_type`/`repeat_count` alone, since a real
+    explaining-turn decision can legitimately be `error_type="conceptual"`
+    with `repeat_count=1` too — that combination is not unique to this
+    case, and both the mock provider and the real prompt need an
+    unambiguous signal to avoid mistaking a consolidation question for a
+    fresh re-teach."""
     regeneration_feedback: str | None = None
     """Set only on a gate-rejected retry (dialogue/orchestrator.py):
     concretely what was wrong with the previous draft (leaked the answer /
