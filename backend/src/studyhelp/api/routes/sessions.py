@@ -232,6 +232,7 @@ async def _pipeline_events(
             classification=classification,
             timing_policy=request.timing_policy,
             problem_is_complete=problem_is_complete,
+            given=problem.given,
         )
     except Exception:
         # The verifier's verdict already streamed and is durable regardless

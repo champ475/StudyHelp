@@ -26,6 +26,7 @@ from studyhelp.dialogue.state import (
     DialogueStateName,
     DialogueStateStore,
 )
+from studyhelp.dialogue.step_family import resolve_step_family
 from studyhelp.dialogue.timing_policy import InterventionPolicy, should_intervene
 from studyhelp.llm.analogies import get_analogy
 from studyhelp.llm.client import (
@@ -36,6 +37,7 @@ from studyhelp.llm.client import (
     LLMClient,
 )
 from studyhelp.logging import get_logger
+from studyhelp.protected_fields import PROTECTED_INT_KEYS, PROTECTED_STR_VALUES_BY_KEY
 from studyhelp.schemas.verify import VerifyResult
 
 logger = get_logger(__name__)
@@ -78,30 +80,20 @@ class DialogueTurnResult:
 
 def _protected_values(correct_fields: dict[str, Any]) -> list[int | str]:
     """Which fields constitute "the answer" depends on the step's own
-    shape: `result_digit`/`value`/`to_digit_after` are output-defining;
-    input digits (already visible to the student on the widget) aren't
-    secret. Topic-agnostic by construction — no field name here is
-    specific to a step *type* the way `verification/topics/...` is.
-    `op` is the one non-numeric answer (fractions' `compare_fractions`
-    step: "<"/">"/"=" is literally the answer to a comparison problem)."""
+    shape: output-defining fields (`PROTECTED_INT_KEYS`,
+    `PROTECTED_STR_VALUES_BY_KEY`) are protected; input digits (already
+    visible to the student on the widget) aren't secret. Topic-agnostic by
+    construction — no field name here is specific to a step *type* the way
+    `verification/topics/...` is."""
     values: list[int | str] = []
-    for key in (
-        "result_digit",
-        "value",
-        "to_digit_after",
-        "num",
-        "den",
-        "left_num",
-        "left_den",
-        "right_num",
-        "right_den",
-    ):
+    for key in PROTECTED_INT_KEYS:
         value = correct_fields.get(key)
         if isinstance(value, int):
             values.append(value)
-    op = correct_fields.get("op")
-    if isinstance(op, str) and op in ("<", ">", "="):
-        values.append(op)
+    for key, protected_str_values in PROTECTED_STR_VALUES_BY_KEY.items():
+        value = correct_fields.get(key)
+        if isinstance(value, str) and value in protected_str_values:
+            values.append(value)
     # The 7 light-check topics' (and `patterns`' two step types') answer
     # field: a bare word or number rather than one of the numeric keys
     # above (e.g. "acute", "Tuesday", "0" lines of symmetry). Without this,
@@ -234,6 +226,8 @@ async def _generate_concept_check_message(
     *,
     llm_client: LLMClient,
     topic: str,
+    step_type: str,
+    given: dict[str, Any],
     correct_fields: dict[str, Any],
     student_fields: dict[str, Any],
     conversation: list[ConversationTurn],
@@ -280,6 +274,8 @@ async def _generate_concept_check_message(
             correct_step=correct_fields,
             student_step=student_fields,
             topic=topic,
+            step_type=step_type,
+            given=given,
             protected_values=protected_values,
             is_concept_check=True,
             regeneration_feedback=feedback,
@@ -313,6 +309,7 @@ async def handle_step_submission(
     classification: ClassificationResult | None,
     timing_policy: InterventionPolicy,
     problem_is_complete: bool,
+    given: dict[str, Any] | None = None,
     readability_max_grade: float | None = None,
     turn_budget: int | None = None,
 ) -> DialogueTurnResult:
@@ -323,6 +320,7 @@ async def handle_step_submission(
         else settings.readability_max_grade
     )
     resolved_turn_budget = turn_budget if turn_budget is not None else settings.dialogue_turn_budget
+    resolved_given = given if given is not None else {}
 
     existing = await state_store.get(session_id, problem_id)
 
@@ -347,6 +345,8 @@ async def handle_step_submission(
             concept_check_message = await _generate_concept_check_message(
                 llm_client=llm_client,
                 topic=topic,
+                step_type=step_type,
+                given=resolved_given,
                 correct_fields=correct_fields,
                 student_fields=student_fields,
                 conversation=existing.conversation,
@@ -441,8 +441,9 @@ async def handle_step_submission(
         else 1
     )
 
+    step_family = resolve_step_family(topic, step_type, resolved_given)
     analogy_hint = (
-        get_analogy(topic)
+        get_analogy(topic, step_family)
         if consecutive >= REGISTER_SWITCH_REPEAT_THRESHOLD
         or topic_repeat_count >= TOPIC_REGISTER_SWITCH_THRESHOLD
         else None
@@ -458,6 +459,7 @@ async def handle_step_submission(
             turn_number=turn_count,
             repeat_count=consecutive,
             analogy_hint=analogy_hint,
+            given=resolved_given,
         )
     )
 
@@ -470,6 +472,8 @@ async def handle_step_submission(
             correct_step=correct_fields,
             student_step=student_fields,
             topic=topic,
+            step_type=step_type,
+            given=resolved_given,
             protected_values=protected_values,
             repeat_count=consecutive,
             analogy_hint=analogy_hint,

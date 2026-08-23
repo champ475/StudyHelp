@@ -7,6 +7,8 @@ that the leakage/readability gates actually reject a bad draft and fall
 back to a safe canned message rather than ever returning it.
 """
 
+import importlib
+
 import fakeredis
 import pytest
 
@@ -28,6 +30,7 @@ from studyhelp.llm.client import (
     GenerateResponse,
 )
 from studyhelp.llm.providers.mock import MockLLMProvider
+from studyhelp.protected_fields import PROTECTED_INT_KEYS, PROTECTED_STR_VALUES_BY_KEY
 from studyhelp.schemas.verify import ErrorSignal, VerifyResult
 
 _CORRECT_FIELDS = {"column": "units", "minuend_digit": 12, "subtrahend_digit": 5, "result_digit": 7}
@@ -512,6 +515,169 @@ async def test_repeated_error_on_same_step_switches_to_concrete_analogy(
     assert second.event == "explaining"
     assert second.message is not None
     assert "trading" in second.message.lower()  # subtraction's analogy: trading coins
+
+
+async def test_repeated_error_on_area_step_uses_area_specific_analogy(
+    store: DialogueStateStore,
+) -> None:
+    """CLAUDE.md live-testing Bug D regression: a pure-area step's repeated-
+    error analogy must be grounded in area (tiles), never the topic-wide
+    entry that also talks about walking the perimeter's edge."""
+    area_fields = {"length": 6, "width": 4, "result": 24}
+    kwargs = dict(
+        state_store=store,
+        llm_client=MockLLMProvider(),
+        session_id="s-area",
+        problem_id="p-area",
+        topic="area_perimeter",
+        step_type="compute_area",
+        correct_fields=area_fields,
+        student_fields={"length": 6, "width": 4, "result": 20},
+        verify_result=_INVALID_RESULT,
+        classification=None,
+        timing_policy=InterventionPolicy.IMMEDIATE,
+        problem_is_complete=False,
+        given={"shape": "rectangle", "length": 6, "width": 4, "measure": "area"},
+    )
+    await handle_step_submission(**kwargs)  # type: ignore[arg-type]
+    second = await handle_step_submission(**kwargs)  # type: ignore[arg-type]
+    assert second.message is not None
+    assert "tile" in second.message.lower()
+    assert "walk" not in second.message.lower()
+    assert "edge" not in second.message.lower()
+
+
+async def test_repeated_error_on_perimeter_step_uses_perimeter_specific_analogy(
+    store: DialogueStateStore,
+) -> None:
+    kwargs = dict(
+        state_store=store,
+        llm_client=MockLLMProvider(),
+        session_id="s-perim",
+        problem_id="p-perim",
+        topic="area_perimeter",
+        step_type="compute_perimeter",
+        correct_fields={"length": 6, "width": 4, "result": 20},
+        student_fields={"length": 6, "width": 4, "result": 24},
+        verify_result=_INVALID_RESULT,
+        classification=None,
+        timing_policy=InterventionPolicy.IMMEDIATE,
+        problem_is_complete=False,
+        given={"shape": "rectangle", "length": 6, "width": 4, "measure": "perimeter"},
+    )
+    await handle_step_submission(**kwargs)  # type: ignore[arg-type]
+    second = await handle_step_submission(**kwargs)  # type: ignore[arg-type]
+    assert second.message is not None
+    assert "walk" in second.message.lower() or "edge" in second.message.lower()
+    assert "tile" not in second.message.lower()
+
+
+async def test_generate_request_carries_step_type_and_given(store: DialogueStateStore) -> None:
+    """`GenerateRequest` must actually receive `step_type`/`given`, not just
+    `DecideRequest` — until this fix, `generate()` had no direct anchor to
+    which operation a step performs and (confirmed live) sometimes drifted
+    into describing a different one (CLAUDE.md live-testing Bug D)."""
+    client = _CapturingLLMClient(
+        first_message="This step just needs a careful look, nothing more to say here.",
+        retry_message="Let's try that again, thinking it through slowly this time together.",
+    )
+    given = {"shape": "rectangle", "length": 6, "width": 4, "measure": "area"}
+    await handle_step_submission(
+        state_store=store,
+        llm_client=client,
+        session_id="s-gt",
+        problem_id="p-gt",
+        topic="area_perimeter",
+        step_type="compute_area",
+        correct_fields={"length": 6, "width": 4, "result": 24},
+        student_fields={"length": 6, "width": 4, "result": 20},
+        verify_result=_INVALID_RESULT,
+        classification=None,
+        timing_policy=InterventionPolicy.IMMEDIATE,
+        problem_is_complete=False,
+        given=given,
+    )
+    assert client.generate_requests
+    assert client.generate_requests[0].step_type == "compute_area"
+    assert client.generate_requests[0].given == given
+
+
+# ---------------------------------------------------------------------------
+# Systemic guard (CLAUDE.md live-testing Bug D): cross-check
+# `PROTECTED_INT_KEYS`/`PROTECTED_STR_VALUES_BY_KEY` against every heavy-DAG
+# topic's actual `step_checkers.py` field models, so a future topic's new
+# answer-output field name can't silently repeat the gap this round found
+# (area_perimeter's `result`, decimals' `result_hundredths`,
+# multiplication_division's `product`/`quotient_digit`/`remainder`, etc. —
+# fields that had NO protected value at all, meaning the leakage filter
+# could never reject anything for those step types).
+# ---------------------------------------------------------------------------
+
+_HEAVY_DAG_TOPICS = (
+    "area_perimeter",
+    "decimals",
+    "fractions_addition",
+    "lcm_hcf",
+    "measurement",
+    "multiplication_division",
+    "subtraction_borrowing",
+)
+
+# Field names that are always visible, non-secret INPUT (already shown to
+# the student on the widget before they submit anything), by design — not
+# every field in a step's expected_state is the answer.
+_VISIBLE_INPUT_FIELDS = {
+    "column",
+    "from_column",
+    "to_column",
+    "minuend_digit",
+    "subtrahend_digit",
+    "from_digit_before",
+    "to_digit_before",
+    "borrow_needed",
+    "digit",
+    "multiplier",
+    "dividend_group",
+    "divisor",
+    "a_hundredths",
+    "b_hundredths",
+    "length",
+    "width",
+    "values",
+}
+
+# Field names whose protection is context-dependent (only some of their
+# possible values are the answer) and are already special-cased inside
+# `_protected_values()` rather than living in `PROTECTED_INT_KEYS`.
+_SPECIALLY_HANDLED_FIELDS = {"op", "direction", "digits", "answer"}
+
+
+def test_every_topics_answer_fields_are_protected() -> None:
+    for topic in _HEAVY_DAG_TOPICS:
+        module = importlib.import_module(f"studyhelp.verification.topics.{topic}.step_checkers")
+        for step_type, model in module.STEP_TYPE_FIELD_MODELS.items():
+            for field_name, field_info in model.model_fields.items():
+                if field_name in _VISIBLE_INPUT_FIELDS or field_name in _SPECIALLY_HANDLED_FIELDS:
+                    continue
+                annotation = field_info.annotation
+                is_plain_int = annotation is int or annotation == (int | None)
+                is_plain_str = annotation is str
+                if not (is_plain_int or is_plain_str):
+                    # Anything else (bool, list[int], a bare Literal type
+                    # alias not already in `_VISIBLE_INPUT_FIELDS`) is out
+                    # of this check's scope — extend the allowlists above
+                    # or `_protected_values()` deliberately if a future
+                    # topic adds one that's actually answer-bearing.
+                    continue
+                in_int_keys = is_plain_int and field_name in PROTECTED_INT_KEYS
+                in_str_keys = is_plain_str and field_name in PROTECTED_STR_VALUES_BY_KEY
+                assert in_int_keys or in_str_keys, (
+                    f"{topic}.{step_type}.{field_name} (type {annotation}) is not classified as "
+                    "either a protected answer field or a known-safe visible-input field — "
+                    "classify it explicitly in orchestrator.py's PROTECTED_INT_KEYS/"
+                    "PROTECTED_STR_VALUES_BY_KEY (if it's answer-bearing) or this test's "
+                    "_VISIBLE_INPUT_FIELDS (if it's always visible, non-secret input)"
+                )
 
 
 def test_protected_values_covers_light_check_word_answers() -> None:

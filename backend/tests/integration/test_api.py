@@ -89,6 +89,36 @@ async def test_public_problem_endpoint_never_exposes_answers(client: AsyncClient
     assert "27" not in raw_body  # the final answer to 52-25, must never appear
 
 
+async def test_public_problem_endpoint_redacts_given_fields_that_duplicate_a_step_answer(
+    client: AsyncClient,
+) -> None:
+    """CLAUDE.md full-system-audit regression: `measurement-001`'s `given`
+    dict includes `direction`/`factor`, which are ALSO the exact
+    `expected_state` of the problem's first step (`identify_conversion_factor`)
+    — before this fix, every measurement problem shipped the answer to its
+    own first step in this endpoint's plain JSON on page load, no LLM or
+    dialogue turn involved at all. `given.value` (the "3" in "3 km to m")
+    must still come through — it's genuine, non-secret input, not a
+    duplicate of any step's answer, even though it shares a key name with
+    `write_final_answer`'s answer-bearing `value` field."""
+    response = await client.get("/problems/measurement-001")
+    assert response.status_code == 200
+    body = response.json()
+
+    assert body["given"] == {
+        "value": 3,
+        "from_unit": "km",
+        "to_unit": "m",
+        "category": "length",
+    }
+    assert "direction" not in body["given"]
+    assert "factor" not in body["given"]
+
+    raw_body = response.text
+    assert "1000" not in raw_body  # the conversion factor, must never appear
+    assert "3000" not in raw_body  # the final answer, must never appear
+
+
 async def test_public_problem_endpoint_unknown_problem_returns_404(client: AsyncClient) -> None:
     response = await client.get("/problems/does-not-exist")
     assert response.status_code == 404

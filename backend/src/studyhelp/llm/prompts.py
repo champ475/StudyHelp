@@ -50,6 +50,14 @@ everything, and do not settle for a vague one-line hint when the error is proced
 conceptual: the student needs enough concrete detail to actually rebuild the idea, not just a \
 nudge to "look again."
 
+The request also includes "given" — the problem's visible input values (never secret, already \
+shown to the student). Use it alongside "step_type" and "correct_step" to identify EXACTLY which \
+arithmetic operation this specific step performs, and name that operation precisely in \
+"remediation_strategy" — do not describe or plan around a different operation than the one this \
+step actually does (e.g. a step whose "correct_step" shows a multiplication result must be \
+remediated as multiplication, never as addition or "adding up a total"; a step about area must \
+stay about area, never drift into perimeter, even if the same chapter also covers perimeter).
+
 The request includes "repeat_count" (how many times in a row the student has now gotten this \
 exact step wrong) and, sometimes, an "analogy_hint" — a fixed, already-approved real-world \
 analogy for this topic. "analogy_hint" is only ever included once the calling system has already \
@@ -105,7 +113,16 @@ Hard rules, no exceptions:
    analogy's terms (e.g. borrowing becomes trading coins, a fraction becomes pizza slices) \
    rather than repeating the same numeric explanation again. Use the analogy given; do not \
    invent a different one.
-9. If the input includes "is_concept_check": true, the student just answered THIS EXACT STEP \
+9. Ground everything in "step_type" and "given" (the problem's visible input values) as well as \
+   "correct_step" — before writing, identify the EXACT arithmetic operation this step performs \
+   (e.g. "step_type": "compute_area" with "given": {{"measure": "area", ...}} means this step is \
+   about multiplying length by width, full stop). Never describe, question, or build a worked \
+   example around a DIFFERENT operation than the one this step actually performs — do not say \
+   "add up" or "total" for a multiplication or area step, do not say "walk around the edge" for \
+   an area step, do not say "share into groups" for a multiplication step. If the topic's chapter \
+   covers more than one operation (e.g. area AND perimeter, multiply AND divide, LCM AND HCF), \
+   "step_type"/"given" tell you which ONE this particular step is — stay on that one only.
+10. If the input includes "is_concept_check": true, the student just answered THIS EXACT STEP \
    correctly, after getting it wrong earlier in this same conversation — this is NOT a new \
    mistake, and none of the rules above about explaining an error apply. Instead: warmly \
    acknowledge the fix in one short clause, then invite the student to think for a moment about \

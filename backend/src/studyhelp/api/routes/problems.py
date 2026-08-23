@@ -16,7 +16,8 @@ from studyhelp.db.models import StepType as StepTypeRow
 from studyhelp.db.repositories.event_repository import log_event
 from studyhelp.db.repositories.problem_repository import get_problem, list_problems
 from studyhelp.logging import get_logger
-from studyhelp.schemas.step_schema import AltPath, NcertRef
+from studyhelp.protected_fields import PROTECTED_INT_KEYS, PROTECTED_STR_VALUES_BY_KEY
+from studyhelp.schemas.step_schema import AltPath, NcertRef, Problem
 from studyhelp.schemas.verify import ProblemState, StudentStep, VerifyResult
 from studyhelp.verification.interface import registry
 
@@ -75,6 +76,44 @@ class PublicProblem(BaseModel):
     alt_paths: list[AltPath]
 
 
+def _public_given(problem: Problem) -> dict[str, Any]:
+    """Redacts any `Problem.given` key whose value is ALSO answer-bearing,
+    before `given` ever reaches this browser-reachable endpoint.
+
+    Found live (CLAUDE.md full-system audit, same session as Bug D):
+    `measurement`'s `given` dict includes `direction`/`factor`, which are
+    *also* the exact `expected_state` of that problem's first step
+    (`identify_conversion_factor`) — every measurement problem shipped the
+    answer to its own first step in this endpoint's plain JSON response,
+    readable straight out of the browser's network tab on page load, no
+    LLM or dialogue turn involved at all.
+
+    Can't simply drop every key named in `PROTECTED_INT_KEYS` wholesale —
+    `given.value` (e.g. "3" in "3 km to m") is legitimate, non-secret input
+    under the SAME key name that means "the answer" inside a step's
+    `expected_state` (e.g. `write_final_answer`'s `value: 3000`); blanket
+    key-name redaction would silently strip real, needed input. Instead,
+    redact a `given` key only when it's a `PROTECTED_INT_KEYS`/
+    `PROTECTED_STR_VALUES_BY_KEY` field AND its value is IDENTICAL to that
+    same key's value in some step's own `expected_state` elsewhere in this
+    problem — a provable duplicate of a real answer, not a coincidentally
+    reused key name."""
+    protected_pairs: set[tuple[str, object]] = set()
+    for node in problem.step_graph:
+        for key, value in node.expected_state.items():
+            if (key in PROTECTED_INT_KEYS and isinstance(value, int)) or (
+                key in PROTECTED_STR_VALUES_BY_KEY
+                and isinstance(value, str)
+                and value in PROTECTED_STR_VALUES_BY_KEY[key]
+            ):
+                protected_pairs.add((key, value))
+    return {
+        key: value
+        for key, value in problem.given.items()
+        if (key, value) not in protected_pairs
+    }
+
+
 async def _step_type_hints(session: AsyncSession, topic: str) -> dict[str, str]:
     stmt = select(StepTypeRow.step_type_key, StepTypeRow.description).where(
         StepTypeRow.topic == topic
@@ -95,7 +134,7 @@ async def get_problem_public(
         problem_id=problem.problem_id,
         ncert_ref=problem.ncert_ref,
         display_label=problem.display_label,
-        given=problem.given,
+        given=_public_given(problem),
         step_graph=[
             PublicStepNode(
                 step_id=node.step_id,

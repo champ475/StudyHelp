@@ -14,6 +14,18 @@ and hands it to both the `decide()` and `generate()` calls as a fixed
 ingredient — the LLM's job is to *use* the given analogy well, not to
 choose or invent one.
 
+Three topics' chapters genuinely cover two distinct operations rather than
+one continuous idea (area_perimeter: area vs. perimeter; multiplication_division:
+multiply vs. divide; lcm_hcf: LCM vs. HCF) — a single topic-wide entry for
+these conflated both operations into one analogy, so a student stuck on a
+pure area step got perimeter language folded in too (CLAUDE.md live-testing
+Bug D: "Area of a 6x4 rectangle" produced an analogy that also talked about
+"walking around the edge"). `STEP_FAMILY_ANALOGIES` below overrides the
+topic-wide entry for those three topics, keyed by `dialogue/step_family.py`'s
+`resolve_step_family()` output; `get_analogy()` falls back to the topic-wide
+entry only when no family-specific one applies (every other topic, or a step
+whose family couldn't be resolved).
+
 Two constraints every entry must keep, both enforced by
 `tests/unit/llm/test_analogies.py`:
 - No bare digits. The leakage filter (`dialogue/leakage_filter.py`) rejects
@@ -120,11 +132,53 @@ TOPIC_ANALOGIES: dict[str, str] = {
 }
 
 
-def get_analogy(topic: str) -> str | None:
+STEP_FAMILY_ANALOGIES: dict[tuple[str, str], str] = {
+    ("area_perimeter", "area"): (
+        "Think about covering a garden bed with square floor tiles, all the same size, with no "
+        "gaps and no overlaps. Area is how many of those tiles it takes to cover the whole bed. "
+        "Rows of tiles going one way, and columns going the other way, together fill the space."
+    ),
+    ("area_perimeter", "perimeter"): (
+        "Think about walking once all the way around the edge of a garden, along the fence. "
+        "Perimeter is the total distance you would walk. You add up the length of every side of "
+        "the fence you pass, all the way back to where you started."
+    ),
+    ("multiplication_division", "multiply"): (
+        "Think about counters arranged in equal rows, like eggs in a carton. Multiplication is a "
+        "fast way to count every counter in all those equal rows together."
+    ),
+    ("multiplication_division", "divide"): (
+        "Think about a pile of counters that you share out evenly into equal groups, one at a "
+        "time, going around and around until none are left. Division tells you how many end up in "
+        "each group, or how many groups you can make."
+    ),
+    ("lcm_hcf", "lcm"): (
+        "Think about two buses at the same bus stop. One bus comes back again and again on its "
+        "own schedule. The other bus comes back on a different schedule. The LCM is the first "
+        "time both buses arrive together again."
+    ),
+    ("lcm_hcf", "hcf"): (
+        "Think about splitting two different-sized teams into smaller groups, so every group, from "
+        "either team, ends up the exact same size, with nobody left over. The HCF is the biggest "
+        "group size that works for both teams at once."
+    ),
+}
+
+
+def get_analogy(topic: str, step_family: str | None = None) -> str | None:
     """`None` for a topic string with no library entry — the caller treats
     that as "no analogy available," not an error. Every registered topic
     (`verification/__init__.py`) has an entry, including the 7 light-check
     chapters (added after the e2e sweep found a student stuck on the same
     light-check mistake twice got the identical generic re-explanation
-    verbatim, with no register to switch to)."""
+    verbatim, with no register to switch to).
+
+    `step_family` (`dialogue/step_family.py::resolve_step_family()`) selects
+    a more specific entry for the three topics that mix two distinct
+    operations under one topic string — falls back to the topic-wide entry
+    when `step_family` is `None` or has no override."""
+    if step_family is not None:
+        family_entry = STEP_FAMILY_ANALOGIES.get((topic, step_family))
+        if family_entry is not None:
+            return family_entry
     return TOPIC_ANALOGIES.get(topic)

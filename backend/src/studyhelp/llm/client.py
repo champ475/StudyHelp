@@ -77,6 +77,14 @@ class DecideRequest(BaseModel):
     `repeat_count >= 2` — deterministically retrieved by application code,
     never left to the model to invent (see that module's docstring).
     `None` when `repeat_count < 2` or the topic has no library entry."""
+    given: dict[str, Any] = Field(default_factory=dict)
+    """The problem's visible input values (`Problem.given` — already shown
+    to the student in the UI, never secret, unlike `correct_step`). Extra
+    grounding context alongside `correct_step`/`step_type`, for topics whose
+    chapter mixes more than one operation under one topic string (e.g.
+    area_perimeter's `given.measure`, lcm_hcf's `given.op`) — `correct_step`
+    alone doesn't always carry which operation a step belongs to (CLAUDE.md
+    live-testing Bug D)."""
 
 
 class DecideResponse(BaseModel):
@@ -98,11 +106,24 @@ class GenerateRequest(BaseModel):
     student_step: dict[str, Any]
     topic: str = ""
     """Same topic string passed to `decide()` — see `DecideRequest.topic`.
-    Not needed by the real prompt (the model already has `correct_step` for
-    grounding) but lets `llm/providers/mock.py` vary its deterministic
-    procedural/conceptual phrasing per topic, not just per `hint_level`, so
-    mock-only manual testing isn't misleadingly identical across every
-    topic's first-ever mistake."""
+    Lets `llm/providers/mock.py` vary its deterministic procedural/conceptual
+    phrasing per topic, not just per `hint_level`, so mock-only manual
+    testing isn't misleadingly identical across every topic's first-ever
+    mistake."""
+    step_type: str = ""
+    """Same step_type passed to `decide()` (`DecideRequest.step_type`) but,
+    until CLAUDE.md live-testing Bug D, never threaded to `generate()` at
+    all — the real prompt had to infer the actual operation this step
+    performs purely from `correct_step`'s field names, and (confirmed live)
+    sometimes drifted to describing a different operation entirely (e.g. an
+    "adding up a total" explanation for a multiplication step). An explicit
+    `step_type` gives the model a direct, unambiguous anchor instead of
+    relying on inference."""
+    given: dict[str, Any] = Field(default_factory=dict)
+    """The problem's visible input values (`Problem.given`) — see
+    `DecideRequest.given`. Extra grounding for topics whose chapter mixes
+    more than one operation under one topic string, where a shared terminal
+    step_type like `write_final_answer` doesn't by itself say which."""
     protected_values: list[int | str] = Field(default_factory=list)
     """The exact values `dialogue/leakage_filter.py::contains_leakage()`
     will reject the draft for containing (`dialogue/orchestrator.py`'s

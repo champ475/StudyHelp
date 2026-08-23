@@ -70,6 +70,7 @@ class GroqLLMProvider:
                 "turn_number": request.turn_number,
                 "repeat_count": request.repeat_count,
                 "analogy_hint": request.analogy_hint,
+                "given": request.given,
             }
         )
         raw = await self._chat_json(DECIDE_SYSTEM_PROMPT, user_content)
@@ -82,6 +83,8 @@ class GroqLLMProvider:
             "correct_step": request.correct_step,
             "student_step": request.student_step,
             "topic": request.topic,
+            "step_type": request.step_type,
+            "given": request.given,
             "protected_values": request.protected_values,
             "repeat_count": request.repeat_count,
             "analogy_hint": request.analogy_hint,

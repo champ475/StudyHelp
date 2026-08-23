@@ -147,6 +147,41 @@ async def test_procedural_message_varies_by_hint_level() -> None:
     assert short.message != long.message
 
 
+async def test_procedural_message_distinguishes_step_family_within_one_topic() -> None:
+    """CLAUDE.md live-testing Bug D regression: area_perimeter's chapter
+    mixes two distinct operations under one topic string — a pure-area step
+    and a pure-perimeter step must not get identically-focused phrasing."""
+    provider = MockLLMProvider()
+    decision = DecideResponse(
+        error_type="procedural", remediation_strategy="x", instructional_intent="y"
+    )
+    area = await provider.generate(
+        GenerateRequest(
+            decision=decision,
+            conversation_so_far=[],
+            correct_step={"length": 6, "width": 4, "result": 24},
+            student_step={},
+            topic="area_perimeter",
+            step_type="compute_area",
+            given={"shape": "rectangle", "length": 6, "width": 4, "measure": "area"},
+        )
+    )
+    perimeter = await provider.generate(
+        GenerateRequest(
+            decision=decision,
+            conversation_so_far=[],
+            correct_step={"length": 6, "width": 4, "result": 20},
+            student_step={},
+            topic="area_perimeter",
+            step_type="compute_perimeter",
+            given={"shape": "rectangle", "length": 6, "width": 4, "measure": "perimeter"},
+        )
+    )
+    assert area.message != perimeter.message
+    assert "space inside" in area.message
+    assert "distance around" in perimeter.message
+
+
 async def test_procedural_message_falls_back_for_unknown_topic() -> None:
     provider = MockLLMProvider()
     decision = DecideResponse(

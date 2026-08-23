@@ -6,6 +6,7 @@ misconception_id outside the candidate set) to exercise the caller's
 closed-set validation.
 """
 
+from studyhelp.dialogue.step_family import resolve_step_family
 from studyhelp.llm.client import (
     ClassifyRequest,
     ClassifyResponse,
@@ -39,6 +40,19 @@ _TOPIC_FOCUS = {
     "smart_charts": "how the chart is read",
 }
 _DEFAULT_FOCUS = "the idea behind this step"
+
+# Finer-grained than `_TOPIC_FOCUS` for the three topics whose chapter mixes
+# two distinct operations under one topic string (CLAUDE.md live-testing Bug
+# D) — checked first, falling back to `_TOPIC_FOCUS` when `step_family` is
+# `None` (every other topic, or a step whose family couldn't be resolved).
+_STEP_FAMILY_FOCUS = {
+    ("area_perimeter", "area"): "how the space inside the shape is measured",
+    ("area_perimeter", "perimeter"): "how the distance around the shape is measured",
+    ("multiplication_division", "multiply"): "how the equal groups are built up",
+    ("multiplication_division", "divide"): "how the total is shared out evenly",
+    ("lcm_hcf", "lcm"): "how the two numbers' multiples line up",
+    ("lcm_hcf", "hcf"): "how the two numbers' factors line up",
+}
 
 
 class MockLLMProvider:
@@ -149,7 +163,11 @@ class MockLLMProvider:
             # to read, not just short. Varies by topic (`_TOPIC_FOCUS`) and
             # by `hint_level`, same mechanism the "careless" branch above
             # already uses, so this branch isn't one fixed string either.
-            focus = _TOPIC_FOCUS.get(request.topic, _DEFAULT_FOCUS)
+            step_family = resolve_step_family(request.topic, request.step_type, request.given)
+            focus = _STEP_FAMILY_FOCUS.get(
+                (request.topic, step_family) if step_family else ("", ""),
+                _TOPIC_FOCUS.get(request.topic, _DEFAULT_FOCUS),
+            )
             messages_by_hint_level = {
                 1: (
                     f"Let's slow down and look at {focus}, not just the numbers. Picture a much "
