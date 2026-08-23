@@ -3,6 +3,7 @@ import { fetchProblem, submitStep } from "../api/client";
 import { computeFrontier } from "../frontier";
 import type { PublicProblem, StudentStep, VerifyResult } from "../types";
 import type { ChatMessage } from "./ChatPanel";
+import { DiagramPanel } from "./DiagramPanel";
 import { FreeTextStepper } from "./FreeTextStepper";
 
 interface ProblemSolverProps {
@@ -169,6 +170,7 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
   return (
     <div className="problem-solver">
       <h2>{problem.display_label}</h2>
+      <DiagramPanel problem={problem} />
       <p className="progress-note">Steps completed: {acceptedStepIds.length}</p>
 
       {lastVerdict && !lastVerdict.is_valid && (

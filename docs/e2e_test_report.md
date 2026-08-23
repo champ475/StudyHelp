@@ -294,3 +294,142 @@ light-check/orchestrator suites unaffected), ruff/mypy clean; frontend
 `shapes_angles`/`patterns` solved-state screenshots, and the
 `shapes_angles` analogy-switch screenshot (both before the collision fix,
 showing the bug, and after, showing it resolved).
+
+## Round 3 (2026-08-23, later still) — Bug D (mismatched/generic explanations),
+## full-syllabus verifier + dialogue sweep, and a 14-topic diagram feature
+
+Founder reported a new bug on `area-perimeter-001` ("Area of a 6x4
+rectangle"): the generated explanation talked about "adding up a total" (an
+addition step, not multiplication) and, on repeat, an analogy that
+described BOTH walking a garden's edge (perimeter) and covering it with
+tiles (area) for a step that was only ever about area. Founder also asked
+to stop tuning to individual questions — test the full problem set, and add
+diagrams across all 14 topics.
+
+### Bug D — root cause and fix
+
+`area_perimeter` (like `multiplication_division` and `lcm_hcf`) genuinely
+covers two distinct operations under one topic string, but `generate()` was
+never told `step_type` at all — only `decide()` was — so the model had to
+infer the operation purely from `correct_step`'s bare field names, and
+(confirmed live against real Groq) sometimes drifted to the wrong one. The
+analogy library also had exactly one entry per mixed topic, conflating both
+operations. Fixed: `dialogue/step_family.py::resolve_step_family()` resolves
+which operation a step belongs to (from `step_type` directly where it
+already disambiguates, falling back to the problem's own `given`
+discriminator field — `given.measure`, `given.op` — for a shared terminal
+step type like `write_final_answer`); `GenerateRequest` gained `step_type`/
+`given`; `GENERATE_SYSTEM_PROMPT` gained an explicit operation-grounding
+rule; `llm/analogies.py`'s three conflated entries were split into
+`STEP_FAMILY_ANALOGIES`, keyed by `(topic, step_family)`. Confirmed live
+against real Groq: re-running the exact reported scenario now stays on
+multiplication/area for both turns, with an area-only analogy (no
+perimeter language) on repeat. Full detail: CHANGELOG.md 2026-08-23 12:40,
+ARCHITECTURE.md D73.
+
+### Two systemic leakage bugs found while root-causing Bug D
+
+Neither was reported — both were found by auditing the mechanism, not by a
+symptom:
+
+1. **`_protected_values()`'s key list had silent gaps.** The same live
+   trace that diagnosed Bug D showed `protected_values: []` for the area
+   step — several topics' real answer-output field names (`result`,
+   `result_hundredths`, `product`/`quotient_digit`/`remainder`/`carry_in`,
+   `from_digit_after`/`combined_result_digit`, `factor`) were never in the
+   list, meaning the leakage filter had zero protected values — and could
+   never reject anything — for those step types. Fixed, plus a new
+   systemic test (`test_every_topics_answer_fields_are_protected`) that
+   cross-checks the list against every topic's real Pydantic field models,
+   so a future gap fails CI instead of leaking silently. ARCHITECTURE.md D74.
+2. **Public `/problems/{id}` was leaking `measurement`'s first-step answer
+   directly.** `given.direction`/`given.factor` are the EXACT
+   `expected_state` of `identify_conversion_factor` — the endpoint shipped
+   them unfiltered, readable from the browser's network tab before the
+   student attempts anything, no LLM involved at all. Fixed with
+   `_public_given()`, which redacts a `given` key only when its value is
+   identical to that same key's value in one of the problem's own steps'
+   `expected_state` (not a blanket key-name drop — `given.value`, e.g. "3"
+   in "3 km to m", is genuine non-secret input under the same key name that
+   means "the answer" elsewhere). Confirmed against real Postgres via a new
+   integration test. ARCHITECTURE.md D75.
+
+### Full-syllabus sweep (generalizing every prior round's 1-per-topic spot-checks)
+
+Two new permanent test suites, not a throwaway script this time:
+
+- `test_skip_ahead_to_final_answer_all_topics.py` (140 cases): every seeded
+  problem's terminal node, submitted directly from a fresh start — Bug1/
+  Bug3's exact scenario, now covering the whole syllabus instead of one
+  problem per topic. All 140 pass.
+- `test_dialogue_sweep_all_topics.py` (160 cases): every problem's first
+  wrong step, run through the real orchestrator against the mock provider,
+  asserting no problem falls back to the generic canned message (the exact
+  failure class Issue A and Bug D's leakage gap both were); plus a second
+  sweep, scoped to the 3 mixed-operation topics, asserting a repeat-attempt
+  analogy never drifts into the OTHER operation's vocabulary.
+
+**This sweep found a third, previously-undiscovered leakage bug**:
+`symmetry-008`/`symmetry-010` (real answer `"no"`) failed — the mock
+provider's harmless "What do you **no**tice?" was rejected on every
+attempt (`"no"` is a substring of `"notice"`), exhausting the gate and
+falling back to the generic message. Same underlying bug class as round
+2's `shapes_angles`/`symmetry` collisions, a different, previously-unknown
+instance, caught only because this round tested every problem instead of a
+sample. Fixed the mechanism itself: `contains_leakage()` now matches a
+purely-alphabetic protected string value on a word boundary (`\bvalue\b`)
+instead of plain substring; a comparison symbol (`<`/`>`/`=`) still matches
+by substring, unaffected. ARCHITECTURE.md D76.
+
+### Diagram feature (all 14 topics)
+
+Built per-topic diagram renderers (`frontend/src/diagrams/`), dispatched by
+topic key (`getDiagramRenderer()`), each a pure function of `Problem.given`
+— never `expected_state`/`final_answer` (never sent to the browser at all).
+
+- **7 heavy-DAG topics: real, data-driven diagrams.** `area_perimeter`
+  (labeled rectangle, filled for area / dashed border for perimeter),
+  `subtraction_with_borrowing` (place-value columns), `decimals`
+  (place-value columns with a decimal point), `multiplication_division`
+  (stacked columns for `x`, a division bracket for `/`), `fractions_addition`
+  (two proportionally-shaded pie charts), `lcm_hcf` (a labeled Venn
+  diagram), `measurement` (a from-unit → to-unit arrow).
+- **7 light-check topics: a scoped-down honest fallback, not a fabricated
+  diagram.** Their `given` is a single free-text `question` string with no
+  structured numeric fields (unlike the 7 heavy topics) — regex-guessing
+  numbers out of prose to build a fake geometric diagram would be fragile
+  and could misrender a question it parsed wrong, worse than no diagram at
+  all. `QuestionCardDiagram` renders the question itself in a styled
+  callout instead — an explicit, deliberate scope-down per this round's
+  own instructions ("if a topic's diagram would be genuinely low-value or
+  not worth building convincingly, keep it simple, note it"), not a gap
+  found and left unfixed.
+- **Leakage safety is structural, not just tested**: `measurement`'s
+  diagram never had access to `direction`/`factor` in the first place —
+  they're redacted server-side (D75) before `given` ever reaches the
+  browser — so there was nothing for the diagram layer to accidentally
+  leak even if it tried.
+- **Two cosmetic bugs found via a live browser screenshot, fixed
+  immediately**: the `area_perimeter` "length N" label clipped off the
+  SVG's left edge (insufficient left padding for the label's own text
+  width); the `lcm_hcf` "LCM?"/"HCF?" label sat right at the two circles'
+  tangent point, hard to read against the overlapping fill. Both fixed and
+  re-screenshotted to confirm.
+
+### Verification
+
+736 backend tests passing (300 new: 140 + 160 from the two full-syllabus
+sweeps), ruff/mypy clean. Frontend: 27 tests passing (11 new, covering all
+14 diagram renderers plus the "renders nothing for an unregistered topic /
+malformed given" fallback paths), `tsc`/`eslint` clean. Confirmed live in a
+real browser (Playwright against a docker-composed Postgres/Redis/API
+stack, real Groq for Bug D's specific root-cause/fix verification, mock
+elsewhere): all 14 topics' diagrams screenshotted and visually confirmed
+correct, including the area/perimeter and LCM/HCF fixes.
+
+### New findings this round
+
+**None outstanding.** The 3 leakage bugs found (D74, D75, D76) and the 2
+cosmetic diagram bugs were all fixed within this same round, not deferred.
+The 7-light-check-topics diagram scope-down is a deliberate, stated design
+decision (see above), not an unresolved finding.

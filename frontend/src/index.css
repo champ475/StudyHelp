@@ -188,6 +188,102 @@ fieldset {
   font-size: 0.85rem;
 }
 
+.diagram-panel {
+  display: flex;
+  justify-content: center;
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.diagram-svg {
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+}
+
+.diagram-label {
+  font-size: 9px;
+  fill: #57534e;
+}
+
+.diagram-label-strong {
+  font-size: 13px;
+  font-weight: 600;
+  fill: #292524;
+}
+
+.diagram-columns {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: "Courier New", monospace;
+  font-size: 1.4rem;
+  color: #292524;
+}
+
+.diagram-column-row {
+  display: flex;
+  gap: 0.15rem;
+}
+
+.diagram-column-sign {
+  width: 1.4rem;
+  text-align: center;
+}
+
+.diagram-column-digit {
+  width: 1.4rem;
+  text-align: center;
+}
+
+.diagram-decimal-point {
+  width: 0.5rem;
+}
+
+.diagram-column-line {
+  border-top: 2px solid #292524;
+  margin-top: 0.2rem;
+}
+
+.diagram-division {
+  display: flex;
+  align-items: flex-start;
+  font-family: "Courier New", monospace;
+  font-size: 1.4rem;
+  color: #292524;
+  gap: 0.4rem;
+}
+
+.diagram-division-bracket {
+  border-top: 2px solid #292524;
+  border-left: 2px solid #292524;
+  padding: 0 0.4rem;
+}
+
+.diagram-question-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  background: #fefce8;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  max-width: 100%;
+}
+
+.diagram-question-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #57534e;
+}
+
+.diagram-question-icon {
+  font-size: 1.1rem;
+}
+
 .error-banner {
   color: #b91c1c;
 }
