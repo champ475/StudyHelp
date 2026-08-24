@@ -5,14 +5,23 @@
 // box is where the student types the *next* step. Committing it (Enter, or
 // the "Next step" button) is the moment verification happens — "mistake
 // checking happens when I move to next step" — and a wrong submission
-// keeps the box open (re-editable, re-verified on retry) with the
-// interrupt/dialogue rendered immediately below it, rather than silently
-// advancing.
+// keeps the box open (re-editable, re-verified on retry).
+//
+// UI order matches the real event order (CLAUDE.md Bug4), not "all steps,
+// then all explanations": each step block is immediately followed by the
+// tutor messages that responded to attempts at that step
+// (`messagesByStepIndex[i]`, keyed by `ChatMessage.stepIndex`) before the
+// next step block. A retry re-uses the same active box rather than opening
+// a new one, so a second wrong attempt at the same step just appends
+// another message below the block that's already there.
 //
 // Topic-agnostic by construction: the only per-topic content is `hint`,
 // which the backend supplies per step type (PublicStepNode.hint, sourced
 // from that step type's seed-authored `step_types.description`) — this
 // component never hardcodes a topic's shape.
+
+import { ChatPanel, type ChatMessage } from "./ChatPanel";
+import type { PublicProblem } from "../types";
 
 interface FreeTextStepperProps {
   lockedTexts: string[];
@@ -22,6 +31,12 @@ interface FreeTextStepperProps {
   disabled: boolean;
   solved: boolean;
   hint?: string;
+  messagesByStepIndex?: ChatMessage[][];
+  isThinking?: boolean;
+  // Only threaded through to `ChatPanel` so a `showDiagram` message can
+  // re-render the problem's own diagram — never used for anything else
+  // here (this component stays topic-agnostic otherwise).
+  problem: PublicProblem;
 }
 
 export function FreeTextStepper({
@@ -32,47 +47,64 @@ export function FreeTextStepper({
   disabled,
   solved,
   hint,
+  messagesByStepIndex = [],
+  isThinking = false,
+  problem,
 }: FreeTextStepperProps) {
   return (
     <div className="free-text-stepper">
       {lockedTexts.map((text, index) => (
-        <div key={index} className="free-text-step locked">
-          <span className="step-number">Step {index + 1}</span>
-          <input value={text} readOnly disabled className="free-text-input locked" />
-          <span className="step-check" aria-label="Correct">
-            ✓
-          </span>
+        <div key={index} className="free-text-step-block">
+          <div className="free-text-step locked">
+            <span className="step-number">Step {index + 1}</span>
+            <input value={text} readOnly disabled className="free-text-input locked" />
+            <span className="step-check" aria-label="Correct">
+              ✓
+            </span>
+          </div>
+          {messagesByStepIndex[index] && messagesByStepIndex[index].length > 0 && (
+            <ChatPanel messages={messagesByStepIndex[index]} isThinking={false} problem={problem} />
+          )}
         </div>
       ))}
       {!solved && (
-        <div className="free-text-step active">
-          {hint && <p className="step-hint">{hint}</p>}
-          <div className="free-text-step-row">
-            <span className="step-number">Step {lockedTexts.length + 1}</span>
-            <input
-              value={activeText}
-              onChange={(event) => onActiveTextChange(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  onCommit();
-                }
-              }}
-              disabled={disabled}
-              placeholder={hint || "Type this step"}
-              className="free-text-input"
-              aria-label={`Step ${lockedTexts.length + 1} input`}
-              autoFocus
-            />
-            <button
-              type="button"
-              className="submit-button"
-              onClick={onCommit}
-              disabled={disabled || !activeText.trim()}
-            >
-              Next step →
-            </button>
+        <div className="free-text-step-block">
+          <div className="free-text-step active">
+            {hint && <p className="step-hint">{hint}</p>}
+            <div className="free-text-step-row">
+              <span className="step-number">Step {lockedTexts.length + 1}</span>
+              <input
+                value={activeText}
+                onChange={(event) => onActiveTextChange(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    onCommit();
+                  }
+                }}
+                disabled={disabled}
+                placeholder={hint || "Type this step"}
+                className="free-text-input"
+                aria-label={`Step ${lockedTexts.length + 1} input`}
+                autoFocus
+              />
+              <button
+                type="button"
+                className="submit-button"
+                onClick={onCommit}
+                disabled={disabled || !activeText.trim()}
+              >
+                Next step →
+              </button>
+            </div>
           </div>
+          {((messagesByStepIndex[lockedTexts.length]?.length ?? 0) > 0 || isThinking) && (
+            <ChatPanel
+              messages={messagesByStepIndex[lockedTexts.length] ?? []}
+              isThinking={isThinking}
+              problem={problem}
+            />
+          )}
         </div>
       )}
     </div>

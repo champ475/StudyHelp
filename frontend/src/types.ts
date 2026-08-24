@@ -87,6 +87,20 @@ export interface TurnComplete {
   turn_count: number;
   expects_retry: boolean;
   message: string | null;
+  // Deterministically set by the backend (`dialogue/diagram_hint.py`), never
+  // by the LLM — true only on an "explaining" turn whose classified
+  // misconception is one of the curated, visually-clarifying ones. When
+  // true, the frontend re-shows the SAME `given`-derived diagram the
+  // problem header already shows (never new, answer-revealing content).
+  diagram_hint: boolean;
+  // `symmetry`-only, user-directed exception (see backend's
+  // `dialogue/diagram_hint.py::should_reveal_symmetry_lines()`): the
+  // correct `answer` field, present only once the student has missed this
+  // exact step 2+ times in a row. When set, `SymmetryDiagram` draws the
+  // actual line(s) of symmetry instead of the bare shape — every other
+  // topic's `diagram_hint` never carries answer data, this is scoped
+  // narrowly to symmetry alone.
+  diagram_hint_reveal_answer: string | null;
 }
 
 export interface CreateSessionResponse {

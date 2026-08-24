@@ -13,5 +13,35 @@
     "source": "Topic-authored; no direct literature-survey citation for this specific pictograph-scale bug — not matched to a deterministic buggy-rule signature (would need the problem's own scale factor, not present in a single answer field; see ARCHITECTURE.md D47's interface lesson).",
     "version": 1,
     "review_status": "seed_curated"
+  },
+  {
+    "id": "smart_charts.misreads_bar_height_off_gridline",
+    "topic": "smart_charts",
+    "step_type": "smart_charts_answer",
+    "typical_mindset": "A bar's height is read by eye against the nearest gridline rather than tracing carefully to the exact value the bar's top actually reaches — when a bar falls between two gridlines, the child rounds to whichever gridline looks closest rather than reading the precise value intended.",
+    "explanation_strategy": "Have the child place a finger exactly at the top of the bar and then trace straight across to the number scale, rather than estimating by eye, so the read-off is anchored to the bar's true top edge.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Put your finger right at the very top of this bar. Now trace straight across to the numbers on the side — what number does your finger land on?" },
+      { "role": "student", "text": "It's right between 30 and 40... closer to 35." },
+      { "role": "tutor", "text": "Good noticing — that's the real value, even though it's not exactly on a gridline." }
+    ],
+    "source": "NCERT Class 5 Ch.12 misconception notes — not matched to a deterministic buggy-rule signature (the chart's own gridline spacing isn't present in a single answer field; see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "smart_charts.compares_bars_instead_of_totaling",
+    "topic": "smart_charts",
+    "step_type": "smart_charts_answer",
+    "typical_mindset": "When a question asks for a combined total across several categories (e.g. 'how many books were sold in all three months'), the child instead reports just the single largest category's value — as if 'in all' meant 'pick out the biggest one' rather than 'add every one together.'",
+    "explanation_strategy": "Ask the child to name each category's value out loud one at a time, then ask what 'in all' or 'altogether' means to do with a list of separate numbers, before reaching for one number as the answer.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "What were the three months' values — January, February, March?" },
+      { "role": "student", "text": "20, 35, and 15." },
+      { "role": "tutor", "text": "Good. The question asks for the total 'in all three months' — does that mean picking the biggest one, or combining all three?" }
+    ],
+    "source": "NCERT Class 5 Ch.12 misconception notes — not matched to a deterministic buggy-rule signature (the per-category breakdown behind the chart isn't present in a single answer field; see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
   }
 ]

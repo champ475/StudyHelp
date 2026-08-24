@@ -1,7 +1,17 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { FreeTextStepper } from "./FreeTextStepper";
+import type { PublicProblem } from "../types";
+
+const testProblem: PublicProblem = {
+  problem_id: "p1",
+  ncert_ref: { class: 5, chapter: 1, chapter_title: "Test", topic: "fractions_addition" },
+  display_label: "Test problem",
+  given: {},
+  step_graph: [],
+  alt_paths: [],
+};
 
 describe("FreeTextStepper", () => {
   it("shows the per-topic hint as both a helper line and the input placeholder", () => {
@@ -14,6 +24,7 @@ describe("FreeTextStepper", () => {
         disabled={false}
         solved={false}
         hint="Rewrite both fractions with a common denominator."
+        problem={testProblem}
       />,
     );
     expect(
@@ -33,6 +44,7 @@ describe("FreeTextStepper", () => {
         onCommit={vi.fn()}
         disabled={false}
         solved={false}
+        problem={testProblem}
       />,
     );
     expect(screen.getByPlaceholderText("Type this step")).toBeInTheDocument();
@@ -49,6 +61,7 @@ describe("FreeTextStepper", () => {
         onCommit={onCommit}
         disabled={false}
         solved={false}
+        problem={testProblem}
       />,
     );
 
@@ -62,6 +75,38 @@ describe("FreeTextStepper", () => {
     expect(onCommit).toHaveBeenCalledTimes(2);
   });
 
+  it("renders each step's tutor messages directly below that step, not grouped at the end (Bug4)", () => {
+    render(
+      <FreeTextStepper
+        lockedTexts={["units 2 < 7"]}
+        activeText="12 - 7 = 4"
+        onActiveTextChange={vi.fn()}
+        onCommit={vi.fn()}
+        disabled={false}
+        solved={false}
+        messagesByStepIndex={[
+          [{ id: "m1", text: "Explanation for step 1's wrong attempt.", stepIndex: 0 }],
+          [{ id: "m2", text: "Explanation for the current step's wrong attempt.", stepIndex: 1 }],
+        ]}
+        problem={testProblem}
+      />,
+    );
+
+    const container = screen.getByText("Explanation for step 1's wrong attempt.").closest(
+      ".free-text-stepper",
+    ) as HTMLElement;
+    const blocks = Array.from(container.children);
+    // Block order must be [locked step 1, its explanation, active step,
+    // its explanation] — the real event order, not all steps then all
+    // explanations.
+    expect(blocks).toHaveLength(2);
+    const [firstBlock, secondBlock] = blocks as [HTMLElement, HTMLElement];
+    expect(within(firstBlock).getByDisplayValue("units 2 < 7")).toBeInTheDocument();
+    expect(firstBlock.textContent).toContain("Explanation for step 1's wrong attempt.");
+    expect(within(secondBlock).getByDisplayValue("12 - 7 = 4")).toBeInTheDocument();
+    expect(secondBlock.textContent).toContain("Explanation for the current step's wrong attempt.");
+  });
+
   it("renders no active box once solved, only locked history", () => {
     render(
       <FreeTextStepper
@@ -71,6 +116,7 @@ describe("FreeTextStepper", () => {
         onCommit={vi.fn()}
         disabled={false}
         solved={true}
+        problem={testProblem}
       />,
     );
     expect(screen.queryByRole("button", { name: "Next step →" })).not.toBeInTheDocument();

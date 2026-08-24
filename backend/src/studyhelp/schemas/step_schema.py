@@ -70,3 +70,23 @@ class Problem(BaseModel):
         entries = {self.step_graph[0].step_id} if self.step_graph else set()
         entries.update(p.entry for p in self.alt_paths)
         return list(entries)
+
+    def reachable_step_ids(self, from_step_ids: set[str]) -> set[str]:
+        """Forward BFS closure over `.next` edges starting from `from_step_ids`
+        (inclusive) — every node still reachable from here, not just the
+        immediate next hop. A verifier that only checks the immediate
+        frontier wrongly flags a valid further-along submission (e.g. a
+        student who jumps straight to the final answer) as an error; this is
+        what lets `verify_step()` check a submission against every node the
+        DAG still permits, not just the prescribed next one."""
+        seen: set[str] = set()
+        frontier = set(from_step_ids)
+        while frontier:
+            seen.update(frontier)
+            next_frontier: set[str] = set()
+            for step_id in frontier:
+                node = self.node(step_id)
+                if node is not None:
+                    next_frontier.update(n for n in node.next if n not in seen)
+            frontier = next_frontier
+        return seen

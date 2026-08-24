@@ -14,5 +14,36 @@
     "source": "Topic-authored; no direct literature-survey citation for acute/obtuse label confusion specifically.",
     "version": 1,
     "review_status": "seed_curated"
+  },
+  {
+    "id": "shapes_angles.right_straight_swap",
+    "topic": "shapes_angles",
+    "step_type": "shapes_angles_answer",
+    "bug_signature": { "buggy_rule_id": "shapes_angles.right_straight_swap" },
+    "typical_mindset": "A right angle (a square corner, 90 degrees) and a straight angle (a flat line, 180 degrees) are both remembered as 'the special named angles' without a firm sense of just how different their sizes are — the labels get swapped even though a right angle looks nothing like a flat line once actually pictured.",
+    "explanation_strategy": "Ground both labels in a concrete, physical comparison — a square corner versus a flat ruler laid down — rather than asking the child to recall the definitions by name.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Does this angle look like the corner of a square book, or like a flat, straight line?" },
+      { "role": "student", "text": "Like a flat straight line." },
+      { "role": "tutor", "text": "Right — a flat line like that is called a straight angle. So is it a right angle, or a straight angle?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for right/straight angle label confusion specifically.",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "shapes_angles.miscounts_polygon_sides",
+    "topic": "shapes_angles",
+    "step_type": "shapes_angles_answer",
+    "typical_mindset": "When naming a polygon by its number of sides (triangle, quadrilateral, pentagon, hexagon), the child counts corners instead of sides, or loses count partway around an irregular-looking shape, landing on a neighboring polygon name instead of the correct one.",
+    "explanation_strategy": "Have the child trace each side with a finger while counting out loud, one side at a time, starting from a marked point and stopping exactly when they return to it, rather than glancing at the shape and guessing its name.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Let's trace and count together, starting from this corner. One side... two sides... keep going until we get back to where we started." },
+      { "role": "student", "text": "One, two, three, four, five!" },
+      { "role": "tutor", "text": "Five sides — so what do we call a shape with five sides?" }
+    ],
+    "source": "NCERT Class 5 Ch.2 misconception notes — not matched to a deterministic buggy-rule signature (miscounting is a slip on the child's own counting process, not a stable field-comparable pattern against the correct answer).",
+    "version": 1,
+    "review_status": "seed_curated"
   }
 ]

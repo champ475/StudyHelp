@@ -62,5 +62,37 @@
     "source": "VanLehn 1980, Repair Theory — impasse-driven repair across cascading borrows",
     "version": 1,
     "review_status": "seed_curated"
+  },
+  {
+    "id": "subtraction_borrowing.reversed_borrow_judgment",
+    "topic": "subtraction_with_borrowing",
+    "step_type": "compare_column",
+    "bug_signature": { "buggy_rule_id": "subtraction_borrowing.reversed_borrow_judgment" },
+    "typical_mindset": "The 'is the top digit big enough?' check gets applied backwards — the child compares the digits correctly but decides a borrow is needed exactly when it isn't (and vice versa), as if 'bigger on top' were itself the danger sign rather than 'smaller on top.'",
+    "explanation_strategy": "Ground the comparison in a concrete enough-ness question rather than a memorized rule: ask directly whether the top pile has enough to give away the bottom amount, and only then ask whether that means a borrow is needed.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "In this column, we have 7 on top and 3 on the bottom. Does the top have enough to give away 3?" },
+      { "role": "student", "text": "Yes, 7 is enough." },
+      { "role": "tutor", "text": "Right! So do we need to borrow here, or not?" }
+    ],
+    "source": "Brown & Burton 1978 (DEBUGGY) — documented as a comparison-direction variant of the borrow-decision bug",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "subtraction_borrowing.digit_order_reversed",
+    "topic": "subtraction_with_borrowing",
+    "step_type": "write_final_answer",
+    "bug_signature": { "buggy_rule_id": "subtraction_borrowing.digit_order_reversed" },
+    "typical_mindset": "Each column's result digit was found correctly, but when assembling them into the final number the child writes them in the order they were worked out (units column first, since that's solved first) instead of in place-value order (highest place first) — producing a number with the digits back to front.",
+    "explanation_strategy": "Ask the child to point to the leftmost column of the subtraction (the biggest place value) and name its result digit first, building the answer from left to right rather than in solving order.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Which column did we solve first — the units, or the hundreds?" },
+      { "role": "student", "text": "The units." },
+      { "role": "tutor", "text": "Right, but when we WRITE the answer, we start from the biggest place value, not the order we solved them in. What's the result digit in the leftmost column?" }
+    ],
+    "source": "VanLehn 1990, Mind Bugs — documented place-value assembly errors distinct from the per-column procedure bugs",
+    "version": 1,
+    "review_status": "seed_curated"
   }
 ]

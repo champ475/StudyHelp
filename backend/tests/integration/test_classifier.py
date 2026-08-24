@@ -100,7 +100,13 @@ async def test_no_candidates_routes_to_novel(db_session: AsyncSession) -> None:
         db_session,
         MockLLMProvider(),
         topic="subtraction_with_borrowing",
-        step_type="compare_column",  # no misconception_bank entries seeded for this step_type
+        # A step_type that exists nowhere in the seeded misconception_bank
+        # (every real step_type across every topic now has at least one
+        # entry after the misconception-bank expansion pass — see
+        # ARCHITECTURE.md's retrieval-bank sizing note) — get_candidates()
+        # returns empty for it by construction, keeping this test's premise
+        # true regardless of how full any individual topic's bank gets.
+        step_type="__no_seeded_candidates_for_this_step_type__",
         correct_fields={
             "column": "units",
             "minuend_digit": 9,

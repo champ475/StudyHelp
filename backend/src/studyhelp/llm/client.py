@@ -15,7 +15,7 @@ split these correspond to.
 import time
 from typing import Any, Literal, Protocol
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from studyhelp.config import get_settings
 from studyhelp.logging import get_logger
@@ -65,6 +65,26 @@ class DecideRequest(BaseModel):
     student_step: dict[str, Any]
     misconception: ClassifyCandidate | None
     turn_number: int
+    repeat_count: int = 1
+    """How many consecutive times the student has now gotten *this exact
+    step* wrong (`DialogueState.consecutive_errors_on_this_step` —
+    orchestrator.py), distinct from `turn_number` (how many dialogue turns
+    have actually been shown, which can lag `repeat_count` under a delayed
+    intervention policy). Drives the register switch to a concrete analogy
+    at `repeat_count >= 2` (CLAUDE.md Bug2)."""
+    analogy_hint: str | None = None
+    """The fixed, topic-appropriate analogy (`llm/analogies.py`) to use once
+    `repeat_count >= 2` — deterministically retrieved by application code,
+    never left to the model to invent (see that module's docstring).
+    `None` when `repeat_count < 2` or the topic has no library entry."""
+    given: dict[str, Any] = Field(default_factory=dict)
+    """The problem's visible input values (`Problem.given` — already shown
+    to the student in the UI, never secret, unlike `correct_step`). Extra
+    grounding context alongside `correct_step`/`step_type`, for topics whose
+    chapter mixes more than one operation under one topic string (e.g.
+    area_perimeter's `given.measure`, lcm_hcf's `given.op`) — `correct_step`
+    alone doesn't always carry which operation a step belongs to (CLAUDE.md
+    live-testing Bug D)."""
 
 
 class DecideResponse(BaseModel):
@@ -84,6 +104,59 @@ class GenerateRequest(BaseModel):
     conversation_so_far: list[dict[str, str]]
     correct_step: dict[str, Any]
     student_step: dict[str, Any]
+    topic: str = ""
+    """Same topic string passed to `decide()` — see `DecideRequest.topic`.
+    Lets `llm/providers/mock.py` vary its deterministic procedural/conceptual
+    phrasing per topic, not just per `hint_level`, so mock-only manual
+    testing isn't misleadingly identical across every topic's first-ever
+    mistake."""
+    step_type: str = ""
+    """Same step_type passed to `decide()` (`DecideRequest.step_type`) but,
+    until CLAUDE.md live-testing Bug D, never threaded to `generate()` at
+    all — the real prompt had to infer the actual operation this step
+    performs purely from `correct_step`'s field names, and (confirmed live)
+    sometimes drifted to describing a different operation entirely (e.g. an
+    "adding up a total" explanation for a multiplication step). An explicit
+    `step_type` gives the model a direct, unambiguous anchor instead of
+    relying on inference."""
+    given: dict[str, Any] = Field(default_factory=dict)
+    """The problem's visible input values (`Problem.given`) — see
+    `DecideRequest.given`. Extra grounding for topics whose chapter mixes
+    more than one operation under one topic string, where a shared terminal
+    step_type like `write_final_answer` doesn't by itself say which."""
+    protected_values: list[int | str] = Field(default_factory=list)
+    """The exact values `dialogue/leakage_filter.py::contains_leakage()`
+    will reject the draft for containing (`dialogue/orchestrator.py`'s
+    `_protected_values(correct_step)` — the same list the gate itself
+    checks against, not re-derived by the model from `correct_step`, which
+    mixes protected output fields with non-secret visible-input fields the
+    model can't reliably tell apart on its own). Confirmed live (CLAUDE.md
+    open-ended-review Issue A) that without this, a model told to "use a
+    demo example with different numbers" (rule 1) will still sometimes
+    pick small illustrative numbers that coincidentally equal one of this
+    problem's own protected values (e.g. a "1/2 + 1/3" demo colliding with
+    a correct numerator of 3) and get rejected for an unrelated reason —
+    telling it exactly what to avoid, including inside its own demo, fixes
+    that at the source instead of relying on trial-and-error retries."""
+    repeat_count: int = 1
+    """Same value passed to `decide()` for this turn — see `DecideRequest`.
+    Threaded independently to `generate()` (not just embedded in
+    `decision`) so the register-switch instruction is enforced directly at
+    generation time regardless of what `decision.remediation_strategy`'s
+    free text happens to say."""
+    analogy_hint: str | None = None
+    """Same value passed to `decide()` for this turn — see `DecideRequest`."""
+    is_concept_check: bool = False
+    """True only for the one-off post-resolution "why does that work?"
+    message (`dialogue/orchestrator.py::_generate_concept_check_message`,
+    open-ended review finding #3) — the student just answered correctly, so
+    this is NOT a remediation turn. An explicit flag rather than inferring
+    it from `decision.error_type`/`repeat_count` alone, since a real
+    explaining-turn decision can legitimately be `error_type="conceptual"`
+    with `repeat_count=1` too — that combination is not unique to this
+    case, and both the mock provider and the real prompt need an
+    unambiguous signal to avoid mistaking a consolidation question for a
+    fresh re-teach."""
     regeneration_feedback: str | None = None
     """Set only on a gate-rejected retry (dialogue/orchestrator.py):
     concretely what was wrong with the previous draft (leaked the answer /

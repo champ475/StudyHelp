@@ -30,5 +30,51 @@
     "source": "Topic-authored; no direct literature-survey citation for long-division remainder-carrying specifically.",
     "version": 1,
     "review_status": "seed_curated"
+  },
+  {
+    "id": "multiplication_division.basic_fact_retrieval_error",
+    "topic": "multiplication_division",
+    "step_type": "multiply_units",
+    "typical_mindset": "The procedure for multiplying (line up the digit and the multiplier, write the product) is followed correctly, but the multiplication fact itself is recalled wrong — a single-digit times single-digit slip (e.g. remembering 7x8 as 54 instead of 56) rather than a systematic procedural bug.",
+    "explanation_strategy": "Isolate just the fact itself, away from the procedure: ask the child to work out that one multiplication using a method they trust (skip-counting, repeated addition, or a times-table they know), then plug the corrected fact back into the step.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Let's check just this one part: what is 7 times 8?" },
+      { "role": "student", "text": "Um... 54?" },
+      { "role": "tutor", "text": "Let's skip-count by 8s seven times to check: 8, 16, 24... keep going. What do you land on?" }
+    ],
+    "source": "Topic-authored; a basic-fact retrieval slip rather than a systematic bug — not matched to a deterministic buggy-rule signature (indistinguishable from any other single-digit arithmetic slip at the field-comparison level, and not a stable, enumerable misconception in the DEBUGGY sense).",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "multiplication_division.divide_tens_drops_remainder",
+    "topic": "multiplication_division",
+    "step_type": "divide_tens",
+    "bug_signature": { "buggy_rule_id": "multiplication_division.divide_tens_drops_remainder" },
+    "typical_mindset": "The quotient digit for this column is found correctly, but whatever doesn't divide evenly is simply dropped instead of being carried forward as a remainder to combine with the next digit — 'leftover' isn't yet understood as something that has to go somewhere.",
+    "explanation_strategy": "Ask the child directly what's left over after dividing, using a concrete sharing picture (sharing objects into equal groups, with some left in hand), so the leftover amount becomes something they notice needs tracking rather than something they can discard.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "If you share 7 by 3, you get 2 each. Is there anything left over, or did it share out exactly?" },
+      { "role": "student", "text": "There's 1 left over." },
+      { "role": "tutor", "text": "Right — that 1 doesn't disappear. We carry it forward to use with the next digit. Let's write that down too." }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for long-division remainder-carrying specifically.",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "multiplication_division.reports_partial_result_as_final",
+    "topic": "multiplication_division",
+    "step_type": "write_final_answer",
+    "typical_mindset": "One of the intermediate partial results (e.g. just the tens-column product, or just the first quotient digit) gets written as the final answer instead of the full assembled result — the last individually-computed number is treated as 'the answer' without combining it with the other columns.",
+    "explanation_strategy": "Ask the child to list out each partial piece they worked out, one at a time, and then ask how those pieces need to be put together (added, or placed side by side) to make the true final answer.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "You worked out the units product and the tens product separately. What are those two numbers?" },
+      { "role": "student", "text": "12 and 40." },
+      { "role": "tutor", "text": "Good — now, is the final answer just one of those, or do we need to put them together somehow?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for this specific answer-assembly confusion — not matched to a deterministic buggy-rule signature (write_final_answer's single 'value' field carries no record of the intermediate partial products, see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
   }
 ]

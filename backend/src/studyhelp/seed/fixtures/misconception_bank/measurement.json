@@ -30,5 +30,50 @@
     "source": "Topic-authored; no direct literature-survey citation for unit-conversion factor confusion specifically.",
     "version": 1,
     "review_status": "seed_curated"
+  },
+  {
+    "id": "measurement.forgets_to_apply_conversion",
+    "topic": "measurement",
+    "step_type": "convert_units",
+    "typical_mindset": "The factor and direction were correctly worked out one step earlier, but the actual multiplication or division never gets carried out — the original number is written straight through unchanged, as if choosing the right operation were the whole task rather than also doing it.",
+    "explanation_strategy": "Point back at the factor and direction just chosen and ask the child to actually perform that operation on the original number, rather than accepting the unchanged number as if the conversion had already happened.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "You decided we should multiply by 100. Did you multiply the number by 100, or is this still the number we started with?" },
+      { "role": "student", "text": "Oh, it's still the same number." },
+      { "role": "tutor", "text": "Right — let's actually multiply it by 100 now. What do you get?" }
+    ],
+    "source": "NCERT Class 5 Ch.14 misconception notes — not matched to a deterministic buggy-rule signature (the pre-conversion amount isn't available in convert_units' own field pair, only the resulting 'value', see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "measurement.reports_unconverted_value",
+    "topic": "measurement",
+    "step_type": "write_final_answer",
+    "typical_mindset": "By the final answer step, the child reports the value in the original unit rather than the converted one — the number that was actually computed and the number the question asked for (in the new unit) are treated as interchangeable, since 'the answer' just means the last number worked with.",
+    "explanation_strategy": "Ask the child to say which unit the question wants the answer in, and check that against the unit their final written number is actually in, rather than accepting whichever number came last.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Which unit does the question want your final answer in — metres, or centimetres?" },
+      { "role": "student", "text": "Centimetres." },
+      { "role": "tutor", "text": "Right — is the number you wrote the centimetre number, or still the metre number?" }
+    ],
+    "source": "NCERT Class 5 Ch.14 misconception notes — not matched to a deterministic buggy-rule signature (write_final_answer's single 'value' field carries no record of which unit it's meant to represent, see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "measurement.conflates_measurement_type_factors",
+    "topic": "measurement",
+    "step_type": "identify_conversion_factor",
+    "typical_mindset": "The powers-of-ten factors used for length, weight, and volume conversions all blur together into one general 'metric conversion number' — the child reaches for a factor that's correct for a different measurement type (e.g. the kilogram-gram factor while converting a length), rather than one anchored to the specific unit pair in this problem.",
+    "explanation_strategy": "Ask the child to name what kind of quantity is being measured here — length, weight, or volume/capacity — before recalling the factor, so the factor gets anchored to the right family of units rather than pulled from a jumbled general memory.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Are we measuring how long something is, how heavy it is, or how much liquid it holds?" },
+      { "role": "student", "text": "How heavy it is." },
+      { "role": "tutor", "text": "Good — so which pair of units are we converting between, kilograms and grams, or metres and centimetres?" }
+    ],
+    "source": "NCERT Class 5 Ch.14 misconception notes — not matched to a deterministic buggy-rule signature (which measurement family the problem belongs to isn't available in identify_conversion_factor's own field pair, see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
   }
 ]
