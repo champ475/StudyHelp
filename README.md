@@ -63,17 +63,12 @@ cd StudyHelp
 1. Copy `backend/.env.example` → `backend/.env` if it doesn't exist yet.
 2. Start Postgres, Redis, and the API via `docker compose up -d --build`.
 3. Wait for Postgres's healthcheck, then run pending Alembic migrations inside the API container.
-4. Install frontend dependencies on first run (`npm install`, if `frontend/node_modules` is missing).
-5. Start the Vite dev server in the foreground.
+4. Seed the database (problems, step-DAGs, misconception bank, buggy-rule library —
+   from the fixtures committed in this repo; safe to re-run, upserts by natural key).
+5. Install frontend dependencies on first run (`npm install`, if `frontend/node_modules` is missing).
+6. Start the Vite dev server in the foreground.
 
-Then, in a second terminal, seed the database (problems, step-DAGs, misconception
-bank, buggy-rule library — safe to re-run, upserts by natural key):
-
-```powershell
-docker compose exec api python scripts/seed_db.py
-```
-
-Open the app:
+That's the whole setup — no separate seed step needed. Open the app:
 
 - **Frontend**: http://localhost:5173
 - **Backend API**: http://localhost:8000 (health check at `/health`)

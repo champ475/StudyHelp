@@ -28,6 +28,9 @@ while ($true) {
 Write-Host "Running alembic migrations..." -ForegroundColor Cyan
 docker compose exec -T api alembic upgrade head
 
+Write-Host "Seeding database (problems, misconception bank, buggy-rule library)..." -ForegroundColor Cyan
+docker compose exec -T api python scripts/seed_db.py
+
 if (-not (Test-Path "frontend\node_modules")) {
     Write-Host "Installing frontend dependencies..." -ForegroundColor Cyan
     Push-Location frontend
