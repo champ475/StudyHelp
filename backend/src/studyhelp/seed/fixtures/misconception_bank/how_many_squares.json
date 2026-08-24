@@ -13,5 +13,35 @@
     "source": "Topic-authored; no direct literature-survey citation for this specific counting bug — not matched to a deterministic buggy-rule signature (no cross-step problem-size context available at the single-answer-field level, see ARCHITECTURE.md D47's interface lesson).",
     "version": 1,
     "review_status": "seed_curated"
+  },
+  {
+    "id": "how_many_squares.double_counts_overlapping_squares",
+    "topic": "how_many_squares",
+    "step_type": "how_many_squares_answer",
+    "typical_mindset": "Squares of the same size that overlap (share some of their little boxes) are counted as if only non-overlapping squares could exist — the child either counts an overlapping square twice by accident, or skips it entirely, because 'two squares sharing space' doesn't fit an initial mental picture of neatly separate squares.",
+    "explanation_strategy": "Have the child systematically slide a same-size square window one position at a time across the grid, marking each new position found, rather than eyeballing the whole grid at once — so overlapping squares are found in an orderly sweep instead of ad hoc.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Let's start this square in the top-left corner. Now slide it one box to the right — is that a new square too, even though it overlaps the first one?" },
+      { "role": "student", "text": "Yes, it's a different square." },
+      { "role": "tutor", "text": "Right — let's keep sliding one box at a time and count every position, even the overlapping ones." }
+    ],
+    "source": "NCERT Class 5 Ch.5 misconception notes — not matched to a deterministic buggy-rule signature (requires the grid dimensions to check systematically, not available from a single answer field; see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "how_many_squares.forgets_the_whole_outer_square",
+    "topic": "how_many_squares",
+    "step_type": "how_many_squares_answer",
+    "typical_mindset": "Every square strictly smaller than the full grid gets counted, but the grid's own outer boundary — the biggest square of all, made of every little box together — doesn't get counted as 'a square' in its own right, since it's the frame the counting happens inside rather than a shape being counted.",
+    "explanation_strategy": "Ask the child whether the outer boundary of the whole grid is itself a square shape, tracing it with a finger, before finalizing the total — so the biggest size gets checked explicitly rather than assumed away.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Trace the very outside edge of the whole grid with your finger. Is that outline itself a square?" },
+      { "role": "student", "text": "Oh — yes, it is!" },
+      { "role": "tutor", "text": "Right, so that counts too. Did you include it in your total?" }
+    ],
+    "source": "NCERT Class 5 Ch.5 misconception notes — not matched to a deterministic buggy-rule signature (requires knowing the grid's full dimensions to check, not available from a single answer field; see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
   }
 ]

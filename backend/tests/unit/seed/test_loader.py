@@ -62,37 +62,73 @@ def test_problems_load_and_pass_arithmetic_validation() -> None:
     assert "subtraction-borrow-014" in problem_ids
 
 
-def test_misconceptions_load_with_twenty_six_seed_entries() -> None:
+def test_misconceptions_load_with_fifty_eight_seed_entries() -> None:
+    """Grown from the original 26-entry seed (see git history for that
+    baseline) to 58 as part of the misconception-bank expansion pass —
+    roughly 4-6 entries per multi-step topic and 2-3 per single-step
+    topic, per ARCHITECTURE.md's retrieval-bank sizing note."""
     entries = load_misconceptions()
-    assert len(entries) == 26
+    assert len(entries) == 58
     ids = {e.id for e in entries}
     assert ids == {
         "subtraction_borrowing.smaller_from_larger",
         "subtraction_borrowing.no_decrement_after_borrow",
         "subtraction_borrowing.borrow_across_zero",
         "subtraction_borrowing.stale_borrow_digit",
+        "subtraction_borrowing.reversed_borrow_judgment",
+        "subtraction_borrowing.digit_order_reversed",
         "fractions_addition.no_common_denominator",
         "fractions_addition.add_across",
         "fractions_addition.forgot_to_simplify",
         "fractions_addition.subtract_across",
         "fractions_addition.compares_numerators_only",
+        "fractions_addition.leaves_improper_fraction_unconverted",
         "lcm_hcf.list_shifted_by_one",
         "lcm_hcf.extra_non_common_value",
+        "lcm_hcf.checks_only_one_number",
+        "lcm_hcf.confuses_lcm_and_hcf",
         "decimals.tenths_written_as_hundredths",
         "decimals.decimal_point_shifted",
+        "decimals.digits_treated_as_separate_whole_numbers",
+        "decimals.decimal_point_shifted_final",
+        "decimals.no_borrow_across_decimal_point",
         "area_perimeter.formula_confusion",
         "area_perimeter.forgot_times_two",
+        "area_perimeter.area_as_sum",
+        "area_perimeter.perimeter_uses_area_formula",
+        "area_perimeter.reports_wrong_quantity",
         "multiplication_division.forgot_carry",
         "multiplication_division.misplaced_remainder",
+        "multiplication_division.basic_fact_retrieval_error",
+        "multiplication_division.divide_tens_drops_remainder",
+        "multiplication_division.reports_partial_result_as_final",
         "measurement.wrong_direction",
         "measurement.wrong_factor",
+        "measurement.forgets_to_apply_conversion",
+        "measurement.reports_unconverted_value",
+        "measurement.conflates_measurement_type_factors",
         "shapes_angles.acute_obtuse_swap",
+        "shapes_angles.right_straight_swap",
+        "shapes_angles.miscounts_polygon_sides",
         "how_many_squares.only_counts_unit_squares",
+        "how_many_squares.double_counts_overlapping_squares",
+        "how_many_squares.forgets_the_whole_outer_square",
         "symmetry.assumes_nonzero_symmetry",
+        "symmetry.overcounts_diagonal_lines",
+        "symmetry.confuses_rotational_with_line_symmetry",
         "patterns.repeats_last_term",
+        "patterns.counts_terms_instead_of_difference",
+        "patterns.reports_last_term_as_difference",
+        "patterns.applies_difference_twice",
         "mapping.ignores_return_trip_cancellation",
+        "mapping.confuses_opposite_directions",
+        "mapping.misreads_grid_scale",
         "boxes_sketches.confuses_faces_and_vertices",
+        "boxes_sketches.misses_hidden_faces_or_edges",
+        "boxes_sketches.miscounts_edges_via_faces_only",
         "smart_charts.reads_symbol_count_not_value",
+        "smart_charts.misreads_bar_height_off_gridline",
+        "smart_charts.compares_bars_instead_of_totaling",
     }
 
 

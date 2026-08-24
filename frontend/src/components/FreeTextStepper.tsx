@@ -21,6 +21,7 @@
 // component never hardcodes a topic's shape.
 
 import { ChatPanel, type ChatMessage } from "./ChatPanel";
+import type { PublicProblem } from "../types";
 
 interface FreeTextStepperProps {
   lockedTexts: string[];
@@ -32,6 +33,10 @@ interface FreeTextStepperProps {
   hint?: string;
   messagesByStepIndex?: ChatMessage[][];
   isThinking?: boolean;
+  // Only threaded through to `ChatPanel` so a `showDiagram` message can
+  // re-render the problem's own diagram — never used for anything else
+  // here (this component stays topic-agnostic otherwise).
+  problem: PublicProblem;
 }
 
 export function FreeTextStepper({
@@ -44,6 +49,7 @@ export function FreeTextStepper({
   hint,
   messagesByStepIndex = [],
   isThinking = false,
+  problem,
 }: FreeTextStepperProps) {
   return (
     <div className="free-text-stepper">
@@ -57,7 +63,7 @@ export function FreeTextStepper({
             </span>
           </div>
           {messagesByStepIndex[index] && messagesByStepIndex[index].length > 0 && (
-            <ChatPanel messages={messagesByStepIndex[index]} isThinking={false} />
+            <ChatPanel messages={messagesByStepIndex[index]} isThinking={false} problem={problem} />
           )}
         </div>
       ))}
@@ -96,6 +102,7 @@ export function FreeTextStepper({
             <ChatPanel
               messages={messagesByStepIndex[lockedTexts.length] ?? []}
               isThinking={isThinking}
+              problem={problem}
             />
           )}
         </div>

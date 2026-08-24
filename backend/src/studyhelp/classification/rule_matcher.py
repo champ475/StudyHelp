@@ -93,6 +93,49 @@ def _b4_stale_borrow_digit(correct: _Fields, student: _Fields) -> bool:
     )
 
 
+def _b5_reversed_borrow_judgment(correct: _Fields, student: _Fields) -> bool:
+    """`compare_column` step: the child compares the two digits correctly
+    but applies the borrow-needed test backwards -- deciding a borrow is
+    needed exactly when it isn't (minuend >= subtrahend) and vice versa.
+    Only fires when the digits actually differ, so there's no ambiguity
+    about which direction is "correct"."""
+    minuend = _as_int(student, "minuend_digit")
+    subtrahend = _as_int(student, "subtrahend_digit")
+    student_borrow_needed = student.get("borrow_needed")
+    correct_borrow_needed = correct.get("borrow_needed")
+    if minuend is None or subtrahend is None or minuend == subtrahend:
+        return False
+    if not isinstance(student_borrow_needed, bool) or not isinstance(correct_borrow_needed, bool):
+        return False
+    reversed_judgment = subtrahend < minuend
+    return bool(student_borrow_needed == reversed_judgment and student_borrow_needed != correct_borrow_needed)
+
+
+def _b6_digit_order_reversed(correct: _Fields, student: _Fields) -> bool:
+    """`write_final_answer` step: the per-column result digits were each
+    found correctly, but assembled in solving order (units first) rather
+    than place-value order (highest place first) -- the student's `value`
+    is the correct value's decimal digit string reversed. `write_final_answer`
+    is a step_type shared across several topics' schemas that all differ in
+    field shape, and `match_buggy_rule` dispatches on step_type alone (no
+    topic parameter) -- so this is gated on the `digits` field, which only
+    subtraction_borrowing's write_final_answer schema has, to avoid firing
+    on another topic's plain `{value: int}` final-answer submission.
+    Also guarded to multi-digit, all-distinct-digit correct values so the
+    reversal is unambiguous rather than a coincidental match."""
+    if "digits" not in correct or "digits" not in student:
+        return False
+    correct_value = _as_int(correct, "value")
+    student_value = _as_int(student, "value")
+    if correct_value is None or student_value is None or correct_value < 10:
+        return False
+    digits = str(correct_value)
+    if len(set(digits)) != len(digits):
+        return False
+    reversed_value = int(digits[::-1])
+    return bool(student_value == reversed_value and student_value != correct_value)
+
+
 def _f1_no_common_denominator(correct: _Fields, student: _Fields) -> bool:
     """Classic Class 5 fraction-addition misconception: the student never
     converts to a common denominator at all — the two denominators they
@@ -176,6 +219,32 @@ def _ap2_forgot_times_two(correct: _Fields, student: _Fields) -> bool:
     return bool(result == length + width and result != 2 * (length + width))
 
 
+def _ap3_area_as_sum(correct: _Fields, student: _Fields) -> bool:
+    """On an area problem, the student adds length and width instead of
+    multiplying them -- reaching for addition (the more familiar
+    operation) rather than the tiling/multiplication idea area actually
+    needs. Distinct from AP1 (which uses the full perimeter formula
+    2*(l+w)) -- this is the simpler, un-doubled sum."""
+    length = _as_int(student, "length")
+    width = _as_int(student, "width")
+    result = _as_int(student, "result")
+    if length is None or width is None or result is None:
+        return False
+    return bool(result == length + width and result != length * width)
+
+
+def _ap5_perimeter_uses_area_formula(correct: _Fields, student: _Fields) -> bool:
+    """On a perimeter problem, the student multiplies length by width
+    (the area formula) instead of adding and doubling all four sides --
+    the mirror image of AP1's formula confusion."""
+    length = _as_int(student, "length")
+    width = _as_int(student, "width")
+    result = _as_int(student, "result")
+    if length is None or width is None or result is None:
+        return False
+    return bool(result == length * width and result != 2 * (length + width))
+
+
 def _md1_forgot_carry(correct: _Fields, student: _Fields) -> bool:
     """Multiplication `multiply_tens` step: the correct carry from the
     units column was nonzero, but the student states carry_in=0 and
@@ -202,6 +271,22 @@ def _md2_misplaced_remainder(correct: _Fields, student: _Fields) -> bool:
     if correct_group is None or student_group is None or correct_group < 10:
         return False
     return bool(student_group == correct_group % 10 and student_group != correct_group)
+
+
+def _md4_divide_tens_drops_remainder(correct: _Fields, student: _Fields) -> bool:
+    """Division `divide_tens` step: the quotient digit is right, but the
+    student reports remainder=0 when the true remainder is nonzero --
+    the leftover amount is simply dropped instead of tracked forward to
+    combine with the next digit."""
+    correct_remainder = _as_int(correct, "remainder")
+    if not correct_remainder:
+        return False
+    student_quotient = _as_int(student, "quotient_digit")
+    correct_quotient = _as_int(correct, "quotient_digit")
+    student_remainder = _as_int(student, "remainder")
+    if student_quotient is None or correct_quotient is None or student_remainder is None:
+        return False
+    return bool(student_quotient == correct_quotient and student_remainder == 0)
 
 
 def _me1_wrong_direction(correct: _Fields, student: _Fields) -> bool:
@@ -246,6 +331,18 @@ def _sa1_acute_obtuse_swap(correct: _Fields, student: _Fields) -> bool:
     if not isinstance(correct_answer, str) or not isinstance(student_answer, str):
         return False
     swap = {"acute": "obtuse", "obtuse": "acute"}
+    return bool(swap.get(correct_answer.strip().lower()) == student_answer.strip().lower())
+
+
+def _sa2_right_straight_swap(correct: _Fields, student: _Fields) -> bool:
+    """Shapes and Angles `answer` step: the student swaps right and
+    straight -- names the opposite of the two easily-confused named
+    angles at 90 degrees and 180 degrees."""
+    correct_answer = correct.get("answer")
+    student_answer = student.get("answer")
+    if not isinstance(correct_answer, str) or not isinstance(student_answer, str):
+        return False
+    swap = {"right": "straight", "straight": "right"}
     return bool(swap.get(correct_answer.strip().lower()) == student_answer.strip().lower())
 
 
@@ -476,6 +573,48 @@ _MATCHERS: list[_MatcherSpec] = [
         "SYM1-assumes-nonzero-symmetry",
         "symmetry_answer",
         _sym1_assumes_nonzero_symmetry,
+    ),
+    _MatcherSpec(
+        "subtraction_borrowing.reversed_borrow_judgment",
+        "B5-reversed-borrow-judgment",
+        "compare_column",
+        _b5_reversed_borrow_judgment,
+    ),
+    _MatcherSpec(
+        "subtraction_borrowing.digit_order_reversed",
+        "B6-digit-order-reversed",
+        "write_final_answer",
+        _b6_digit_order_reversed,
+    ),
+    _MatcherSpec(
+        "area_perimeter.area_as_sum",
+        "AP3-area-as-sum",
+        "compute_area",
+        _ap3_area_as_sum,
+    ),
+    _MatcherSpec(
+        "area_perimeter.perimeter_uses_area_formula",
+        "AP5-perimeter-uses-area-formula",
+        "compute_perimeter",
+        _ap5_perimeter_uses_area_formula,
+    ),
+    _MatcherSpec(
+        "multiplication_division.divide_tens_drops_remainder",
+        "MD4-divide-tens-drops-remainder",
+        "divide_tens",
+        _md4_divide_tens_drops_remainder,
+    ),
+    _MatcherSpec(
+        "shapes_angles.right_straight_swap",
+        "SA2-right-straight-swap",
+        "shapes_angles_answer",
+        _sa2_right_straight_swap,
+    ),
+    _MatcherSpec(
+        "decimals.decimal_point_shifted_final",
+        "DEC4-decimal-point-shifted-final",
+        "write_final_answer",
+        _dec2_decimal_point_shifted,
     ),
 ]
 

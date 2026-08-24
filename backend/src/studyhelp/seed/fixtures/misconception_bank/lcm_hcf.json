@@ -30,5 +30,35 @@
     "source": "Topic-authored; no direct literature-survey citation for LCM/HCF specifically (see ARCHITECTURE.md D20's note that this topic had weaker citation grounding than subtraction).",
     "version": 1,
     "review_status": "seed_curated"
+  },
+  {
+    "id": "lcm_hcf.checks_only_one_number",
+    "topic": "lcm_hcf",
+    "step_type": "find_common_values",
+    "typical_mindset": "The word 'common' isn't fully anchored to 'true of both numbers' — the child lists multiples or factors of just one of the two given numbers (usually the first one) and treats that whole list as if it already answers the question, without checking any value against the second number.",
+    "explanation_strategy": "Ask the child to name both original numbers out loud before listing anything, then ask whose multiples/factors they were listing — theirs, or just one number's — so they notice for themselves that the second number was never used.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "We have two numbers here. Which ones did you list multiples for?" },
+      { "role": "student", "text": "Just the first one, I think." },
+      { "role": "tutor", "text": "Right — for a COMMON multiple, we need it to show up in both numbers' lists. Let's list the second number's multiples too." }
+    ],
+    "source": "NCERT Class 5 Ch.6 misconception notes — not matched to a deterministic buggy-rule signature (the two source numbers aren't available in the find_common_values step's own field pair, only the submitted value list; see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "lcm_hcf.confuses_lcm_and_hcf",
+    "topic": "lcm_hcf",
+    "step_type": "write_final_answer",
+    "typical_mindset": "LCM and HCF are both 'the special number you get from two numbers,' and which specific one a question wants isn't firmly tied to the words 'lowest common multiple' versus 'highest common factor' — the child correctly finds one of the two quantities but reports it even when the other one was asked for.",
+    "explanation_strategy": "Before accepting the final number, ask the child to say in their own words whether the question wants the biggest number that divides into both, or the smallest number both divide into — then check which of their working numbers matches that description.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Is this question asking for the biggest number that fits INTO both of ours, or the smallest number that BOTH of ours fit into?" },
+      { "role": "student", "text": "The smallest one both fit into." },
+      { "role": "tutor", "text": "Right, that's the LCM. Which of the numbers you found matches that?" }
+    ],
+    "source": "NCERT Class 5 Ch.6 misconception notes — not matched to a deterministic buggy-rule signature (write_final_answer's single 'value' field carries no record of which of LCM/HCF was intended, see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
   }
 ]

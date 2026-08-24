@@ -13,5 +13,50 @@
     "source": "Topic-authored; no direct literature-survey citation for this specific pattern-extension bug — not matched to a deterministic buggy-rule signature (the common-difference and next-term steps are separate submissions with no shared field context at the single-answer-field level, see ARCHITECTURE.md D47's interface lesson).",
     "version": 1,
     "review_status": "seed_curated"
+  },
+  {
+    "id": "patterns.counts_terms_instead_of_difference",
+    "topic": "patterns",
+    "step_type": "patterns_common_difference",
+    "typical_mindset": "Asked for 'the common difference,' the child reports how many numbers are in the list shown instead of how much bigger each number is than the one before it — the word 'difference' gets attached to 'a count of things' rather than to 'a gap between two values.'",
+    "explanation_strategy": "Ask the child to pick any two neighboring numbers in the list and find the gap between just those two, rather than looking at the whole list, so 'difference' gets anchored to a single pair-comparison rather than to counting the list.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Look at just these two neighboring numbers, 5 and 8. How much bigger is 8 than 5?" },
+      { "role": "student", "text": "3 more." },
+      { "role": "tutor", "text": "Right — that gap, 3, is the common difference. Does that match what any other pair in the list gives you?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for this specific pattern-vocabulary bug — not matched to a deterministic buggy-rule signature (single free-text numeric field with no access to the underlying list length, see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "patterns.reports_last_term_as_difference",
+    "topic": "patterns",
+    "step_type": "patterns_common_difference",
+    "typical_mindset": "The two separate questions — 'what is the last number shown' and 'what is the common difference' — blur together, and the child answers the common-difference question by restating the last term of the list instead of computing the gap between neighboring terms.",
+    "explanation_strategy": "Ask the child to state clearly which question is being answered right now — the last number in the list, or the gap between two neighboring numbers — before answering, so the two separate ideas stay separate.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Right now, are we looking for the last number in the list, or how much each number grows by?" },
+      { "role": "student", "text": "Oh — how much it grows by." },
+      { "role": "tutor", "text": "Good. So let's pick two neighboring numbers and find that growth amount." }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for this specific pattern-vocabulary bug — not matched to a deterministic buggy-rule signature (single free-text numeric field with no access to the underlying list, see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "patterns.applies_difference_twice",
+    "topic": "patterns",
+    "step_type": "patterns_next_term",
+    "typical_mindset": "Having correctly found the common difference, the child adds it twice instead of once when predicting the very next term — overshooting by one extra step, as if 'moving forward' meant applying the growth rule an extra time for good measure rather than exactly once per term.",
+    "explanation_strategy": "Ask the child to name exactly how many new terms they're predicting (just one), and to add the common difference that same number of times, rather than adding it an extra time out of habit.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "We're finding just the very NEXT number — one single new term. How many times should we add the common difference to get there?" },
+      { "role": "student", "text": "Just once." },
+      { "role": "tutor", "text": "Right — let's add it exactly once to the last term. What do you get?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for this specific pattern-extension bug — not matched to a deterministic buggy-rule signature (the common-difference and next-term steps are separate submissions with no shared field context at the single-answer-field level, see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
   }
 ]

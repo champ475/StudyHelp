@@ -14,5 +14,35 @@
     "source": "Topic-authored; no direct literature-survey citation for this specific symmetry-assumption bug.",
     "version": 1,
     "review_status": "seed_curated"
+  },
+  {
+    "id": "symmetry.overcounts_diagonal_lines",
+    "topic": "symmetry",
+    "step_type": "symmetry_answer",
+    "typical_mindset": "Any line drawn corner-to-corner or through the middle of a shape is assumed to be a line of symmetry just because it looks like it 'cuts the shape in half' — without actually checking that the two resulting halves are true mirror images, so extra diagonal lines get counted that don't really fold the shape onto itself.",
+    "explanation_strategy": "Have the child mentally fold the shape along the specific diagonal in question and check corner-by-corner whether it lands exactly on top of the other half, rather than accepting any line through the middle as valid.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "If you folded the rectangle along that corner-to-corner line, would the two triangle halves match up exactly, corner to corner?" },
+      { "role": "student", "text": "Hmm, actually the corners don't line up." },
+      { "role": "tutor", "text": "Right — so that diagonal line doesn't count as a line of symmetry here, even though it cuts the shape into two pieces." }
+    ],
+    "source": "NCERT Class 5 Ch.8 misconception notes — a documented common error where 'divides the area in half' is conflated with 'is a mirror line'; not matched to a deterministic buggy-rule signature (requires knowing the shape's actual geometry, not present in a single answer field; see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "symmetry.confuses_rotational_with_line_symmetry",
+    "topic": "symmetry",
+    "step_type": "symmetry_answer",
+    "typical_mindset": "A shape that looks the same after being spun around (like a pinwheel or an S) is treated as having a line of symmetry, because 'it still looks balanced/the same' — the specific test of folding along a straight line (rather than turning the shape) hasn't been distinguished from this more general sense of visual balance.",
+    "explanation_strategy": "Explicitly separate the two actions — spinning in place versus folding flat — and ask the child to try the fold test specifically, rather than relying on a general sense that the shape 'looks balanced.'",
+    "example_dialogue": [
+      { "role": "tutor", "text": "This 'S' shape looks the same if we spin it halfway around. But if we FOLD it flat down the middle instead of spinning it, do the two halves land on each other?" },
+      { "role": "student", "text": "No, folding doesn't work — one half sticks out." },
+      { "role": "tutor", "text": "Right — spinning and folding are different tests. For lines of symmetry, we only care about the folding one." }
+    ],
+    "source": "NCERT Class 5 Ch.8 misconception notes — a documented common conflation between rotational and reflective (line) symmetry at this grade level.",
+    "version": 1,
+    "review_status": "seed_curated"
   }
 ]

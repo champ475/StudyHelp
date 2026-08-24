@@ -1,6 +1,7 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { DiagramPanel } from "./DiagramPanel";
+import { SymmetryDiagram } from "../diagrams/SymmetryDiagram";
 import type { PublicProblem } from "../types";
 
 function problemWith(topic: string, given: Record<string, unknown>): PublicProblem {
@@ -105,16 +106,8 @@ describe("DiagramPanel", () => {
     expect(container.textContent).toContain("? m");
   });
 
-  it("renders the question-card fallback for every light-check topic", () => {
-    for (const topic of [
-      "shapes_angles",
-      "how_many_squares",
-      "symmetry",
-      "patterns",
-      "mapping",
-      "boxes_sketches",
-      "smart_charts",
-    ]) {
+  it("renders the question-card fallback for every remaining light-check topic", () => {
+    for (const topic of ["how_many_squares", "patterns", "mapping", "boxes_sketches", "smart_charts"]) {
       const { container, unmount } = render(
         <DiagramPanel problem={problemWith(topic, { question: "An angle measures 30 degrees." })} />,
       );
@@ -122,6 +115,97 @@ describe("DiagramPanel", () => {
       expect(container.textContent).toContain("An angle measures 30 degrees.");
       unmount();
     }
+  });
+
+  it("renders an angle arc for shapes_angles from a 'N degrees' question, never the classification", () => {
+    const { container } = render(
+      <DiagramPanel
+        problem={problemWith("shapes_angles", {
+          question: "An angle measures 90 degrees. Classify it: acute, right, obtuse, straight, or reflex?",
+        })}
+      />,
+    );
+    expect(container.querySelector("svg")).toBeInTheDocument();
+    expect(container.textContent).toContain("90°");
+    expect(container.textContent).not.toContain("right"); // the classification answer
+  });
+
+  it("renders a shape outline for shapes_angles from a named-shape question", () => {
+    const { container } = render(
+      <DiagramPanel problem={problemWith("shapes_angles", { question: "How many sides does a pentagon have?" })} />,
+    );
+    expect(container.querySelector("polygon")).toBeInTheDocument();
+  });
+
+  it("renders a bare shape (no symmetry line) for symmetry, never the line count", () => {
+    const { container } = render(
+      <DiagramPanel problem={problemWith("symmetry", { question: "How many lines of symmetry does a square have?" })} />,
+    );
+    expect(container.querySelector("rect")).toBeInTheDocument();
+    expect(container.querySelectorAll("line").length).toBe(0);
+  });
+
+  it("renders a letter glyph for symmetry letter questions", () => {
+    const { container } = render(
+      <DiagramPanel
+        problem={problemWith("symmetry", { question: "Does the capital letter A have a line of symmetry? Answer yes or no." })}
+      />,
+    );
+    expect(container.textContent).toContain("A");
+  });
+
+  it("symmetry: draws the correct dashed lines when revealAnswer is set (user-directed reveal)", () => {
+    const { container } = render(
+      <SymmetryDiagram
+        given={{ question: "How many lines of symmetry does a square have?" }}
+        revealAnswer="4"
+      />,
+    );
+    expect(container.querySelectorAll("line").length).toBe(4);
+  });
+
+  it("symmetry: draws no lines and no reveal when revealAnswer is absent", () => {
+    const { container } = render(
+      <SymmetryDiagram given={{ question: "How many lines of symmetry does a square have?" }} />,
+    );
+    expect(container.querySelectorAll("line").length).toBe(0);
+  });
+
+  it("symmetry: shows a 'no line of symmetry' caption for a zero-line reveal", () => {
+    const { container } = render(
+      <SymmetryDiagram
+        given={{ question: "How many lines of symmetry does a scalene triangle (a triangle where all three sides are different lengths) have?" }}
+        revealAnswer="0"
+      />,
+    );
+    expect(container.querySelectorAll("line").length).toBe(0);
+    expect(container.textContent).toContain("No line of symmetry");
+  });
+
+  it("symmetry: draws one line for a 'yes' letter reveal, none for 'no'", () => {
+    const yes = render(
+      <SymmetryDiagram
+        given={{ question: "Does the capital letter A have a line of symmetry? Answer yes or no." }}
+        revealAnswer="yes"
+      />,
+    );
+    expect(yes.container.querySelectorAll("line").length).toBe(1);
+
+    const no = render(
+      <SymmetryDiagram
+        given={{ question: "Does the capital letter F have a line of symmetry? Answer yes or no." }}
+        revealAnswer="no"
+      />,
+    );
+    expect(no.container.querySelectorAll("line").length).toBe(0);
+    expect(no.container.textContent).toContain("No line of symmetry");
+  });
+
+  it("falls back to null for shapes_angles/symmetry questions outside the known vocabulary", () => {
+    const { container } = render(
+      <DiagramPanel problem={problemWith("shapes_angles", { question: "Unrecognized question text." })} />,
+    );
+    expect(container).toBeEmptyDOMElement();
   });
 
   it("renders nothing for an unregistered topic", () => {

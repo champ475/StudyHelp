@@ -13,5 +13,35 @@
     "source": "Topic-authored; no direct literature-survey citation for this specific mapping bug — not matched to a deterministic buggy-rule signature (net-position problems need the full described route, not just the single final answer field, to check generically; see ARCHITECTURE.md D47's interface lesson).",
     "version": 1,
     "review_status": "seed_curated"
+  },
+  {
+    "id": "mapping.confuses_opposite_directions",
+    "topic": "mapping",
+    "step_type": "mapping_answer",
+    "typical_mindset": "North/south and east/west are recognized as opposite pairs, but which specific direction is 'the opposite one' isn't yet reliable — the child sometimes moves the right distance but in the mirror-image direction (e.g. treats 'west' as if it meant 'east'), landing on the wrong side of the starting point.",
+    "explanation_strategy": "Anchor directions to a shared physical reference (which way is the classroom door, or which way the child is facing) before asking about the map, so 'opposite direction' becomes something pointed at rather than recalled abstractly.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "If north is this way (pointing), which way is south — the same way, or the opposite way?" },
+      { "role": "student", "text": "The opposite way." },
+      { "role": "tutor", "text": "Right! So if we walk south from the start, do we end up above the start, or below it?" }
+    ],
+    "source": "NCERT Class 5 Ch.9 misconception notes — not matched to a deterministic buggy-rule signature (net-position problems need the full described route, not just the single final answer field, to check generically; see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "mapping.misreads_grid_scale",
+    "topic": "mapping",
+    "step_type": "mapping_answer",
+    "typical_mindset": "Each square on a grid map is treated as representing exactly one unit of real distance regardless of what the map's scale actually says (e.g. 'each square = 2 km') — the count of squares crossed is reported directly as the answer without multiplying by the scale.",
+    "explanation_strategy": "Point back at the map's scale key first and ask what one square stands for in real distance, before asking the child to work out the total distance for a given number of squares.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "The map says each square stands for 2 kilometres. If you crossed 3 squares, is the real distance 3 kilometres, or something else?" },
+      { "role": "student", "text": "3 kilometres?" },
+      { "role": "tutor", "text": "Each square is worth 2 kilometres, not 1 — so what's the real distance for 3 squares?" }
+    ],
+    "source": "NCERT Class 5 Ch.9 misconception notes — not matched to a deterministic buggy-rule signature (the map's scale factor isn't present in a single answer field; see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
   }
 ]

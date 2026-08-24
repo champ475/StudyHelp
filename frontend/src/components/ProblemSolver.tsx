@@ -96,6 +96,17 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
               const id = streamingMessageId;
               setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, isReflection: true } : m)));
             }
+            // Deterministic per the backend (`dialogue/diagram_hint.py`) —
+            // re-shows the problem's own diagram under this specific
+            // explanation when the classified misconception is one this
+            // topic's diagram visually clarifies.
+            if (event.data.diagram_hint && streamingMessageId !== null) {
+              const id = streamingMessageId;
+              const revealAnswer = event.data.diagram_hint_reveal_answer;
+              setMessages((prev) =>
+                prev.map((m) => (m.id === id ? { ...m, showDiagram: true, revealAnswer } : m))
+              );
+            }
           } else if (event.event === "error") {
             setLoadError(event.data.detail);
           }
@@ -189,6 +200,7 @@ export function ProblemSolver({ sessionId, problemId }: ProblemSolverProps) {
         hint={frontierHint}
         messagesByStepIndex={messagesByStepIndex}
         isThinking={isSubmitting}
+        problem={problem}
       />
 
       {solved && <p className="solved-banner">Solved! Great work.</p>}

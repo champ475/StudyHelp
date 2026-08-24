@@ -18,6 +18,7 @@ from typing import Any, Literal
 
 from studyhelp.classification.classifier import ClassificationResult
 from studyhelp.config import get_settings
+from studyhelp.dialogue.diagram_hint import should_attach_diagram_hint, should_reveal_symmetry_lines
 from studyhelp.dialogue.leakage_filter import contains_leakage
 from studyhelp.dialogue.readability_gate import flesch_kincaid_grade, passes_readability
 from studyhelp.dialogue.state import (
@@ -76,6 +77,24 @@ class DialogueTurnResult:
     message: str | None
     turn_count: int
     expects_retry: bool
+    diagram_hint: bool = False
+    """Whether the frontend should re-show this topic's existing,
+    `given`-derived diagram (the same one `DiagramPanel` shows at
+    problem-load) alongside this turn's message. Deterministic — set only
+    by `dialogue/diagram_hint.py::should_attach_diagram_hint()` against the
+    already-classified `misconception_id`, never by the LLM (same principle
+    as `analogy_hint`: see that module's docstring). Only ever `True` on an
+    "explaining" turn; every other event leaves it at the default `False`."""
+    diagram_hint_reveal_answer: str | None = None
+    """`symmetry`-only, user-directed exception (see
+    `diagram_hint.py::should_reveal_symmetry_lines()`): the correct
+    `answer` field, passed through ONLY once `should_reveal_symmetry_lines()`
+    is true, so the frontend's `SymmetryDiagram` can draw the actual
+    line(s) of symmetry instead of the bare shape. `None` for every other
+    topic and for symmetry itself before the repeat-count threshold —
+    deliberately narrow (a raw field value, not a general `correct_step`
+    passthrough) so this stays a scoped, auditable exception rather than a
+    new general leak surface."""
 
 
 def _protected_values(correct_fields: dict[str, Any]) -> list[int | str]:
@@ -505,10 +524,21 @@ async def handle_step_submission(
     )
     await state_store.save(new_state)
 
+    diagram_hint = should_attach_diagram_hint(
+        classification.misconception_id if classification is not None else None
+    )
+    diagram_hint_reveal_answer: str | None = None
+    if diagram_hint and should_reveal_symmetry_lines(topic, consecutive):
+        answer = correct_fields.get("answer")
+        if isinstance(answer, str) and answer:
+            diagram_hint_reveal_answer = answer
+
     return DialogueTurnResult(
         event="explaining",
         state=DialogueStateName.AWAITING_RETRY,
         message=message,
         turn_count=turn_count,
         expects_retry=True,
+        diagram_hint=diagram_hint,
+        diagram_hint_reveal_answer=diagram_hint_reveal_answer,
     )

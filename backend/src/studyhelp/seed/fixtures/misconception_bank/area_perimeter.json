@@ -30,5 +30,52 @@
     "source": "Topic-authored; no direct literature-survey citation for area/perimeter formula confusion specifically.",
     "version": 1,
     "review_status": "seed_curated"
+  },
+  {
+    "id": "area_perimeter.area_as_sum",
+    "topic": "area_perimeter",
+    "step_type": "compute_area",
+    "bug_signature": { "buggy_rule_id": "area_perimeter.area_as_sum" },
+    "typical_mindset": "Combining a length and a width is done the way two numbers are usually first combined — by adding them — rather than multiplying; the idea that area specifically needs multiplying (counting rows of tiles, not just the two edge lengths) hasn't taken hold, so the student adds length and width and stops.",
+    "explanation_strategy": "Build the tile-grid picture concretely: ask how many tiles are in one row, then how many rows there are, and whether adding those two numbers together would actually count every tile in the grid.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "If one row has 5 tiles, and there are 3 rows, does adding 5 + 3 tell us how many tiles are in the whole grid?" },
+      { "role": "student", "text": "Hmm, no, that's not enough tiles." },
+      { "role": "tutor", "text": "Right — to count every tile in 3 rows of 5, what should we do with 5 and 3 instead of adding them?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for area/perimeter formula confusion specifically.",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "area_perimeter.perimeter_uses_area_formula",
+    "topic": "area_perimeter",
+    "step_type": "compute_perimeter",
+    "bug_signature": { "buggy_rule_id": "area_perimeter.perimeter_uses_area_formula" },
+    "typical_mindset": "The mirror image of formula confusion: for a perimeter question, the student reaches for the multiplying formula (length times width) instead of the adding-and-doubling one, because multiplying feels like 'the rectangle formula' regardless of which quantity is being asked for.",
+    "explanation_strategy": "Ask what perimeter actually measures — walking around the outside edge — and whether multiplying the two sides together could ever represent a distance walked, before returning to the addition-based formula.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "If you walked all the way around the edge of this rectangle, would you be walking in a straight line the whole time, or turning corners and adding up distances?" },
+      { "role": "student", "text": "Turning corners and adding." },
+      { "role": "tutor", "text": "Exactly — so which four numbers should we add together to find that distance?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for area/perimeter formula confusion specifically.",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "area_perimeter.reports_wrong_quantity",
+    "topic": "area_perimeter",
+    "step_type": "write_final_answer",
+    "typical_mindset": "By the time the final number is written down, the earlier working may be correct, but the child writes down the area value when the question asked for perimeter (or vice versa) — the last number computed gets treated as 'the answer' without checking it against what was actually asked.",
+    "explanation_strategy": "Before accepting the final number, ask the child to reread the question and say in their own words which quantity it's asking for, then check that against which of their two computed numbers matches.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Let's reread the question together — is it asking how much space is inside the rectangle, or the distance around its edge?" },
+      { "role": "student", "text": "Oh, it's asking for the distance around." },
+      { "role": "tutor", "text": "Right — so which of your two numbers should you write as the final answer?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for this specific answer-reporting confusion — not matched to a deterministic buggy-rule signature (write_final_answer's single 'value' field carries no record of which quantity it represents, see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
   }
 ]

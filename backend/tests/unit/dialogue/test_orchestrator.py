@@ -474,6 +474,166 @@ async def test_misconception_from_classification_reaches_the_decide_call(
     assert saved.bug_code == "B1-smaller-from-larger"
 
 
+async def test_diagram_hint_attaches_for_a_curated_misconception_id(
+    store: DialogueStateStore,
+) -> None:
+    classification = ClassificationResult(
+        source="rule",
+        misconception_id="subtraction_borrowing.stale_borrow_digit",
+        bug_code="B4-stale-borrow-digit",
+        confidence="high",
+    )
+    result = await handle_step_submission(
+        state_store=store,
+        llm_client=MockLLMProvider(),
+        session_id="s1",
+        problem_id="p1",
+        topic="subtraction_with_borrowing",
+        step_type="subtract_column",
+        correct_fields=_CORRECT_FIELDS,
+        student_fields=_WRONG_FIELDS,
+        verify_result=_INVALID_RESULT,
+        classification=classification,
+        timing_policy=InterventionPolicy.IMMEDIATE,
+        problem_is_complete=False,
+    )
+    assert result.diagram_hint is True
+
+
+async def test_diagram_hint_stays_false_for_an_uncurated_misconception_id(
+    store: DialogueStateStore,
+) -> None:
+    # A real, classified misconception — just not one of the curated
+    # diagram-hint-worthy ids in `dialogue/diagram_hint.py`.
+    classification = ClassificationResult(
+        source="rule",
+        misconception_id="subtraction_borrowing.smaller_from_larger",
+        bug_code="B1-smaller-from-larger",
+        confidence="high",
+    )
+    result = await handle_step_submission(
+        state_store=store,
+        llm_client=MockLLMProvider(),
+        session_id="s1",
+        problem_id="p1",
+        topic="subtraction_with_borrowing",
+        step_type="subtract_column",
+        correct_fields=_CORRECT_FIELDS,
+        student_fields=_WRONG_FIELDS,
+        verify_result=_INVALID_RESULT,
+        classification=classification,
+        timing_policy=InterventionPolicy.IMMEDIATE,
+        problem_is_complete=False,
+    )
+    assert result.diagram_hint is False
+
+
+async def test_diagram_hint_stays_false_with_no_classification(store: DialogueStateStore) -> None:
+    result = await handle_step_submission(
+        state_store=store,
+        llm_client=MockLLMProvider(),
+        session_id="s1",
+        problem_id="p1",
+        topic="subtraction_with_borrowing",
+        step_type="subtract_column",
+        correct_fields=_CORRECT_FIELDS,
+        student_fields=_WRONG_FIELDS,
+        verify_result=_INVALID_RESULT,
+        classification=None,
+        timing_policy=InterventionPolicy.IMMEDIATE,
+        problem_is_complete=False,
+    )
+    assert result.diagram_hint is False
+
+
+async def test_symmetry_diagram_hint_does_not_reveal_answer_on_first_miss(
+    store: DialogueStateStore,
+) -> None:
+    classification = ClassificationResult(
+        source="rule",
+        misconception_id="symmetry.assumes_nonzero_symmetry",
+        bug_code="SYM1-assumes-nonzero-symmetry",
+        confidence="high",
+    )
+    kwargs = dict(
+        state_store=store,
+        llm_client=MockLLMProvider(),
+        session_id="s-sym",
+        problem_id="p-sym",
+        topic="symmetry",
+        step_type="symmetry_answer",
+        correct_fields={"answer": "4"},
+        student_fields={"answer": "1"},
+        verify_result=_INVALID_RESULT,
+        classification=classification,
+        timing_policy=InterventionPolicy.IMMEDIATE,
+        problem_is_complete=False,
+        given={"question": "How many lines of symmetry does a square have?"},
+    )
+    result = await handle_step_submission(**kwargs)  # type: ignore[arg-type]
+    assert result.diagram_hint is True
+    assert result.diagram_hint_reveal_answer is None
+
+
+async def test_symmetry_diagram_hint_reveals_answer_after_two_misses(
+    store: DialogueStateStore,
+) -> None:
+    classification = ClassificationResult(
+        source="rule",
+        misconception_id="symmetry.assumes_nonzero_symmetry",
+        bug_code="SYM1-assumes-nonzero-symmetry",
+        confidence="high",
+    )
+    kwargs = dict(
+        state_store=store,
+        llm_client=MockLLMProvider(),
+        session_id="s-sym2",
+        problem_id="p-sym2",
+        topic="symmetry",
+        step_type="symmetry_answer",
+        correct_fields={"answer": "4"},
+        student_fields={"answer": "1"},
+        verify_result=_INVALID_RESULT,
+        classification=classification,
+        timing_policy=InterventionPolicy.IMMEDIATE,
+        problem_is_complete=False,
+        given={"question": "How many lines of symmetry does a square have?"},
+    )
+    await handle_step_submission(**kwargs)  # type: ignore[arg-type]
+    second = await handle_step_submission(**kwargs)  # type: ignore[arg-type]
+    assert second.diagram_hint is True
+    assert second.diagram_hint_reveal_answer == "4"
+
+
+async def test_non_symmetry_diagram_hint_never_reveals_answer_regardless_of_repeat_count(
+    store: DialogueStateStore,
+) -> None:
+    classification = ClassificationResult(
+        source="rule",
+        misconception_id="subtraction_borrowing.stale_borrow_digit",
+        bug_code="B4-stale-borrow-digit",
+        confidence="high",
+    )
+    kwargs = dict(
+        state_store=store,
+        llm_client=MockLLMProvider(),
+        session_id="s-sub",
+        problem_id="p-sub",
+        topic="subtraction_with_borrowing",
+        step_type="subtract_column",
+        correct_fields=_CORRECT_FIELDS,
+        student_fields=_WRONG_FIELDS,
+        verify_result=_INVALID_RESULT,
+        classification=classification,
+        timing_policy=InterventionPolicy.IMMEDIATE,
+        problem_is_complete=False,
+    )
+    await handle_step_submission(**kwargs)  # type: ignore[arg-type]
+    second = await handle_step_submission(**kwargs)  # type: ignore[arg-type]
+    assert second.diagram_hint is True
+    assert second.diagram_hint_reveal_answer is None
+
+
 async def test_repeated_error_on_same_step_switches_to_concrete_analogy(
     store: DialogueStateStore,
 ) -> None:

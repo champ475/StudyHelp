@@ -30,5 +30,51 @@
     "source": "Topic-authored; no direct literature-survey citation for decimal place-value specifically.",
     "version": 1,
     "review_status": "seed_curated"
+  },
+  {
+    "id": "decimals.digits_treated_as_separate_whole_numbers",
+    "topic": "decimals",
+    "step_type": "align_place_value",
+    "typical_mindset": "The part after the decimal point is treated as its own separate whole number rather than a fraction of a whole -- so 3.4 and 3.25 get aligned by matching digit-count ('4' lines up under '25' as if both were just short numbers) instead of by place value, the classic 'whole number bias' applied to decimals.",
+    "explanation_strategy": "Ask the child what '4 tenths' and '25 hundredths' would look like as fractions, and which one is actually bigger, before asking them to align the digits -- so the alignment follows from the fraction sizes rather than from digit-counting.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Is 4 tenths the same amount as 25 hundredths, or a different amount?" },
+      { "role": "student", "text": "Different -- hmm, is 4 tenths bigger?" },
+      { "role": "tutor", "text": "Let's check: 4 tenths is the same as how many hundredths? Say it out loud using the 'and how many hundredths' words." }
+    ],
+    "source": "Resnick, Nesher, Leonard, Magone, Omanson & Peled (1989), 'Conceptual bases of arithmetic errors: the case of decimal fractions' -- documents whole-number-bias alignment errors in decimal place value",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "decimals.decimal_point_shifted_final",
+    "topic": "decimals",
+    "step_type": "write_final_answer",
+    "bug_signature": { "buggy_rule_id": "decimals.decimal_point_shifted_final" },
+    "typical_mindset": "Even after computing the right digits earlier, when re-stating the final answer the decimal point gets placed by guesswork one column too far right again -- the same ten-times-too-large slip as in the computation step, but recurring at the final write-up stage as if the two steps aren't connected to the same number.",
+    "explanation_strategy": "Ask the child to compare their final written answer to the number they just computed a moment ago -- are they the same value, just copied down, or did something change?",
+    "example_dialogue": [
+      { "role": "tutor", "text": "A moment ago you worked out the answer. Is the number you just wrote as your final answer the exact same value, or did it get bigger?" },
+      { "role": "student", "text": "It looks bigger now." },
+      { "role": "tutor", "text": "Right — let's copy the decimal point across in the same place it was before. Where does that put it?" }
+    ],
+    "source": "Topic-authored; no direct literature-survey citation for decimal place-value specifically.",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "decimals.no_borrow_across_decimal_point",
+    "topic": "decimals",
+    "step_type": "compute_result",
+    "typical_mindset": "When subtracting and a hundredths digit is smaller than the one being taken away, the borrow that should cross from the tenths column into the hundredths column doesn't happen -- each side of the decimal point is treated as its own separate mini-subtraction, so borrowing 'stops' at the decimal point instead of crossing it.",
+    "explanation_strategy": "Point out explicitly that the decimal point is just a place-value marker, not a wall -- ask the child whether the tenths column is allowed to lend a 'ten hundredths' to the hundredths column, the same way any two neighboring columns can.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "In whole-number subtraction, can a column borrow from its neighbor next door?" },
+      { "role": "student", "text": "Yes." },
+      { "role": "tutor", "text": "The tenths and hundredths columns are neighbors too, even with the dot between them. Can the tenths column lend the hundredths column ten?" }
+    ],
+    "source": "Resnick, Nesher, Leonard, Magone, Omanson & Peled (1989) -- decimal-fraction arithmetic errors literature; NCERT Class 5 Ch.10 misconception notes",
+    "version": 1,
+    "review_status": "seed_curated"
   }
 ]

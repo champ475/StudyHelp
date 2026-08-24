@@ -255,6 +255,8 @@ async def _pipeline_events(
                 "turn_count": 0,
                 "expects_retry": False,
                 "message": _LLM_UNAVAILABLE_MESSAGE,
+                "diagram_hint": False,
+                "diagram_hint_reveal_answer": None,
             },
         )
         await db.commit()
@@ -271,6 +273,8 @@ async def _pipeline_events(
             "turn_count": dialogue_result.turn_count,
             "expects_retry": dialogue_result.expects_retry,
             "message": dialogue_result.message,
+            "diagram_hint": dialogue_result.diagram_hint,
+            "diagram_hint_reveal_answer": dialogue_result.diagram_hint_reveal_answer,
         },
     )
 

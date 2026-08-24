@@ -78,5 +78,20 @@
     "source": "Ni & Zhou 2005, 'whole number bias' in fraction learning; NCERT Class 5 Ch.7 misconception notes",
     "version": 1,
     "review_status": "seed_curated"
+  },
+  {
+    "id": "fractions_addition.leaves_improper_fraction_unconverted",
+    "topic": "fractions_addition",
+    "step_type": "write_final_answer",
+    "typical_mindset": "When the sum comes out bigger than one whole (numerator bigger than denominator), the fraction is written exactly as computed instead of being converted into a mixed number — 'more than one whole' hasn't yet been connected to the idea of pulling whole pieces out of the fraction.",
+    "explanation_strategy": "Ask the child how many whole pies an improper-fraction amount like 7/4 would actually make, and how many quarters would be left over, so the mixed-number form emerges from counting wholes rather than from a stated conversion rule.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "You got 7/4. If each whole pie is cut into 4 pieces, how many whole pies can you make from 7 pieces?" },
+      { "role": "student", "text": "1 whole pie, with 3 pieces left over." },
+      { "role": "tutor", "text": "Exactly! So how would you write that as a mixed number — one whole and how many quarters?" }
+    ],
+    "source": "NCERT Class 5 Ch.7; general Class 5 fraction-to-mixed-number curricular emphasis — not matched to a deterministic buggy-rule signature (validity depends on the problem's expected answer format, e.g. whether a mixed number is required, not derivable from the fields alone).",
+    "version": 1,
+    "review_status": "seed_curated"
   }
 ]

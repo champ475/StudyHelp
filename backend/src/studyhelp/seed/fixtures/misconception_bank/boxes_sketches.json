@@ -13,5 +13,35 @@
     "source": "Topic-authored; no direct literature-survey citation for this specific faces/vertices confusion — not matched to a deterministic buggy-rule signature (would require knowing both the asked-for count type and the shape's other counts, not available from a single answer field; see ARCHITECTURE.md D47's interface lesson).",
     "version": 1,
     "review_status": "seed_curated"
+  },
+  {
+    "id": "boxes_sketches.misses_hidden_faces_or_edges",
+    "topic": "boxes_sketches",
+    "step_type": "boxes_sketches_answer",
+    "typical_mindset": "Only the faces, edges, or corners that are visible in the drawing get counted — the ones hidden behind the solid in a 2D sketch (like the back face or the bottom) aren't included, because 'what I can see in the picture' is treated as 'everything the shape has.'",
+    "explanation_strategy": "Ask the child to imagine picking the solid shape up and turning it around in their hands, naming a part they couldn't see in the picture, before finishing the count — so hidden parts get surfaced by imagined rotation rather than by being told they exist.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "If you picked this box up and turned it around, is there a face on the back that we can't see in this drawing?" },
+      { "role": "student", "text": "Oh yeah, there's one hiding behind." },
+      { "role": "tutor", "text": "Right! Let's add that hidden one to our count too." }
+    ],
+    "source": "NCERT Class 5 Ch.3 misconception notes — not matched to a deterministic buggy-rule signature (which parts are hidden depends on the specific sketch's viewing angle, not derivable from the single answer field; see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
+  },
+  {
+    "id": "boxes_sketches.miscounts_edges_via_faces_only",
+    "topic": "boxes_sketches",
+    "step_type": "boxes_sketches_answer",
+    "typical_mindset": "Edges are counted by walking around each face and counting its four sides, then adding those counts across all faces — without noticing that each edge is shared by two faces and so gets counted twice, giving a total that's double the true edge count.",
+    "explanation_strategy": "Have the child point to one single edge and ask how many faces meet at it, so they discover each edge belongs to two faces at once and should only be counted the one time, not once per face.",
+    "example_dialogue": [
+      { "role": "tutor", "text": "Point to this one edge. How many flat faces touch it?" },
+      { "role": "student", "text": "Two of them." },
+      { "role": "tutor", "text": "Right — so if we count it once for each face, we'd count it twice. How should we count each edge instead?" }
+    ],
+    "source": "NCERT Class 5 Ch.3 misconception notes — not matched to a deterministic buggy-rule signature (requires knowing the per-face breakdown behind the submitted total, not present in a single answer field; see ARCHITECTURE.md D47's interface lesson).",
+    "version": 1,
+    "review_status": "seed_curated"
   }
 ]

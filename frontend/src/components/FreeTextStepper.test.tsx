@@ -2,6 +2,16 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { FreeTextStepper } from "./FreeTextStepper";
+import type { PublicProblem } from "../types";
+
+const testProblem: PublicProblem = {
+  problem_id: "p1",
+  ncert_ref: { class: 5, chapter: 1, chapter_title: "Test", topic: "fractions_addition" },
+  display_label: "Test problem",
+  given: {},
+  step_graph: [],
+  alt_paths: [],
+};
 
 describe("FreeTextStepper", () => {
   it("shows the per-topic hint as both a helper line and the input placeholder", () => {
@@ -14,6 +24,7 @@ describe("FreeTextStepper", () => {
         disabled={false}
         solved={false}
         hint="Rewrite both fractions with a common denominator."
+        problem={testProblem}
       />,
     );
     expect(
@@ -33,6 +44,7 @@ describe("FreeTextStepper", () => {
         onCommit={vi.fn()}
         disabled={false}
         solved={false}
+        problem={testProblem}
       />,
     );
     expect(screen.getByPlaceholderText("Type this step")).toBeInTheDocument();
@@ -49,6 +61,7 @@ describe("FreeTextStepper", () => {
         onCommit={onCommit}
         disabled={false}
         solved={false}
+        problem={testProblem}
       />,
     );
 
@@ -75,6 +88,7 @@ describe("FreeTextStepper", () => {
           [{ id: "m1", text: "Explanation for step 1's wrong attempt.", stepIndex: 0 }],
           [{ id: "m2", text: "Explanation for the current step's wrong attempt.", stepIndex: 1 }],
         ]}
+        problem={testProblem}
       />,
     );
 
@@ -102,6 +116,7 @@ describe("FreeTextStepper", () => {
         onCommit={vi.fn()}
         disabled={false}
         solved={true}
+        problem={testProblem}
       />,
     );
     expect(screen.queryByRole("button", { name: "Next step →" })).not.toBeInTheDocument();
